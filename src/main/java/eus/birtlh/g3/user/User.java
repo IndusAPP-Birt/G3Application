@@ -79,7 +79,7 @@ public class User {
      * @param name nombre del usuario
      * @param lastName apellidos del usuario; pueden ser {@code null}
      * @param email dirección de correo electrónico del usuario
-     * @param passwordHash hash de la contraseña del usuario
+     * @param passwordHash hash de contraseña ya generado; nunca la contraseña en texto plano
      * @param role rol asignado al usuario
      * @throws IllegalArgumentException si alguno de los datos no cumple las invariantes de dominio
      */

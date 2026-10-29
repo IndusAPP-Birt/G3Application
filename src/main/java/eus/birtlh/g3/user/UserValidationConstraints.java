@@ -1,5 +1,8 @@
 package eus.birtlh.g3.user;
 
+/**
+ * Agrupa las reglas y límites de validación compartidos entre los DTOs y la entidad {@link User}.
+ */
 public final class UserValidationConstraints {
 
     public static final int MIN_NAME_LENGTH = 2;
