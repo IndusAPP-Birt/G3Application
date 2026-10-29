@@ -3,6 +3,7 @@ package eus.birtlh.g3.user.service;
 import eus.birtlh.g3.user.Role;
 import eus.birtlh.g3.user.User;
 import eus.birtlh.g3.user.dto.CreateUserRequest;
+import eus.birtlh.g3.user.dto.UpdateUserRequest;
 import eus.birtlh.g3.user.exception.EmailAlreadyInUseException;
 import eus.birtlh.g3.user.exception.UserNotFoundException;
 import eus.birtlh.g3.user.repository.UserRepository;
@@ -108,5 +109,33 @@ public class UserService {
                         request.role()
                 )
         );
+    }
+
+    /**
+     * Actualiza los datos de un usuario.
+     *
+     * @param id identificador del usuario que se va a actualizar
+     * @param request datos actualizados del usuario
+     * @return usuario actualizado
+     * @throws UserNotFoundException si no existe un usuario con el identificador indicado
+     * @throws EmailAlreadyInUseException si la dirección de correo electrónico ya está asignada a otro usuario
+     * @throws IllegalStateException si se intenta rebajar el rol de un administrador
+     */
+    @Transactional
+    public User updateUser(Long id, UpdateUserRequest request) {
+        User user = this.getUserById(id);
+
+        userRepository.findByEmail(request.email())
+                .filter(existingUser -> !existingUser.getId().equals(user.getId()))
+                .ifPresent(existingUser -> {
+                    throw new EmailAlreadyInUseException();
+                });
+
+        user.changeName(request.name());
+        user.changeLastName(request.lastName());
+        user.changeEmail(request.email());
+        user.changeRole(request.role());
+
+        return userRepository.save(user);
     }
 }

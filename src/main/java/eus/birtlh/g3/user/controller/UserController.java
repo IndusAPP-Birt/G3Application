@@ -4,6 +4,7 @@ import eus.birtlh.g3.common.dto.ApiResponse;
 import eus.birtlh.g3.user.Role;
 import eus.birtlh.g3.user.UserValidationConstraints;
 import eus.birtlh.g3.user.dto.CreateUserRequest;
+import eus.birtlh.g3.user.dto.UpdateUserRequest;
 import eus.birtlh.g3.user.dto.UserResponse;
 import eus.birtlh.g3.user.mapper.UserMapper;
 import eus.birtlh.g3.user.service.UserService;
@@ -178,6 +179,28 @@ public class UserController {
                 new ApiResponse<>(
                         user,
                         "Usuario creado correctamente.",
+                        Instant.now()
+                )
+        );
+    }
+
+    @PutMapping
+    public ResponseEntity<ApiResponse<UserResponse>> update(
+            @PathVariable
+            @Positive(message = "El id debe ser positivo.")
+            Long id,
+
+            @Valid
+            @RequestBody UpdateUserRequest request
+    ) {
+        UserResponse user = UserMapper.toResponse(
+                userService.updateUser(id, request)
+        );
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        user,
+                        "Usuario actualizado correctamente.",
                         Instant.now()
                 )
         );
