@@ -138,4 +138,35 @@ public class UserService {
 
         return userRepository.save(user);
     }
+
+    /**
+     * Habilita a un usuario.
+     *
+     * @param id identificador del usuario que se va a habilitar
+     * @return usuario habilitado
+     * @throws UserNotFoundException si no existe un usuario con el identificador indicado
+     */
+    @Transactional
+    public User enableUser(Long id) {
+        User user = this.getUserById(id);
+        user.enable();
+
+        return userRepository.save(user);
+    }
+
+    /**
+     * Deshabilita a un usuario.
+     *
+     * @param id identificador del usuario que se va a deshabilitar
+     * @return usuario deshabilitado
+     * @throws UserNotFoundException si no existe un usuario con el identificador indicado
+     * @throws IllegalStateException si se intenta deshabilitar a un administrador
+     */
+    @Transactional
+    public User disableUser(Long id) {
+        User user = this.getUserById(id);
+        user.disable();
+
+        return userRepository.save(user);
+    }
 }

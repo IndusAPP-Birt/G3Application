@@ -97,7 +97,7 @@ public class UserController {
         return ResponseEntity.ok(
                 new ApiResponse<>(
                         user,
-                        "Usuario obtenido correctamente",
+                        "Usuario obtenido correctamente.",
                         Instant.now()
                 )
         );
@@ -184,6 +184,13 @@ public class UserController {
         );
     }
 
+    /**
+     * Actualiza los datos de un usuario.
+     *
+     * @param id identificador del usuario que se va a actualizar
+     * @param request datos actualizados del usuario
+     * @return respuesta HTTP con el usuario actualizado
+     */
     @PutMapping
     public ResponseEntity<ApiResponse<UserResponse>> update(
             @PathVariable
@@ -201,6 +208,56 @@ public class UserController {
                 new ApiResponse<>(
                         user,
                         "Usuario actualizado correctamente.",
+                        Instant.now()
+                )
+        );
+    }
+
+    /**
+     * Habilita a un usuario.
+     *
+     * @param id identificador del usuario que se va a habilitar
+     * @return respuesta HTTP con el usuario habilitado
+     */
+    @PatchMapping
+    public ResponseEntity<ApiResponse<UserResponse>> enable(
+            @PathVariable
+            @Positive(message = "El id debe ser positivo.")
+            Long id
+    ) {
+        UserResponse user = UserMapper.toResponse(
+                userService.enableUser(id)
+        );
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        user,
+                        "Usuario habilitado correctamente.",
+                        Instant.now()
+                )
+        );
+    }
+
+    /**
+     * Deshabilita a un usuario.
+     *
+     * @param id identificador del usuario que se va a deshabilitar
+     * @return respuesta HTTP con el usuario deshabilitado
+     */
+    @PatchMapping
+    public ResponseEntity<ApiResponse<UserResponse>> disable(
+            @PathVariable
+            @Positive(message = "El id debe ser positivo.")
+            Long id
+    ) {
+        UserResponse user = UserMapper.toResponse(
+                userService.disableUser(id)
+        );
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        user,
+                        "Usuario deshabilitado correctamente.",
                         Instant.now()
                 )
         );
