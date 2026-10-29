@@ -1,5 +1,6 @@
 package eus.birtlh.g3.user.service;
 
+import eus.birtlh.g3.user.Role;
 import eus.birtlh.g3.user.User;
 import eus.birtlh.g3.user.dto.CreateUserRequest;
 import eus.birtlh.g3.user.exception.EmailAlreadyInUseException;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Gestiona las operaciones de negocio relacionadas con los usuarios.
@@ -45,6 +47,41 @@ public class UserService {
     public User getUserById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(UserNotFoundException::new);
+    }
+
+    /**
+     * Obtiene un usuario por su dirección de correo electrónico.
+     *
+     * @param email dirección de correo electrónico del usuario; se normaliza antes de buscar
+     * @return usuario encontrado
+     * @throws UserNotFoundException si no existe un usuario con la dirección de correo electrónico indicada
+     */
+    @Transactional(readOnly = true)
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email.strip().toLowerCase(Locale.ROOT))
+                .orElseThrow(UserNotFoundException::new);
+    }
+
+    /**
+     * Obtiene los usuarios que tienen asignado un rol determinado.
+     *
+     * @param role rol por el que se va a filtrar
+     * @return lista de usuarios con el rol indicado
+     */
+    @Transactional(readOnly = true)
+    public List<User> getUsersByRole(Role role) {
+        return userRepository.findAllByRole(role);
+    }
+
+    /**
+     * Obtiene los usuarios según su estado de habilitación.
+     *
+     * @param enabled estado de habilitación por el que se va a filtrar
+     * @return lista de usuarios con el estado indicado
+     */
+    @Transactional(readOnly = true)
+    public List<User> getUsersByEnabled(boolean enabled) {
+        return userRepository.findAllByEnabled(enabled);
     }
 
     /**

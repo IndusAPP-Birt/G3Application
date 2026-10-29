@@ -1,12 +1,14 @@
 package eus.birtlh.g3.user.controller;
 
 import eus.birtlh.g3.common.dto.ApiResponse;
+import eus.birtlh.g3.user.Role;
+import eus.birtlh.g3.user.UserValidationConstraints;
 import eus.birtlh.g3.user.dto.CreateUserRequest;
 import eus.birtlh.g3.user.dto.UserResponse;
 import eus.birtlh.g3.user.mapper.UserMapper;
 import eus.birtlh.g3.user.service.UserService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +34,7 @@ public class UserController {
      *
      * @return respuesta HTTP con la lista de usuarios
      */
-    @GetMapping(params = {"!email", "!enabled", "!role"})
+    @GetMapping(params = {"!email", "!role", "!enabled"})
     public ResponseEntity<ApiResponse<List<UserResponse>>> findAll() {
         List<UserResponse> users = userService.getAllUsers()
                 .stream()
@@ -69,6 +71,88 @@ public class UserController {
                 )
         );
     }
+
+    /**
+     * Obtiene un usuario por su dirección de correo electrónico.
+     *
+     * @param email dirección de correo electrónico del usuario
+     * @return respuesta HTTP con el usuario solicitado
+     */
+    @GetMapping(params = {"email", "!role", "!enabled"})
+    public ResponseEntity<ApiResponse<UserResponse>> findByEmail(
+            @RequestParam("email")
+            @NotBlank(message = "La dirección de correo electrónico es obligatoria.")
+            @Size(
+                    max = UserValidationConstraints.MAX_EMAIL_LENGTH,
+                    message = "La dirección de correo electrónico no puede superar los {max} caracteres.")
+            @Pattern(
+                    regexp = UserValidationConstraints.EMAIL_REGEX,
+                    message = "La dirección de correo electrónico debe tener un formato válido."
+            )
+            String email
+    ) {
+        UserResponse user = UserMapper.toResponse(userService.getUserByEmail(email));
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        user,
+                        "Usuario obtenido correctamente",
+                        Instant.now()
+                )
+        );
+    }
+
+    /**
+     * Obtiene los usuarios que tienen asignado un rol determinado.
+     *
+     * @param role rol por el que se va a filtrar
+     * @return respuesta HTTP con la lista de usuarios que tienen el rol indicado
+     */
+    @GetMapping(params = {"!email", "role", "!enabled"})
+    public ResponseEntity<ApiResponse<List<UserResponse>>> findByRole(
+            @RequestParam("role")
+            @NotNull(message = "El rol es obligatorio.")
+            Role role
+    ) {
+        List<UserResponse> users = userService.getUsersByRole(role)
+                .stream()
+                .map(UserMapper::toResponse)
+                .toList();
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        users,
+                        "Usuarios obtenidos correctamente.",
+                        Instant.now()
+                )
+        );
+    }
+
+    /**
+     * Obtiene los usuarios según su estado de habilitación.
+     *
+     * @param enabled estado de habilitación por el que se va a filtrar
+     * @return respuesta HTTP con la lista de usuarios que tienen el estado indicado
+     */
+    @GetMapping(params = {"!email", "!role", "enabled"})
+    public ResponseEntity<ApiResponse<List<UserResponse>>> findByEnabled(
+            @RequestParam("enabled")
+            boolean enabled
+    ) {
+        List<UserResponse> users = userService.getUsersByEnabled(enabled)
+                .stream()
+                .map(UserMapper::toResponse)
+                .toList();
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        users,
+                        "Usuarios obtenidos correctamente.",
+                        Instant.now()
+                )
+        );
+    }
+
 
     /**
      * Crea un nuevo usuario.
