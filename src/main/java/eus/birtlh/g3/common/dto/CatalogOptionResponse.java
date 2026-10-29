@@ -1,4 +1,4 @@
-package eus.birtlh.g3.common;
+package eus.birtlh.g3.common.dto;
 
 /**
  * DTO que representa una opción de un catálogo en las respuestas de la API.
