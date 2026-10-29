@@ -9,6 +9,8 @@ import java.time.Instant;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
+import static eus.birtlh.g3.user.UserValidationConstraints.MAX_NAME_LENGTH;
+
 /**
  * Entidad que representa a un usuario de la aplicación.
  *
@@ -26,15 +28,7 @@ import java.util.regex.Pattern;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User {
 
-    // Patrón basado en el repositorio de validación de OWASP.
-    private static final Pattern EMAIL_PATTERN = Pattern.compile(
-            "^[A-Za-z0-9_+&*-]+(?:\\.[A-Za-z0-9_+&*-]+)*@"
-                    + "(?:[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?\\.)+[A-Za-z]{2,}$"
-    );
-    private static final int MIN_NAME_LENGTH = 2;
-    private static final int MAX_NAME_LENGTH = 100;
-    private static final int MAX_EMAIL_LENGTH = 254;
-    private static final int MAX_PASSWORD_HASH_LENGTH = 255;
+    private static final Pattern EMAIL_PATTERN = Pattern.compile(UserValidationConstraints.EMAIL_REGEX);
 
     /** Identificador único del usuario. */
     @Id
@@ -52,7 +46,7 @@ public class User {
     /** Dirección de correo electrónico del usuario. */
     // TODO: En la capa de servicio, comprobar que el correo no está en uso al crear o modificar
     //  un usuario, y gestionar la posible violación del índice único ante operaciones concurrentes.
-    @Column(nullable = false, length = MAX_EMAIL_LENGTH)
+    @Column(nullable = false, length = UserValidationConstraints.MAX_EMAIL_LENGTH)
     private String email;
 
     /** Hash de la contraseña del usuario. */
@@ -217,7 +211,7 @@ public class User {
             throw new IllegalArgumentException("El nombre es obligatorio.");
         }
 
-        if (normalizedName.length() < MIN_NAME_LENGTH || normalizedName.length() > MAX_NAME_LENGTH) {
+        if (normalizedName.length() < UserValidationConstraints.MIN_NAME_LENGTH || normalizedName.length() > MAX_NAME_LENGTH) {
             throw new IllegalArgumentException("El nombre debe tener entre 2 y 100 caracteres.");
         }
 
@@ -242,7 +236,7 @@ public class User {
             throw new IllegalArgumentException("Los apellidos no pueden estar vacíos.");
         }
 
-        if (normalizedLastName.length() < MIN_NAME_LENGTH || normalizedLastName.length() > MAX_NAME_LENGTH) {
+        if (normalizedLastName.length() < UserValidationConstraints.MIN_NAME_LENGTH || normalizedLastName.length() > MAX_NAME_LENGTH) {
             throw new IllegalArgumentException("Los apellidos, si se indican, deben tener entre 2 y 100 caracteres.");
         }
 
@@ -268,7 +262,7 @@ public class User {
             throw new IllegalArgumentException("La dirección de correo electrónico es obligatoria.");
         }
 
-        if (normalizedEmail.length() > MAX_EMAIL_LENGTH) {
+        if (normalizedEmail.length() > UserValidationConstraints.MAX_EMAIL_LENGTH) {
             throw new IllegalArgumentException("La dirección de correo electrónico no puede superar los 254 caracteres.");
         }
 
@@ -291,7 +285,7 @@ public class User {
             throw new IllegalArgumentException("El hash de la contraseña es obligatorio.");
         }
 
-        if (passwordHash.length() > MAX_PASSWORD_HASH_LENGTH) {
+        if (passwordHash.length() > UserValidationConstraints.MAX_PASSWORD_HASH_LENGTH) {
             throw new IllegalArgumentException("El hash de la contraseña no puede superar los 255 caracteres.");
         }
 
