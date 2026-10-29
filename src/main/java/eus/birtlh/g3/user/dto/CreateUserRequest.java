@@ -23,19 +23,19 @@ public record CreateUserRequest(
         @Size(
                 min = UserValidationConstraints.MIN_NAME_LENGTH,
                 max = UserValidationConstraints.MAX_NAME_LENGTH,
-                message = "El nombre debe tener entre 2 y 100 caracteres.")
+                message = "El nombre debe tener entre {min} y {max} caracteres.")
         String name,
 
         @Size(
-                min = UserValidationConstraints.MIN_NAME_LENGTH,
-                max = UserValidationConstraints.MAX_NAME_LENGTH,
-                message = "Los apellidos, si se indican, deben tener entre 2 y 100 caracteres.")
+                min = UserValidationConstraints.MIN_LAST_NAME_LENGTH,
+                max = UserValidationConstraints.MAX_LAST_NAME_LENGTH,
+                message = "Los apellidos, si se indican, deben tener entre {min} y {max} caracteres.")
         String lastName,
 
         @NotBlank(message = "La dirección de correo electrónico es obligatoria.")
         @Size(
                 max = UserValidationConstraints.MAX_EMAIL_LENGTH,
-                message = "La dirección de correo electrónico no puede superar los 254 caracteres.")
+                message = "La dirección de correo electrónico no puede superar los {max} caracteres.")
         @Pattern(
                 regexp = UserValidationConstraints.EMAIL_REGEX,
                 message = "La dirección de correo electrónico debe tener un formato válido."
@@ -45,7 +45,7 @@ public record CreateUserRequest(
         @NotBlank(message = "La contraseña es obligatoria.")
         @Size(
                 min = UserValidationConstraints.MIN_PASSWORD_LENGTH,
-                message = "La contraseña debe tener al menos 8 caracteres."
+                message = "La contraseña debe tener al menos {min} caracteres."
         )
         String password,
 

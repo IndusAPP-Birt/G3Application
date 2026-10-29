@@ -6,7 +6,7 @@ package eus.birtlh.g3.user.exception;
 public class EmailAlreadyInUseException extends RuntimeException {
 
     /**
-     * Crea una excepción con el mensaje de dirección de correo electrónico ya en uso.
+     * Crea una excepción indicando que la dirección de correo electrónico ya está en uso.
      */
     public EmailAlreadyInUseException() {
         super("La dirección de correo electrónico ya está en uso.");

@@ -13,8 +13,8 @@ import java.time.Instant;
  * @param email dirección de correo electrónico del usuario
  * @param role opción de catálogo que representa el rol asignado al usuario
  * @param enabled indica si el usuario está habilitado
- * @param createdAt fecha y hora de creación del usuario
- * @param updatedAt fecha y hora de la última actualización del usuario
+ * @param createdAt fecha y hora UTC de creación del usuario
+ * @param updatedAt fecha y hora UTC de la última actualización del usuario
  */
 public record UserResponse(
         Long id,

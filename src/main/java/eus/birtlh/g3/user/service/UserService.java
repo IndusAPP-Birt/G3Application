@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Gestiona las operaciones de negocio relacionadas con los usuarios.
@@ -36,35 +35,6 @@ public class UserService {
     }
 
     /**
-     * Crea y persiste un usuario tras comprobar la disponibilidad de su correo electrónico.
-     *
-     * <p>La contraseña recibida se codifica antes de almacenarse.</p>
-     *
-     * @param request datos necesarios para crear el usuario
-     * @return usuario creado
-     * @throws EmailAlreadyInUseException si la dirección de correo electrónico ya está en uso
-     */
-    @Transactional
-    public User createUser(CreateUserRequest request) {
-
-        String email = request.email().strip().toLowerCase(Locale.ROOT);
-
-        if (userRepository.existsByEmail(email)) {
-            throw new EmailAlreadyInUseException();
-        }
-
-        return userRepository.save(
-                new User(
-                        request.name(),
-                        request.lastName(),
-                        email,
-                        passwordEncoder.encode(request.password()),
-                        request.role()
-                )
-        );
-    }
-
-    /**
      * Obtiene un usuario por su identificador.
      *
      * @param id identificador del usuario
@@ -75,5 +45,31 @@ public class UserService {
     public User getUserById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(UserNotFoundException::new);
+    }
+
+    /**
+     * Crea y persiste un usuario tras comprobar la disponibilidad de su correo electrónico.
+     *
+     * <p>La contraseña recibida se codifica antes de almacenarse.</p>
+     *
+     * @param request datos necesarios para crear el usuario
+     * @return usuario creado
+     * @throws EmailAlreadyInUseException si la dirección de correo electrónico ya está en uso
+     */
+    @Transactional
+    public User createUser(CreateUserRequest request) {
+        if (userRepository.existsByEmail(request.email())) {
+            throw new EmailAlreadyInUseException();
+        }
+
+        return userRepository.save(
+                new User(
+                        request.name(),
+                        request.lastName(),
+                        request.email(),
+                        passwordEncoder.encode(request.password()),
+                        request.role()
+                )
+        );
     }
 }

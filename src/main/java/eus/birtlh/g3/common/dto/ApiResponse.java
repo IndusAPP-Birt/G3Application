@@ -8,9 +8,8 @@ import java.time.Instant;
  * @param <T> tipo de dato devuelto en la respuesta
  * @param data datos devueltos por la operación
  * @param message mensaje descriptivo del resultado de la operación
- * @param timestamp fecha y hora en que se genera la respuesta
+ * @param timestamp fecha y hora UTC en que se genera la respuesta
  */
-@SuppressWarnings("SpellCheckingInspection")
 public record ApiResponse<T>(
         T data,
         String message,

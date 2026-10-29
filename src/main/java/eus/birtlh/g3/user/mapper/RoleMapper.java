@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
  * Convierte valores de {@link Role} en opciones de catálogo para la API.
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class RoleMapper {
+public final class RoleMapper {
 
     /**
      * Convierte un rol en su código y descripción legible.

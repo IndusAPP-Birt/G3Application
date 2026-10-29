@@ -15,23 +15,23 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 public class SecurityConfig {
 
-    // TODO: Al implementar JWT, configurar la autenticación, las reglas de autorización por rol
-    //  y la política de CSRF adecuada para el mecanismo de autenticación elegido.
+    // TODO: Al implementar JWT, configurar la autenticación, la jerarquía de roles, las reglas
+    //  de autorización por rol y la política de CSRF adecuada para el mecanismo de autenticación elegido.
     /**
      * Define la cadena de filtros de seguridad y las reglas de acceso a los endpoints.
      *
      * @param http configurador de seguridad HTTP
      * @return cadena de filtros de seguridad configurada
-     * @throws Exception si no se puede construir la configuración de seguridad
      */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/roles").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/users", "/api/users/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
                         .anyRequest().authenticated()
                 )
                 .build();

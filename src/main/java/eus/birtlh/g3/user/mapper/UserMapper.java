@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
  * Convierte entidades {@link User} en sus representaciones de respuesta para la API.
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class UserMapper {
+public final class UserMapper {
 
     /**
      * Convierte un usuario en un DTO de respuesta sin exponer el hash de la contraseña.

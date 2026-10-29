@@ -11,6 +11,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ import java.util.Map;
  */
 @RestControllerAdvice
 @Slf4j
+@SuppressWarnings("unused")
 public class GlobalExceptionHandler {
 
     /**
@@ -31,9 +33,7 @@ public class GlobalExceptionHandler {
      * @return respuesta con estado HTTP 400
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ApiResponse<Void>> handleHttpMessageNotReadableException(
-    ) {
-
+    public ResponseEntity<ApiResponse<Void>> handleHttpMessageNotReadableException() {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                 new ApiResponse<>(
                         null,
@@ -50,8 +50,9 @@ public class GlobalExceptionHandler {
      * @return respuesta con estado HTTP 400 y los errores agrupados por campo
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<Map<String, List<String>>>> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
-
+    public ResponseEntity<ApiResponse<Map<String, List<String>>>> handleMethodArgumentNotValidException(
+            MethodArgumentNotValidException ex
+    ) {
         Map<String, List<String>> errors = new LinkedHashMap<>();
 
         ex.getBindingResult().getFieldErrors().forEach(error ->
@@ -77,8 +78,9 @@ public class GlobalExceptionHandler {
      * @return respuesta con estado HTTP 400 y los errores agrupados por parámetro
      */
     @ExceptionHandler(HandlerMethodValidationException.class)
-    public ResponseEntity<ApiResponse<Map<String, List<String>>>> handleHandlerMethodValidationException(HandlerMethodValidationException ex) {
-
+    public ResponseEntity<ApiResponse<Map<String, List<String>>>> handleHandlerMethodValidationException(
+            HandlerMethodValidationException ex
+    ) {
         Map<String, List<String>> errors = new LinkedHashMap<>();
 
         ex.getParameterValidationResults().forEach(result -> {
@@ -100,19 +102,36 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Devuelve una respuesta cuando uno o más parámetros de la solicitud tienen un formato no válido.
+     *
+     * @return respuesta con estado HTTP 400
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMethodArgumentTypeMismatchException() {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                new ApiResponse<>(
+                        null,
+                        "Uno o más parámetros de la solicitud tienen un formato no válido.",
+                        Instant.now()
+                )
+        );
+    }
+
+    /**
      * Gestiona solicitudes con datos que no cumplen las reglas de dominio.
      *
      * @param ex excepción de argumento inválido
      * @return respuesta HTTP 400 con el detalle de la validación
      */
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ApiResponse<Void>> handleIllegalArgumentException(IllegalArgumentException ex) {
-
+    public ResponseEntity<ApiResponse<Void>> handleIllegalArgumentException(
+            IllegalArgumentException ex
+    ) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                 new ApiResponse<>(
-                  null,
-                  ex.getMessage(),
-                  Instant.now()
+                        null,
+                        ex.getMessage(),
+                        Instant.now()
                 )
         );
     }
@@ -125,8 +144,8 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleUserNotFoundException(
-            UserNotFoundException ex) {
-
+            UserNotFoundException ex
+    ) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                 new ApiResponse<>(
                         null,
@@ -145,8 +164,9 @@ public class GlobalExceptionHandler {
      * @return respuesta con estado HTTP 409
      */
     @ExceptionHandler(EmailAlreadyInUseException.class)
-    public ResponseEntity<ApiResponse<Void>> handleEmailAlreadyInUseException(EmailAlreadyInUseException ex) {
-
+    public ResponseEntity<ApiResponse<Void>> handleEmailAlreadyInUseException(
+            EmailAlreadyInUseException ex
+    ) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(
                 new ApiResponse<>(
                         null,
@@ -165,8 +185,9 @@ public class GlobalExceptionHandler {
      * @return respuesta HTTP 400 con el detalle del conflicto
      */
     @ExceptionHandler(IllegalStateException.class)
-    public ResponseEntity<ApiResponse<Void>> handleIllegalStateException(IllegalStateException ex) {
-
+    public ResponseEntity<ApiResponse<Void>> handleIllegalStateException(
+            IllegalStateException ex
+    ) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                 new ApiResponse<>(
                         null,
@@ -184,7 +205,6 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleException(Exception ex) {
-
         log.error("Error no controlado.", ex);
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(

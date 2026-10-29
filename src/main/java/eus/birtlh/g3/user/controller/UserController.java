@@ -15,7 +15,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.time.Instant;
 import java.util.List;
 
-
 // TODO: Asignar permisos por rol a todos los endpoints de este controlador.
 //  Temporalmente están disponibles sin restricciones de rol.
 /**
@@ -49,6 +48,29 @@ public class UserController {
     }
 
     /**
+     * Obtiene un usuario por su identificador.
+     *
+     * @param id identificador del usuario
+     * @return respuesta HTTP con el usuario solicitado
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<UserResponse>> findById(
+            @PathVariable
+            @Positive(message = "El id debe ser positivo.")
+            Long id
+    ) {
+        UserResponse user = UserMapper.toResponse(userService.getUserById(id));
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        user,
+                        "Usuario obtenido correctamente.",
+                        Instant.now()
+                )
+        );
+    }
+
+    /**
      * Crea un nuevo usuario.
      *
      * @param request datos necesarios para crear el usuario
@@ -72,29 +94,6 @@ public class UserController {
                 new ApiResponse<>(
                         user,
                         "Usuario creado correctamente.",
-                        Instant.now()
-                )
-        );
-    }
-
-    /**
-     * Obtiene un usuario por su identificador.
-     *
-     * @param id identificador del usuario
-     * @return respuesta HTTP con el usuario solicitado
-     */
-    @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<UserResponse>> findById(
-            @PathVariable
-            @Positive(message = "El id debe ser positivo.")
-            Long id
-    ) {
-        UserResponse user = UserMapper.toResponse(userService.getUserById(id));
-
-        return ResponseEntity.ok(
-                new ApiResponse<>(
-                        user,
-                        "Usuario obtenido correctamente.",
                         Instant.now()
                 )
         );

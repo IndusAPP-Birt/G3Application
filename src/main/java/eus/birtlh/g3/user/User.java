@@ -9,6 +9,7 @@ import java.time.Instant;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
+import static eus.birtlh.g3.user.UserValidationConstraints.MAX_LAST_NAME_LENGTH;
 import static eus.birtlh.g3.user.UserValidationConstraints.MAX_NAME_LENGTH;
 
 /**
@@ -40,7 +41,7 @@ public class User {
     private String name;
 
     /** Apellidos del usuario. */
-    @Column(name = "last_name", length = MAX_NAME_LENGTH)
+    @Column(name = "last_name", length = MAX_LAST_NAME_LENGTH)
     private String lastName;
 
     /** Dirección de correo electrónico del usuario. */
@@ -52,7 +53,7 @@ public class User {
     /** Hash de la contraseña del usuario. */
     // TODO: En la capa de servicio, generar este valor con PasswordEncoder antes de crear o
     //  modificar un usuario. Nunca debe recibirse una contraseña en texto plano.
-    @Column(name = "password_hash", nullable = false)
+    @Column(name = "password_hash", nullable = false, length = UserValidationConstraints.MAX_PASSWORD_HASH_LENGTH)
     @Getter(AccessLevel.NONE)
     private String passwordHash;
 
@@ -65,11 +66,11 @@ public class User {
     @Column(nullable = false)
     private boolean enabled = true;
 
-    /** Fecha y hora de creación del usuario. */
+    /** Fecha y hora UTC de creación del usuario. */
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
-    /** Fecha y hora de la última actualización del usuario. */
+    /** Fecha y hora UTC de la última actualización del usuario. */
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
@@ -212,7 +213,13 @@ public class User {
         }
 
         if (normalizedName.length() < UserValidationConstraints.MIN_NAME_LENGTH || normalizedName.length() > MAX_NAME_LENGTH) {
-            throw new IllegalArgumentException("El nombre debe tener entre 2 y 100 caracteres.");
+            throw new IllegalArgumentException(
+                    "El nombre debe tener entre "
+                            + UserValidationConstraints.MIN_NAME_LENGTH
+                            + " y "
+                            + UserValidationConstraints.MAX_NAME_LENGTH
+                            + " caracteres."
+            );
         }
 
         return normalizedName;
@@ -236,8 +243,14 @@ public class User {
             throw new IllegalArgumentException("Los apellidos no pueden estar vacíos.");
         }
 
-        if (normalizedLastName.length() < UserValidationConstraints.MIN_NAME_LENGTH || normalizedLastName.length() > MAX_NAME_LENGTH) {
-            throw new IllegalArgumentException("Los apellidos, si se indican, deben tener entre 2 y 100 caracteres.");
+        if (normalizedLastName.length() < UserValidationConstraints.MIN_LAST_NAME_LENGTH || normalizedLastName.length() > MAX_LAST_NAME_LENGTH) {
+            throw new IllegalArgumentException(
+                    "Los apellidos, si se indican, deben tener entre "
+                            + UserValidationConstraints.MIN_LAST_NAME_LENGTH
+                            + " y "
+                            + UserValidationConstraints.MAX_LAST_NAME_LENGTH
+                            + " caracteres."
+            );
         }
 
         return normalizedLastName;
@@ -256,21 +269,25 @@ public class User {
             throw new IllegalArgumentException("La dirección de correo electrónico es obligatoria.");
         }
 
-        String normalizedEmail = email.strip().toLowerCase(Locale.ROOT);
+        email = email.strip().toLowerCase(Locale.ROOT);
 
-        if (normalizedEmail.isBlank()) {
+        if (email.isBlank()) {
             throw new IllegalArgumentException("La dirección de correo electrónico es obligatoria.");
         }
 
-        if (normalizedEmail.length() > UserValidationConstraints.MAX_EMAIL_LENGTH) {
-            throw new IllegalArgumentException("La dirección de correo electrónico no puede superar los 254 caracteres.");
+        if (email.length() > UserValidationConstraints.MAX_EMAIL_LENGTH) {
+            throw new IllegalArgumentException(
+                    "La dirección de correo electrónico no puede superar los "
+                            + UserValidationConstraints.MAX_EMAIL_LENGTH
+                            + " caracteres."
+            );
         }
 
-        if (!EMAIL_PATTERN.matcher(normalizedEmail).matches()) {
+        if (!EMAIL_PATTERN.matcher(email).matches()) {
             throw new IllegalArgumentException("La dirección de correo electrónico debe tener un formato válido.");
         }
 
-        return normalizedEmail;
+        return email;
     }
 
     /**
@@ -286,7 +303,11 @@ public class User {
         }
 
         if (passwordHash.length() > UserValidationConstraints.MAX_PASSWORD_HASH_LENGTH) {
-            throw new IllegalArgumentException("El hash de la contraseña no puede superar los 255 caracteres.");
+            throw new IllegalArgumentException(
+                    "El hash de la contraseña no puede superar los "
+                            + UserValidationConstraints.MAX_PASSWORD_HASH_LENGTH
+                            + " caracteres."
+            );
         }
 
         return passwordHash;
