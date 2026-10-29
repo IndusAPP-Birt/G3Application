@@ -1,14 +1,16 @@
 package eus.birtlh.g3.user.controller;
 
 import eus.birtlh.g3.common.dto.ApiResponse;
+import eus.birtlh.g3.user.dto.CreateUserRequest;
 import eus.birtlh.g3.user.dto.UserResponse;
 import eus.birtlh.g3.user.mapper.UserMapper;
 import eus.birtlh.g3.user.service.UserService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.time.Instant;
 import java.util.List;
@@ -43,6 +45,58 @@ public class UserController {
                         users,
                         "Usuarios obtenidos correctamente.",
                         Instant.now())
+        );
+    }
+
+    /**
+     * Crea un nuevo usuario.
+     *
+     * @param request datos necesarios para crear el usuario
+     * @return respuesta HTTP con el usuario creado
+     */
+    @PostMapping
+    public ResponseEntity<ApiResponse<UserResponse>> create(
+            @Valid
+            @RequestBody CreateUserRequest request
+    ) {
+        UserResponse user = UserMapper.toResponse(
+                userService.createUser(request)
+        );
+
+        return ResponseEntity.created(
+                ServletUriComponentsBuilder.fromCurrentRequest()
+                        .path("/{id}")
+                        .buildAndExpand(user.id())
+                        .toUri()
+        ).body(
+                new ApiResponse<>(
+                        user,
+                        "Usuario creado correctamente.",
+                        Instant.now()
+                )
+        );
+    }
+
+    /**
+     * Obtiene un usuario por su identificador.
+     *
+     * @param id identificador del usuario
+     * @return respuesta HTTP con el usuario solicitado
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<UserResponse>> findById(
+            @PathVariable
+            @Positive(message = "El id debe ser positivo.")
+            Long id
+    ) {
+        UserResponse user = UserMapper.toResponse(userService.getUserById(id));
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        user,
+                        "Usuario obtenido correctamente.",
+                        Instant.now()
+                )
         );
     }
 }
