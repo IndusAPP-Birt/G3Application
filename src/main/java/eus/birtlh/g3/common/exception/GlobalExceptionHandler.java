@@ -4,10 +4,15 @@ import eus.birtlh.g3.common.dto.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Gestiona de forma centralizada las excepciones producidas por los controladores REST.
@@ -15,6 +20,33 @@ import java.time.Instant;
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
+
+    /**
+     * Devuelve los errores de validación de un cuerpo de solicitud.
+     *
+     * @param ex excepción que contiene los errores de los campos validados
+     * @return respuesta con estado HTTP 400 y los errores agrupados por campo
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponse<Map<String, List<String>>>> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+
+        Map<String, List<String>> errors = new LinkedHashMap<>();
+
+        ex.getBindingResult().getFieldErrors().forEach(error ->
+                errors.computeIfAbsent(
+                        error.getField(),
+                        key -> new ArrayList<>()
+                ).add(error.getDefaultMessage())
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                new ApiResponse<>(
+                        errors,
+                        "La solicitud contiene errores de validación.",
+                        Instant.now()
+                )
+        );
+    }
 
     /**
      * Gestiona solicitudes con datos que no cumplen las reglas de dominio.
