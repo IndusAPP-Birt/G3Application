@@ -32,6 +32,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/roles").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/users", "/api/users/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/users", "/api/users/**").permitAll()
+                        .requestMatchers(HttpMethod.PATCH, "/api/users", "/api/users/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .build();
