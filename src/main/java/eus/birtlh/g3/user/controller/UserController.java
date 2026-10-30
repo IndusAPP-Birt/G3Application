@@ -4,6 +4,7 @@ import eus.birtlh.g3.common.dto.ApiResponse;
 import eus.birtlh.g3.user.Role;
 import eus.birtlh.g3.user.UserValidationConstraints;
 import eus.birtlh.g3.user.dto.CreateUserRequest;
+import eus.birtlh.g3.user.dto.ResetUserPasswordRequest;
 import eus.birtlh.g3.user.dto.UpdateUserRequest;
 import eus.birtlh.g3.user.dto.UserResponse;
 import eus.birtlh.g3.user.mapper.UserMapper;
@@ -191,7 +192,7 @@ public class UserController {
      * @param request datos actualizados del usuario
      * @return respuesta HTTP con el usuario actualizado
      */
-    @PutMapping
+    @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<UserResponse>> update(
             @PathVariable
             @Positive(message = "El id debe ser positivo.")
@@ -219,7 +220,7 @@ public class UserController {
      * @param id identificador del usuario que se va a habilitar
      * @return respuesta HTTP con el usuario habilitado
      */
-    @PatchMapping
+    @PatchMapping("/{id}/enable")
     public ResponseEntity<ApiResponse<UserResponse>> enable(
             @PathVariable
             @Positive(message = "El id debe ser positivo.")
@@ -244,7 +245,7 @@ public class UserController {
      * @param id identificador del usuario que se va a deshabilitar
      * @return respuesta HTTP con el usuario deshabilitado
      */
-    @PatchMapping
+    @PatchMapping("/{id}/disable")
     public ResponseEntity<ApiResponse<UserResponse>> disable(
             @PathVariable
             @Positive(message = "El id debe ser positivo.")
@@ -258,6 +259,32 @@ public class UserController {
                 new ApiResponse<>(
                         user,
                         "Usuario deshabilitado correctamente.",
+                        Instant.now()
+                )
+        );
+    }
+
+    /**
+     * Restablece la contraseña de un usuario.
+     *
+     * @param id identificador del usuario cuya contraseña se va a restablecer
+     * @param request nueva contraseña del usuario
+     * @return respuesta HTTP que confirma el restablecimiento
+     */
+    @PutMapping("/{id}/password")
+    public ResponseEntity<ApiResponse<UserResponse>> changePassword(
+            @PathVariable
+            @Positive(message = "El id debe ser positivo.")
+            Long id,
+
+            @Valid
+            @RequestBody ResetUserPasswordRequest request
+    ) {
+        userService.resetUserPassword(id, request);
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        null,
+                        "Contraseña restablecida correctamente",
                         Instant.now()
                 )
         );

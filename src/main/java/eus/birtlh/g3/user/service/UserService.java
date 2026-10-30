@@ -3,11 +3,13 @@ package eus.birtlh.g3.user.service;
 import eus.birtlh.g3.user.Role;
 import eus.birtlh.g3.user.User;
 import eus.birtlh.g3.user.dto.CreateUserRequest;
+import eus.birtlh.g3.user.dto.ResetUserPasswordRequest;
 import eus.birtlh.g3.user.dto.UpdateUserRequest;
 import eus.birtlh.g3.user.exception.EmailAlreadyInUseException;
 import eus.birtlh.g3.user.exception.UserNotFoundException;
 import eus.birtlh.g3.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.repository.query.PreprocessedQuery;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -166,6 +168,25 @@ public class UserService {
     public User disableUser(Long id) {
         User user = this.getUserById(id);
         user.disable();
+
+        return userRepository.save(user);
+    }
+
+    /**
+     * Restablece la contraseña de un usuario.
+     *
+     * @param id identificador del usuario cuya contraseña se va a restablecer
+     * @param request nueva contraseña del usuario
+     * @return usuario con la contraseña restablecida
+     * @throws UserNotFoundException si no existe un usuario con el identificador indicado
+     */
+    @Transactional
+    public User resetUserPassword(Long id, ResetUserPasswordRequest request) {
+        User user = this.getUserById(id);
+
+        user.changePasswordHash(
+                passwordEncoder.encode(request.password())
+        );
 
         return userRepository.save(user);
     }
