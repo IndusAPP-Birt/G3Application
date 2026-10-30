@@ -3,6 +3,8 @@ package eus.birtlh.g3.security;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -15,8 +17,8 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 public class SecurityConfig {
 
-    // TODO: Al implementar JWT, configurar la autenticación, la jerarquía de roles, las reglas
-    //  de autorización por rol y la política de CSRF adecuada para el mecanismo de autenticación elegido.
+    // TODO: Al implementar JWT, configurar la autenticación, las reglas de autorización por rol
+    //  y la política de CSRF adecuada para el mecanismo de autenticación elegido.
     /**
      * Define la cadena de filtros de seguridad y las reglas de acceso a los endpoints.
      *
@@ -47,5 +49,19 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    /**
+     * Define la jerarquía de roles en la que el administrador hereda los permisos de inspector
+     * y técnico de mantenimiento.
+     *
+     * @return jerarquía de roles de la aplicación
+     */
+    @Bean
+    static RoleHierarchy roleHierarchy() {
+        return RoleHierarchyImpl.withDefaultRolePrefix()
+                .role("ADMINISTRATOR").implies("INSPECTOR")
+                .role("ADMINISTRATOR").implies("MAINTENANCE_TECHNICIAN")
+                .build();
     }
 }
