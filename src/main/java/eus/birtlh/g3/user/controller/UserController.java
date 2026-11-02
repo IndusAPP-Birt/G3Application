@@ -2,6 +2,7 @@ package eus.birtlh.g3.user.controller;
 
 import eus.birtlh.g3.common.dto.ApiResponse;
 import eus.birtlh.g3.user.dto.AdminCreateUserRequest;
+import eus.birtlh.g3.user.dto.AdminUpdateUserRequest;
 import eus.birtlh.g3.user.dto.UserResponse;
 import eus.birtlh.g3.user.UserService;
 import jakarta.validation.Valid;
@@ -83,6 +84,30 @@ public class UserController {
                 ApiResponse.success(
                         user,
                         "Usuario creado correctamente."
+                )
+        );
+    }
+
+    /**
+     * Actualiza completamente un usuario a partir de una solicitud administrativa validada.
+     *
+     * @param id identificador positivo del usuario que se desea actualizar
+     * @param request datos administrables que sustituyen los datos actuales del usuario
+     * @return respuesta HTTP 200 con el usuario actualizado y su marca temporal
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<UserResponse>> updateUser(
+            @PathVariable
+            @Positive (message = "El identificador debe ser mayor que cero.")
+            Long id,
+
+            @Valid
+            @RequestBody AdminUpdateUserRequest request
+    ) {
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        userService.updateUser(id, request),
+                        "Usuario actualizado correctamente."
                 )
         );
     }

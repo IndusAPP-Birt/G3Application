@@ -13,7 +13,8 @@ import org.springframework.security.web.SecurityFilterChain;
  * Configuración de autorización HTTP de la aplicación.
  *
  * <p>Mientras se implementa la autenticación, permite temporalmente el acceso público a la
- * consulta y creación de usuarios, y exige autenticación para el resto de rutas.</p>
+ * consulta, creación y actualización de usuarios, y exige autenticación para el resto de
+ * rutas.</p>
  */
 @Configuration
 public class SecurityConfig {
@@ -32,6 +33,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.GET, "/api/users", "/api/users/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/users/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .build();
