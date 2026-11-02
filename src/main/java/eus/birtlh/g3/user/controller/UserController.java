@@ -1,7 +1,7 @@
 package eus.birtlh.g3.user.controller;
 
 import eus.birtlh.g3.common.PaginationConstants;
-import eus.birtlh.g3.common.dto.ApiResponse;
+import eus.birtlh.g3.common.dto.ApiSuccessResponse;
 import eus.birtlh.g3.common.dto.CatalogOptionResponse;
 import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.user.dto.AdminCreateUserRequest;
@@ -23,7 +23,7 @@ import java.util.List;
  * Controlador REST que expone las operaciones HTTP sobre usuarios.
  *
  * <p>Delega los casos de uso en {@link UserService} y devuelve sus resultados mediante el
- * contrato estándar {@link ApiResponse}.</p>
+ * contrato estándar {@link ApiSuccessResponse}.</p>
  */
 @RestController
 @RequestMapping("/api/users")
@@ -40,7 +40,7 @@ public class UserController {
      * @return respuesta HTTP 200 con la página de usuarios y su marca temporal
      */
     @GetMapping
-    public ResponseEntity<ApiResponse<PageResponse<UserResponse>>> findAllUsers(
+    public ResponseEntity<ApiSuccessResponse<PageResponse<UserResponse>>> findAllUsers(
             @RequestParam(
                     name = "page",
                     defaultValue = PaginationConstants.DEFAULT_PAGE_VALUE)
@@ -63,7 +63,7 @@ public class UserController {
             int size
     ) {
         return ResponseEntity.ok(
-                ApiResponse.success(
+                ApiSuccessResponse.success(
                         userService.getAllUsers(page, size),
                         "Usuarios obtenidos correctamente."
                 )
@@ -76,9 +76,9 @@ public class UserController {
      * @return respuesta HTTP 200 con las opciones de catálogo de roles y su marca temporal
      */
     @GetMapping("/roles")
-    public ResponseEntity<ApiResponse<List<CatalogOptionResponse>>> listAllRoles() {
+    public ResponseEntity<ApiSuccessResponse<List<CatalogOptionResponse>>> listAllRoles() {
         return ResponseEntity.ok(
-                ApiResponse.success(
+                ApiSuccessResponse.success(
                         userService.getAllRoles(),
                         "Roles obtenidos correctamente."
                 )
@@ -92,13 +92,13 @@ public class UserController {
      * @return respuesta HTTP 200 con el usuario y su marca temporal
      */
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<UserResponse>> findUserById(
+    public ResponseEntity<ApiSuccessResponse<UserResponse>> findUserById(
             @PathVariable
             @Positive (message = "El identificador debe ser mayor que cero.")
             Long id
     ) {
         return ResponseEntity.ok(
-                ApiResponse.success(
+                ApiSuccessResponse.success(
                         userService.getUserById(id),
                         "Usuario obtenido correctamente."
                 )
@@ -112,7 +112,7 @@ public class UserController {
      * @return respuesta HTTP 201 con el usuario creado y la cabecera {@code Location} del recurso
      */
     @PostMapping
-    public ResponseEntity<ApiResponse<UserResponse>> createUser(
+    public ResponseEntity<ApiSuccessResponse<UserResponse>> createUser(
             @Valid
             @RequestBody AdminCreateUserRequest request
     ) {
@@ -124,7 +124,7 @@ public class UserController {
                         .buildAndExpand(user.id())
                         .toUri()
         ).body(
-                ApiResponse.success(
+                ApiSuccessResponse.success(
                         user,
                         "Usuario creado correctamente."
                 )
@@ -139,7 +139,7 @@ public class UserController {
      * @return respuesta HTTP 200 con el usuario actualizado y su marca temporal
      */
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<UserResponse>> updateUser(
+    public ResponseEntity<ApiSuccessResponse<UserResponse>> updateUser(
             @PathVariable
             @Positive (message = "El identificador debe ser mayor que cero.")
             Long id,
@@ -148,7 +148,7 @@ public class UserController {
             @RequestBody AdminUpdateUserRequest request
     ) {
         return ResponseEntity.ok(
-                ApiResponse.success(
+                ApiSuccessResponse.success(
                         userService.updateUser(id, request),
                         "Usuario actualizado correctamente."
                 )

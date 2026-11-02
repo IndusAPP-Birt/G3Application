@@ -8,14 +8,15 @@ import java.util.Objects;
  *
  * <p>En las respuestas con cuerpo, {@code data} y {@code timestamp} son obligatorios, mientras
  * que {@code message} es opcional. Se recomienda usar {@link #success(Object, String)} para que
- * el servidor asigne la marca temporal.</p>
+ * el servidor asigne la marca temporal. Las respuestas de error se representan mediante
+ * {@link ApiErrorResponse}.</p>
  *
  * @param <T> tipo de los datos devueltos por la API
  * @param data datos de la respuesta; no puede ser {@code null}
  * @param message mensaje informativo opcional
  * @param timestamp momento de creación de la respuesta; no puede ser {@code null}
  */
-public record ApiResponse<T>(
+public record ApiSuccessResponse<T>(
         T data,
         String message,
         Instant timestamp
@@ -25,7 +26,7 @@ public record ApiResponse<T>(
      *
      * @throws NullPointerException si {@code data} o {@code timestamp} son {@code null}
      */
-    public ApiResponse {
+    public ApiSuccessResponse {
         Objects.requireNonNull(data, "'data' no puede ser null");
         Objects.requireNonNull(timestamp, "'timestamp' no puede ser null");
     }
@@ -39,7 +40,7 @@ public record ApiResponse<T>(
      * @return respuesta con los datos, el mensaje y la marca temporal actual
      * @throws NullPointerException si {@code data} es {@code null}
      */
-    public static <T> ApiResponse<T> success(T data, String message) {
-        return new ApiResponse<>(data, message, Instant.now());
+    public static <T> ApiSuccessResponse<T> success(T data, String message) {
+        return new ApiSuccessResponse<>(data, message, Instant.now());
     }
 }
