@@ -9,4 +9,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * <p>Hereda las operaciones CRUD proporcionadas por Spring Data JPA.</p>
  */
 public interface UserRepository extends JpaRepository<User, Long> {
+
+    boolean existsByEmail(String email);
 }

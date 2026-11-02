@@ -2,7 +2,7 @@ package eus.birtlh.g3.user.controller;
 
 import eus.birtlh.g3.common.dto.ApiResponse;
 import eus.birtlh.g3.user.dto.UserResponse;
-import eus.birtlh.g3.user.service.UserService;
+import eus.birtlh.g3.user.UserService;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
