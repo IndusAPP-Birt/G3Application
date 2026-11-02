@@ -1,12 +1,15 @@
 package eus.birtlh.g3.user.controller;
 
 import eus.birtlh.g3.common.dto.ApiResponse;
+import eus.birtlh.g3.user.dto.AdminCreateUserRequest;
 import eus.birtlh.g3.user.dto.UserResponse;
 import eus.birtlh.g3.user.UserService;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.List;
 
@@ -54,6 +57,32 @@ public class UserController {
                 ApiResponse.success(
                         userService.getUserById(id),
                         "Usuario obtenido correctamente."
+                )
+        );
+    }
+
+    /**
+     * Crea un usuario a partir de una solicitud administrativa validada.
+     *
+     * @param request datos del usuario que se desea crear
+     * @return respuesta HTTP 201 con el usuario creado y la cabecera {@code Location} del recurso
+     */
+    @PostMapping
+    public ResponseEntity<ApiResponse<UserResponse>> createUser(
+            @Valid
+            @RequestBody AdminCreateUserRequest request
+    ) {
+        UserResponse user = userService.createUser(request);
+
+        return ResponseEntity.created(
+                ServletUriComponentsBuilder.fromCurrentRequest()
+                        .path("/{id}")
+                        .buildAndExpand(user.id())
+                        .toUri()
+        ).body(
+                ApiResponse.success(
+                        user,
+                        "Usuario creado correctamente."
                 )
         );
     }
