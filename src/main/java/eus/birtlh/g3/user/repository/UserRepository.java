@@ -18,4 +18,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * contrario
      */
     boolean existsByEmail(String email);
+
+    /**
+     * Comprueba si el correo electrónico ya está asignado a un usuario distinto del indicado.
+     *
+     * @param email dirección de correo electrónico normalizada que se desea comprobar
+     * @param id identificador del usuario que se excluye de la comprobación
+     * @return {@code true} si el correo pertenece a otro usuario; {@code false} en caso contrario
+     */
+    boolean existsByEmailAndIdNot(String email, Long id);
 }

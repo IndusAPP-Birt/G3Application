@@ -1,6 +1,7 @@
 package eus.birtlh.g3.user;
 
 import eus.birtlh.g3.user.dto.AdminCreateUserRequest;
+import eus.birtlh.g3.user.dto.AdminUpdateUserRequest;
 import eus.birtlh.g3.user.dto.UserResponse;
 import eus.birtlh.g3.user.exception.EmailAlreadyInUseException;
 import eus.birtlh.g3.user.exception.UserNotFoundException;
@@ -83,6 +84,50 @@ public class UserService {
                         request.role()
                 )
         );
+
+        return UserMapper.toResponse(user);
+    }
+
+    /**
+     * Actualiza completamente un usuario con datos administrativos validados.
+     *
+     * <p>Comprueba que el correo electrónico no pertenezca a otro usuario, codifica la nueva
+     * contraseña y actualiza sus datos, rol y estado de acceso. Fuerza la sincronización con la
+     * base de datos antes de construir la respuesta para incluir la fecha {@code updatedAt}
+     * actualizada.</p>
+     *
+     * @param id identificador del usuario que se desea actualizar
+     * @param request datos normalizados y validados que sustituyen los datos administrables
+     * @return DTO público del usuario actualizado
+     * @throws UserNotFoundException si no existe un usuario con el identificador indicado
+     * @throws EmailAlreadyInUseException si el correo electrónico pertenece a otro usuario
+     */
+    @Transactional
+    public UserResponse updateUser(Long id, AdminUpdateUserRequest request) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(
+                        "Usuario con " + id + " no encontrado."
+                ));
+
+        if (userRepository.existsByEmailAndIdNot(request.email(), id)) {
+            throw new EmailAlreadyInUseException(
+                    "El email " + request.email() + " ya existe."
+            );
+        }
+
+        user.changeName(request.name());
+        user.changeLastName(request.lastName());
+        user.changeEmail(request.email());
+        user.changePasswordHash(passwordEncoder.encode(request.password()));
+        user.changeRole(request.role());
+
+        if (request.enabled()) {
+            user.enable();
+        } else  {
+            user.disable();
+        }
+
+        userRepository.flush();
 
         return UserMapper.toResponse(user);
     }
