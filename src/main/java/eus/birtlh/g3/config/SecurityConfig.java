@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -11,8 +12,8 @@ import org.springframework.security.web.SecurityFilterChain;
 /**
  * Configuración de autorización HTTP de la aplicación.
  *
- * <p>Mientras se implementa la autenticación, permite el acceso público al listado de usuarios
- * y exige autenticación para el resto de rutas.</p>
+ * <p>Mientras se implementa la autenticación, permite temporalmente el acceso público a la
+ * consulta y creación de usuarios, y exige autenticación para el resto de rutas.</p>
  */
 @Configuration
 public class SecurityConfig {
@@ -27,8 +28,10 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.GET, "/api/users", "/api/users/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
                         .anyRequest().authenticated()
                 )
                 .build();
