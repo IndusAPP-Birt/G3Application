@@ -8,6 +8,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -140,6 +143,63 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest()
                 .body(ApiErrorResponse.error(
                         "El cuerpo de la solicitud no tiene un formato válido."
+                ));
+    }
+
+    /**
+     * Devuelve una respuesta HTTP 405 cuando la ruta no admite el método HTTP solicitado.
+     *
+     * <p>Conserva la cabecera {@code Allow} con los métodos admitidos para el recurso.</p>
+     *
+     * @param ex excepción que identifica el método no admitido y sus métodos alternativos
+     * @return respuesta de error con estado HTTP 405 y cabecera {@code Allow}
+     */
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ApiErrorResponse> handleHttpRequestMethodNotSupportedException(
+            HttpRequestMethodNotSupportedException ex
+    ) {
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                .headers(ex.getHeaders())
+                .body(ApiErrorResponse.error(
+                        "El método HTTP solicitado no está permitido para este recurso."
+                ));
+    }
+
+    /**
+     * Devuelve una respuesta HTTP 415 cuando el tipo de contenido de la solicitud no es admitido.
+     *
+     * <p>Conserva las cabeceras con los tipos de contenido admitidos proporcionadas por Spring.</p>
+     *
+     * @param ex excepción que identifica el tipo de contenido no admitido
+     * @return respuesta de error con estado HTTP 415 y los tipos admitidos
+     */
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<ApiErrorResponse> handleHttpMediaTypeNotSupportedException(
+            HttpMediaTypeNotSupportedException ex
+    ) {
+        return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+                .headers(ex.getHeaders())
+                .body(ApiErrorResponse.error(
+                        "El tipo de contenido debe ser application/json."
+                ));
+    }
+
+    /**
+     * Devuelve una respuesta HTTP 406 cuando el cliente solicita un formato no disponible.
+     *
+     * <p>Conserva las cabeceras con las representaciones admitidas proporcionadas por Spring.</p>
+     *
+     * @param ex excepción que identifica una cabecera {@code Accept} incompatible
+     * @return respuesta de error con estado HTTP 406 y las representaciones admitidas
+     */
+    @ExceptionHandler(HttpMediaTypeNotAcceptableException.class)
+    public ResponseEntity<ApiErrorResponse> handleHttpMediaTypeNotAcceptableException(
+            HttpMediaTypeNotAcceptableException ex
+    ) {
+        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE)
+                .headers(ex.getHeaders())
+                .body(ApiErrorResponse.error(
+                        "La aplicación no puede devolver una respuesta en el formato solicitado."
                 ));
     }
 
