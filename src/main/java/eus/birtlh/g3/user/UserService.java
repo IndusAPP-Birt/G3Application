@@ -3,6 +3,7 @@ package eus.birtlh.g3.user;
 import eus.birtlh.g3.common.dto.CatalogOptionResponse;
 import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.user.dto.AdminCreateUserRequest;
+import eus.birtlh.g3.user.dto.AdminResetUserPasswordRequest;
 import eus.birtlh.g3.user.dto.AdminUpdateUserRequest;
 import eus.birtlh.g3.user.dto.UserResponse;
 import eus.birtlh.g3.user.exception.EmailAlreadyInUseException;
@@ -119,12 +120,12 @@ public class UserService {
     }
 
     /**
-     * Actualiza completamente un usuario con datos administrativos validados.
+     * Actualiza los datos administrativos de un usuario, excepto su contraseña.
      *
-     * <p>Comprueba que el correo electrónico no pertenezca a otro usuario, codifica la nueva
-     * contraseña y actualiza sus datos, rol y estado de acceso. Fuerza la sincronización con la
-     * base de datos antes de construir la respuesta para incluir la fecha {@code updatedAt}
-     * actualizada.</p>
+     * <p>Comprueba que el correo electrónico no pertenezca a otro usuario y actualiza sus datos,
+     * rol y estado de acceso. La contraseña se actualiza mediante un caso de uso independiente.
+     * Fuerza la sincronización con la base de datos antes de construir la respuesta para incluir
+     * la fecha {@code updatedAt} actualizada.</p>
      *
      * @param id identificador del usuario que se desea actualizar
      * @param request datos normalizados y validados que sustituyen los datos administrables
@@ -148,7 +149,6 @@ public class UserService {
         user.changeName(request.name());
         user.changeLastName(request.lastName());
         user.changeEmail(request.email());
-        user.changePasswordHash(passwordEncoder.encode(request.password()));
         user.changeRole(request.role());
 
         if (request.enabled()) {
@@ -156,6 +156,34 @@ public class UserService {
         } else  {
             user.disable();
         }
+
+        userRepository.flush();
+
+        return UserMapper.toResponse(user);
+    }
+
+    /**
+     * Restablece la contraseña de un usuario con una solicitud administrativa validada.
+     *
+     * <p>Codifica la nueva contraseña antes de almacenarla y sincroniza la modificación para que
+     * la respuesta incluya la fecha {@code updatedAt} actualizada.</p>
+     *
+     * @param id identificador del usuario cuya contraseña se desea restablecer
+     * @param request nueva contraseña validada
+     * @return DTO público del usuario con la contraseña actualizada, sin exponer su hash
+     * @throws UserNotFoundException si no existe un usuario con el identificador indicado
+     */
+    @Transactional
+    public UserResponse resetUserPassword(
+            Long id,
+            AdminResetUserPasswordRequest request
+    ) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(
+                        "Usuario con " + id + " no encontrado."
+                ));
+
+        user.changePasswordHash(passwordEncoder.encode(request.password()));
 
         userRepository.flush();
 
