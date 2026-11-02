@@ -1,6 +1,7 @@
 package eus.birtlh.g3.user.controller;
 
 import eus.birtlh.g3.common.dto.ApiResponse;
+import eus.birtlh.g3.common.dto.CatalogOptionResponse;
 import eus.birtlh.g3.user.dto.AdminCreateUserRequest;
 import eus.birtlh.g3.user.dto.AdminUpdateUserRequest;
 import eus.birtlh.g3.user.dto.UserResponse;
@@ -38,6 +39,21 @@ public class UserController {
                 ApiResponse.success(
                         userService.getAllUsers(),
                         "Usuarios obtenidos correctamente."
+                )
+        );
+    }
+
+    /**
+     * Obtiene los roles disponibles para su selección en la API.
+     *
+     * @return respuesta HTTP 200 con las opciones de catálogo de roles y su marca temporal
+     */
+    @GetMapping("/roles")
+    public ResponseEntity<ApiResponse<List<CatalogOptionResponse>>> listAllRoles() {
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        userService.getAllRoles(),
+                        "Roles obtenidos correctamente."
                 )
         );
     }

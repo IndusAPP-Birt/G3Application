@@ -1,10 +1,12 @@
 package eus.birtlh.g3.user;
 
+import eus.birtlh.g3.common.dto.CatalogOptionResponse;
 import eus.birtlh.g3.user.dto.AdminCreateUserRequest;
 import eus.birtlh.g3.user.dto.AdminUpdateUserRequest;
 import eus.birtlh.g3.user.dto.UserResponse;
 import eus.birtlh.g3.user.exception.EmailAlreadyInUseException;
 import eus.birtlh.g3.user.exception.UserNotFoundException;
+import eus.birtlh.g3.user.mapper.RoleMapper;
 import eus.birtlh.g3.user.mapper.UserMapper;
 import eus.birtlh.g3.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -37,6 +40,17 @@ public class UserService {
         return userRepository.findAll()
                 .stream()
                 .map(UserMapper::toResponse)
+                .toList();
+    }
+
+    /**
+     * Obtiene todos los roles disponibles como opciones de catálogo públicas.
+     *
+     * @return lista de roles disponibles con su código y descripción
+     */
+    public List<CatalogOptionResponse> getAllRoles() {
+        return Arrays.stream(Role.values())
+                .map(RoleMapper::toResponse)
                 .toList();
     }
 
