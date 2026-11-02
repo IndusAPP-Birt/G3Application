@@ -9,7 +9,7 @@ centralizado de errores.
 | Área | Estado |
 |---|---|
 | Entidad y persistencia de usuarios | Implementado |
-| Creación y actualización administrativa | Implementado |
+| Creación, actualización y restablecimiento administrativo de contraseñas | Implementado |
 | Listado paginado y catálogo de roles | Implementado |
 | Respuestas de éxito y error | Implementado |
 | Manejo global de errores HTTP | Implementado |
@@ -65,9 +65,10 @@ constante requerirá adaptar los datos persistidos.
 
 ### Política de actualización
 
-`PUT /api/users/{id}` realiza una actualización administrativa completa: nombre, apellidos, email,
-contraseña, rol y estado. El email se normaliza a minúsculas y la contraseña se codifica con BCrypt
-antes de persistirse. No existe borrado físico: se utiliza `enabled` para desactivar usuarios.
+`PUT /api/users/{id}` actualiza los datos administrativos del usuario: nombre, apellidos, email,
+rol y estado. El email se normaliza a minúsculas. La contraseña se restablece de forma independiente
+mediante `PUT /api/users/{id}/password`, donde se codifica con BCrypt antes de persistirse. No existe
+borrado físico: se utiliza `enabled` para desactivar usuarios.
 
 ## Endpoints disponibles
 
@@ -80,7 +81,8 @@ antes de persistirse. No existe borrado físico: se utiliza `enabled` para desac
 | `GET` | `/api/users/roles` | Devuelve el catálogo de roles disponibles. |
 | `GET` | `/api/users/{id}` | Obtiene un usuario por identificador. |
 | `POST` | `/api/users` | Crea un usuario desde un rol administrativo. |
-| `PUT` | `/api/users/{id}` | Actualiza completamente un usuario desde un rol administrativo. |
+| `PUT` | `/api/users/{id}` | Actualiza los datos administrativos de un usuario, excepto su contraseña. |
+| `PUT` | `/api/users/{id}/password` | Restablece la contraseña de un usuario desde un rol administrativo. |
 
 El cuerpo de `POST` incluye:
 
@@ -94,11 +96,23 @@ El cuerpo de `POST` incluye:
 }
 ```
 
-El cuerpo de `PUT` contiene los mismos campos y añade el estado obligatorio:
+El cuerpo de `PUT /api/users/{id}` contiene:
 
 ```json
 {
+  "name": "Ane",
+  "lastName": "García",
+  "email": "ane.garcia@example.com",
+  "role": "ROLE_INSPECTOR",
   "enabled": true
+}
+```
+
+El cuerpo de `PUT /api/users/{id}/password` contiene únicamente la nueva contraseña:
+
+```json
+{
+  "password": "contraseña-segura"
 }
 ```
 
