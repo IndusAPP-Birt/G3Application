@@ -13,13 +13,11 @@ import java.util.Locale;
  * Datos necesarios para que un administrador actualice completamente un usuario.
  *
  * <p>Antes de validarse, elimina los espacios extremos de nombre, apellidos y correo electrónico.
- * Por política de la aplicación, el correo electrónico completo se normaliza a minúsculas. La
- * contraseña se mantiene sin transformar para conservar exactamente el valor introducido.</p>
+ * Por política de la aplicación, el correo electrónico completo se normaliza a minúsculas.</p>
  *
  * @param name nombre del usuario
  * @param lastName apellido del usuario; puede ser {@code null}
  * @param email dirección de correo electrónico normalizada
- * @param password contraseña en texto plano que el servicio debe convertir en hash
  * @param role rol que el administrador asigna al usuario
  * @param enabled estado de acceso que el administrador asigna al usuario
  */
@@ -45,14 +43,6 @@ public record AdminUpdateUserRequest(
                 message = "La dirección de correo electrónico no puede superar los {max} caracteres.")
         @Email(message = "La dirección de correo electrónico debe tener un formato válido.")
         String email,
-
-        @NotBlank(message = "La contraseña es obligatoria.")
-        @Size(
-                min = UserValidationConstraints.MIN_PASSWORD_LENGTH,
-                max = UserValidationConstraints.MAX_PASSWORD_LENGTH,
-                message = "La contraseña debe tener entre {min} y {max} caracteres."
-        )
-        String password,
 
         @NotNull(message = "El rol es obligatorio.")
         Role role,
