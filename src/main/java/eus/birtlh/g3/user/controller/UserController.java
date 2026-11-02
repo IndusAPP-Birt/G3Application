@@ -3,11 +3,10 @@ package eus.birtlh.g3.user.controller;
 import eus.birtlh.g3.common.dto.ApiResponse;
 import eus.birtlh.g3.user.dto.UserResponse;
 import eus.birtlh.g3.user.service.UserService;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -34,7 +33,27 @@ public class UserController {
         return ResponseEntity.ok(
                 ApiResponse.success(
                         userService.getAllUsers(),
-                        "Usuarios obtenidos correctamente"
+                        "Usuarios obtenidos correctamente."
+                )
+        );
+    }
+
+    /**
+     * Obtiene un usuario por su identificador.
+     *
+     * @param id identificador positivo del usuario solicitado
+     * @return respuesta HTTP 200 con el usuario y su marca temporal
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<UserResponse>> findUserById(
+            @PathVariable
+            @Positive (message = "El identificador debe ser mayor que cero.")
+            Long id
+    ) {
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        userService.getUserById(id),
+                        "Usuario obtenido correctamente."
                 )
         );
     }
