@@ -1,12 +1,16 @@
 package eus.birtlh.g3.user.controller;
 
+import eus.birtlh.g3.common.PaginationConstants;
 import eus.birtlh.g3.common.dto.ApiResponse;
 import eus.birtlh.g3.common.dto.CatalogOptionResponse;
+import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.user.dto.AdminCreateUserRequest;
 import eus.birtlh.g3.user.dto.AdminUpdateUserRequest;
 import eus.birtlh.g3.user.dto.UserResponse;
 import eus.birtlh.g3.user.UserService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -29,15 +33,38 @@ public class UserController {
     private final UserService userService;
 
     /**
-     * Obtiene todos los usuarios registrados.
+     * Obtiene una página de usuarios registrados.
      *
-     * @return respuesta HTTP 200 con la lista de usuarios y su marca temporal
+     * @param page índice de página basado en cero
+     * @param size número de usuarios por página
+     * @return respuesta HTTP 200 con la página de usuarios y su marca temporal
      */
     @GetMapping
-    public ResponseEntity<ApiResponse<List<UserResponse>>> findAllUsers() {
+    public ResponseEntity<ApiResponse<PageResponse<UserResponse>>> findAllUsers(
+            @RequestParam(
+                    name = "page",
+                    defaultValue = PaginationConstants.DEFAULT_PAGE_VALUE)
+            @Min(
+                    value = PaginationConstants.MIN_PAGE,
+                    message = "La página debe ser {value} o mayor."
+            )
+            int page,
+
+            @RequestParam(name = "size",
+                    defaultValue = PaginationConstants.DEFAULT_PAGE_SIZE_VALUE)
+            @Min(
+                    value = PaginationConstants.MIN_PAGE_SIZE,
+                    message = "El tamaño de página debe ser {value} o mayor."
+            )
+            @Max(
+                    value = PaginationConstants.MAX_PAGE_SIZE,
+                    message = "El tamaño de página no puede superar {value}."
+            )
+            int size
+    ) {
         return ResponseEntity.ok(
                 ApiResponse.success(
-                        userService.getAllUsers(),
+                        userService.getAllUsers(page, size),
                         "Usuarios obtenidos correctamente."
                 )
         );

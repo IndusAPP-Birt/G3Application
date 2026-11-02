@@ -1,6 +1,7 @@
 package eus.birtlh.g3.user;
 
 import eus.birtlh.g3.common.dto.CatalogOptionResponse;
+import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.user.dto.AdminCreateUserRequest;
 import eus.birtlh.g3.user.dto.AdminUpdateUserRequest;
 import eus.birtlh.g3.user.dto.UserResponse;
@@ -10,6 +11,9 @@ import eus.birtlh.g3.user.mapper.RoleMapper;
 import eus.birtlh.g3.user.mapper.UserMapper;
 import eus.birtlh.g3.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,16 +35,28 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     /**
-     * Obtiene todos los usuarios registrados como DTOs de respuesta.
+     * Obtiene una página de usuarios registrados como DTOs de respuesta.
      *
-     * @return lista de usuarios públicos; puede estar vacía
+     * @param page índice de página basado en cero
+     * @param size número de usuarios por página
+     * @return página de usuarios públicos; su contenido puede estar vacío
      */
     @Transactional(readOnly = true)
-    public List<UserResponse> getAllUsers() {
-        return userRepository.findAll()
-                .stream()
-                .map(UserMapper::toResponse)
-                .toList();
+    public PageResponse<UserResponse> getAllUsers(int page, int size) {
+        Page<User> users = userRepository.findAll(
+                PageRequest.of(page, size, Sort.by("id").ascending())
+        );
+
+        return new PageResponse<>(
+                users.getContent()
+                        .stream()
+                        .map(UserMapper::toResponse)
+                        .toList(),
+                users.getNumber(),
+                users.getSize(),
+                users.getTotalElements(),
+                users.getTotalPages()
+        );
     }
 
     /**
