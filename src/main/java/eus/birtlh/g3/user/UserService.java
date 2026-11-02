@@ -50,7 +50,7 @@ public class UserService {
     public UserResponse getUserById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(
-                        "Usuario con  " + id + " no encontrado."
+                        "Usuario con " + id + " no encontrado."
                 ));
 
         return UserMapper.toResponse(user);

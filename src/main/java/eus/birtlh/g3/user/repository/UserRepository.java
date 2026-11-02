@@ -10,5 +10,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
  */
 public interface UserRepository extends JpaRepository<User, Long> {
 
+    /**
+     * Comprueba si ya existe un usuario con la dirección de correo electrónico indicada.
+     *
+     * @param email dirección de correo electrónico normalizada que se desea comprobar
+     * @return {@code true} si el correo ya está asignado a un usuario; {@code false} en caso
+     * contrario
+     */
     boolean existsByEmail(String email);
 }
