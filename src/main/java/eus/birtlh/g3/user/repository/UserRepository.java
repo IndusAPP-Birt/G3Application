@@ -3,6 +3,8 @@ package eus.birtlh.g3.user.repository;
 import eus.birtlh.g3.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
+
 /**
  * Repositorio de persistencia para la entidad {@link User}.
  *
@@ -27,4 +29,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * @return {@code true} si el correo pertenece a otro usuario; {@code false} en caso contrario
      */
     boolean existsByEmailAndIdNot(String email, Long id);
+
+    /**
+     * Busca un usuario por su dirección de correo electrónico normalizada.
+     *
+     * @param email dirección de correo electrónico que identifica al usuario
+     * @return usuario encontrado o un {@link Optional} vacío si no existe
+     */
+    Optional<User> findByEmail(String email);
 }
