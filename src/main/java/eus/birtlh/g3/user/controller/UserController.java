@@ -5,6 +5,7 @@ import eus.birtlh.g3.common.dto.ApiSuccessResponse;
 import eus.birtlh.g3.common.dto.CatalogOptionResponse;
 import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.user.dto.AdminCreateUserRequest;
+import eus.birtlh.g3.user.dto.AdminResetUserPasswordRequest;
 import eus.birtlh.g3.user.dto.AdminUpdateUserRequest;
 import eus.birtlh.g3.user.dto.UserResponse;
 import eus.birtlh.g3.user.UserService;
@@ -132,7 +133,7 @@ public class UserController {
     }
 
     /**
-     * Actualiza completamente un usuario a partir de una solicitud administrativa validada.
+     * Actualiza los datos administrativos de un usuario, excepto su contraseña.
      *
      * @param id identificador positivo del usuario que se desea actualizar
      * @param request datos administrables que sustituyen los datos actuales del usuario
@@ -151,6 +152,30 @@ public class UserController {
                 ApiSuccessResponse.success(
                         userService.updateUser(id, request),
                         "Usuario actualizado correctamente."
+                )
+        );
+    }
+
+    /**
+     * Restablece la contraseña de un usuario a partir de una solicitud administrativa validada.
+     *
+     * @param id identificador positivo del usuario cuya contraseña se desea restablecer
+     * @param request nueva contraseña validada
+     * @return respuesta HTTP 200 con el usuario actualizado y su marca temporal
+     */
+    @PutMapping("/{id}/password")
+    public ResponseEntity<ApiSuccessResponse<UserResponse>> resetUserPassword(
+            @PathVariable
+            @Positive(message = "El identificador debe ser mayor que cero.")
+            Long id,
+
+            @Valid
+            @RequestBody AdminResetUserPasswordRequest request
+    ) {
+        return ResponseEntity.ok(
+                ApiSuccessResponse.success(
+                        userService.resetUserPassword(id, request),
+                        "Contraseña restablecida correctamente."
                 )
         );
     }
