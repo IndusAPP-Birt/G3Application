@@ -3,7 +3,6 @@ package eus.birtlh.g3.auth.service;
 import eus.birtlh.g3.auth.config.JwtProperties;
 import eus.birtlh.g3.user.UserPrincipal;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
@@ -17,7 +16,7 @@ import java.time.Instant;
 /**
  * Servicio que genera los tokens de acceso JWT emitidos tras una autenticación correcta.
  *
- * <p>Incluye el email como sujeto, los roles como claim, el emisor y las marcas temporales de
+ * <p>Incluye el email como sujeto, el rol como claim, el emisor y las marcas temporales de
  * emisión y caducidad. La firma se delega en el {@link JwtEncoder} configurado con HS256.</p>
  */
 @Service
@@ -30,7 +29,7 @@ public class JwtService {
     /**
      * Genera un token de acceso firmado para el usuario autenticado.
      *
-     * @param principal identidad autenticada de la que se obtienen el email y los roles
+     * @param principal identidad autenticada de la que se obtienen el email y el rol
      * @return representación compacta del JWT firmado
      * @throws JwtEncodingException si no es posible codificar o firmar el token
      */
@@ -43,13 +42,7 @@ public class JwtService {
                 .subject(principal.getUsername())
                 .issuedAt(issuedAt)
                 .expiresAt(expiresAt)
-                .claim(
-                        "roles",
-                        principal.getAuthorities()
-                                .stream()
-                                .map(GrantedAuthority::getAuthority)
-                                .toList()
-                )
+                .claim("role", principal.getRole().name())
                 .build();
 
         JwsHeader header = JwsHeader.with(MacAlgorithm.HS256)

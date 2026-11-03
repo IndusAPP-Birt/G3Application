@@ -57,6 +57,15 @@ public final class UserPrincipal implements UserDetails {
     }
 
     /**
+     * Devuelve el único rol asignado al usuario.
+     *
+     * @return rol del usuario
+     */
+    public Role getRole() {
+        return role;
+    }
+
+    /**
      * Devuelve la autoridad correspondiente al rol asignado al usuario.
      *
      * @return colección inmutable con la autoridad del usuario

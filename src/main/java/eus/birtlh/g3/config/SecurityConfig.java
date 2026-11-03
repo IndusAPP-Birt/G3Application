@@ -1,5 +1,8 @@
 package eus.birtlh.g3.config;
 
+import eus.birtlh.g3.auth.config.JwtRolesConverter;
+import eus.birtlh.g3.auth.security.RestAccessDeniedHandler;
+import eus.birtlh.g3.auth.security.RestAuthenticationEntryPoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -7,16 +10,17 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
 /**
- * Configuración de autorización HTTP de la aplicación.
+ * Configuración de autenticación y autorización HTTP de la aplicación.
  *
- * <p>Mientras se implementa la autenticación, permite temporalmente el acceso público a la
- * consulta, creación y actualización de usuarios, y exige autenticación para el resto de
- * rutas.</p>
+ * <p>La aplicación utiliza tokens JWT Bearer y no conserva sesiones de servidor. Durante esta
+ * fase, los endpoints de usuarios permanecen públicos hasta definir la matriz de permisos.</p>
  */
 @Configuration
 public class SecurityConfig {
@@ -25,13 +29,28 @@ public class SecurityConfig {
      * Construye la cadena de filtros de seguridad de la aplicación.
      *
      * @param http configurador de seguridad HTTP proporcionado por Spring Security
-     * @return cadena de filtros con las reglas de autorización configuradas
+     * @param jwtRolesConverter conversor del claim de rol del JWT en autoridad de Spring Security
+     * @param authenticationEntryPoint generador de respuestas JSON para errores de autenticación
+     * @param accessDeniedHandler generador de respuestas JSON para errores de autorización
+     * @return cadena de filtros con las reglas de seguridad configuradas
      * @throws Exception si Spring Security no puede construir la cadena de filtros
      */
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(
+            HttpSecurity http,
+            JwtRolesConverter jwtRolesConverter,
+            RestAuthenticationEntryPoint authenticationEntryPoint,
+            RestAccessDeniedHandler accessDeniedHandler
+    ) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .accessDeniedHandler(accessDeniedHandler)
+                )
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
@@ -40,14 +59,34 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/users/**").permitAll()
                         .anyRequest().authenticated()
                 )
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(
+                                jwtAuthenticationConverter(jwtRolesConverter)
+                        ))
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                )
                 .build();
     }
 
     /**
-     * Expone el gestor de autenticación configurado por Spring Security.
+     * Crea el conversor que adapta un JWT validado a la autenticación de Spring Security.
      *
-     * <p>Se utilizará en el servicio de autenticación para comprobar las credenciales mediante
-     * {@code UserSecurityDetailsService} y el codificador BCrypt configurado.</p>
+     * <p>Delega la conversión del claim {@code role} en {@link JwtRolesConverter} para que las
+     * reglas de autorización puedan usar la autoridad {@code ROLE_*} resultante.</p>
+     *
+     * @param jwtRolesConverter conversor del rol incluido en el token
+     * @return conversor de JWT a autenticación con sus autoridades
+     */
+    private JwtAuthenticationConverter jwtAuthenticationConverter(
+            JwtRolesConverter jwtRolesConverter
+    ) {
+        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
+        converter.setJwtGrantedAuthoritiesConverter(jwtRolesConverter);
+        return converter;
+    }
+
+    /**
+     * Expone el gestor de autenticación configurado por Spring Security.
      *
      * @param configuration configuración de autenticación proporcionada por Spring Security
      * @return gestor encargado de autenticar las credenciales recibidas
