@@ -3,6 +3,8 @@ package eus.birtlh.g3.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -37,6 +39,23 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .build();
+    }
+
+    /**
+     * Expone el gestor de autenticación configurado por Spring Security.
+     *
+     * <p>Se utilizará en el servicio de autenticación para comprobar las credenciales mediante
+     * {@code UserSecurityDetailsService} y el codificador BCrypt configurado.</p>
+     *
+     * @param configuration configuración de autenticación proporcionada por Spring Security
+     * @return gestor encargado de autenticar las credenciales recibidas
+     * @throws Exception si Spring Security no puede obtener el gestor configurado
+     */
+    @Bean
+    AuthenticationManager authenticationManager(
+            AuthenticationConfiguration configuration
+    ) throws Exception {
+        return configuration.getAuthenticationManager();
     }
 
     /**
