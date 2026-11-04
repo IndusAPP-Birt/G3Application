@@ -19,8 +19,9 @@ import org.springframework.security.web.SecurityFilterChain;
 /**
  * Configuración de autenticación y autorización HTTP de la aplicación.
  *
- * <p>La aplicación utiliza tokens JWT Bearer y no conserva sesiones de servidor. Durante esta
- * fase, los endpoints de usuarios permanecen públicos hasta definir la matriz de permisos.</p>
+ * <p>La aplicación utiliza tokens JWT Bearer y no conserva sesiones de servidor. El inicio de
+ * sesión y la comprobación de salud son públicos; las operaciones administrativas sobre usuarios
+ * requieren la autoridad {@code ROLE_ADMINISTRATOR}.</p>
  */
 @Configuration
 public class SecurityConfig {
@@ -54,9 +55,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/users", "/api/users/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
-                        .requestMatchers(HttpMethod.PUT, "/api/users/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/users", "/api/users/**").hasRole("ADMINISTRATOR")
+                        .requestMatchers(HttpMethod.POST, "/api/users").hasRole("ADMINISTRATOR")
+                        .requestMatchers(HttpMethod.PUT, "/api/users/**").hasRole("ADMINISTRATOR")
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
