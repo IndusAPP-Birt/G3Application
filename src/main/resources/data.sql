@@ -24,3 +24,44 @@ VALUES ('Ane', 'García', 'ane.garcia@example.com', '$2a$10$r2Ns2KtAA9IfDmuMkXT4
        ('Nahia', 'Blanco', 'nahia.blanco@example.com', '$2a$10$r2Ns2KtAA9IfDmuMkXT4fuE4BLUHAhJVjhC2xju4gxH3sKMDdu6yK', 'ROLE_INSPECTOR', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
        ('Ibai', 'Fuentes', 'ibai.fuentes@example.com', '$2a$10$r2Ns2KtAA9IfDmuMkXT4fuE4BLUHAhJVjhC2xju4gxH3sKMDdu6yK', 'ROLE_INSPECTOR', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
        ('Sara', 'Campos', 'sara.campos@example.com', '$2a$10$r2Ns2KtAA9IfDmuMkXT4fuE4BLUHAhJVjhC2xju4gxH3sKMDdu6yK', 'ROLE_INSPECTOR', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+INSERT INTO machines (
+    asset_code,
+    name,
+    manufacturer,
+    model,
+    serial_number,
+    location,
+    commissioned_at,
+    status,
+    created_at,
+    updated_at
+)
+SELECT
+    'MAQ-' || LPAD(CAST(machine_number AS VARCHAR), 4, '0'),
+    CASE MOD(machine_number, 5)
+        WHEN 0 THEN 'Prensa hidráulica '
+        WHEN 1 THEN 'Torno CNC '
+        WHEN 2 THEN 'Fresadora vertical '
+        WHEN 3 THEN 'Cinta transportadora '
+        ELSE 'Compresor industrial '
+    END || CAST(machine_number AS VARCHAR),
+    CASE MOD(machine_number, 4)
+        WHEN 0 THEN 'Siemens'
+        WHEN 1 THEN 'Fagor Automation'
+        WHEN 2 THEN 'Bosch Rexroth'
+        ELSE 'Dürr'
+    END,
+    'Modelo-' || LPAD(CAST(machine_number AS VARCHAR), 3, '0'),
+    'SN-MAQ-' || LPAD(CAST(machine_number AS VARCHAR), 4, '0'),
+    'Planta ' || CAST(MOD(machine_number - 1, 3) + 1 AS VARCHAR)
+            || ' - Nave ' || CAST(MOD(machine_number - 1, 4) + 1 AS VARCHAR),
+    DATEADD('DAY', -machine_number * 30, DATE '2025-01-01'),
+    CASE
+        WHEN MOD(machine_number, 20) = 0 THEN 'RETIRED'
+        WHEN MOD(machine_number, 10) = 0 THEN 'INACTIVE'
+        ELSE 'ACTIVE'
+    END,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
+FROM SYSTEM_RANGE(1, 100) AS generated(machine_number);
