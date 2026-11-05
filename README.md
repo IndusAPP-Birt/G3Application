@@ -1,58 +1,57 @@
 # G3 Application
 
-API REST de gestión administrativa de usuarios, desarrollada con Spring Boot. Incluye autenticación JWT, autorización por rol, contratos HTTP homogéneos, paginación y manejo centralizado de errores.
+API REST desarrollada con Spring Boot para la gestión administrativa de usuarios. Esta rama `feat/auth` amplía el módulo `user` con autenticación JWT y autorización por rol.
 
-## Estado funcional
+## Estado actual
 
 | Área | Estado |
 |---|---|
-| Persistencia, validación, paginación y búsquedas de usuarios | Implementado |
-| Creación, actualización y restablecimiento administrativo de contraseña | Implementado |
+| Entidad y persistencia de usuarios | Implementado |
+| Creación, actualización y restablecimiento administrativo de contraseñas | Implementado |
+| Listado paginado, búsquedas de usuarios y catálogo de roles | Implementado |
+| Respuestas de éxito y error | Implementado |
+| Manejo global de errores HTTP | Implementado |
 | Autenticación mediante email y contraseña | Implementado |
-| JWT firmado con HS256 y validador de emisor/caducidad | Implementado |
+| JWT firmado con HS256 y validación de emisor/caducidad | Implementado |
 | Autorización de usuarios por `ROLE_ADMINISTRATOR` | Implementado |
-| Respuestas JSON homogéneas para éxito y error | Implementado |
-| Errores de seguridad `401` y `403` en JSON | Implementado |
-| Pruebas de integración HTTP automatizadas | Pendiente |
+| Pruebas de endpoints con MockMvc | Pendiente |
 | Refresh token, cierre de sesión y revocación de tokens | Pendiente |
 
-## Requisitos y ejecución local
+## Requisitos y ejecución
 
 - Java 21
 - Maven Wrapper incluido
 - Una clave de firma JWT Base64 de 32 bytes
 
-Genera una clave local y arranca la aplicación:
+Durante el desarrollo se utiliza H2 en memoria, el esquema se crea al arrancar y se cargan datos de ejemplo desde `data.sql`. Sus usuarios usan la contraseña de desarrollo `password`.
 
 ```bash
 export JWT_SIGNING_KEY="$(openssl rand -base64 32)"
 ./mvnw spring-boot:run
 ```
 
-La configuración actual usa H2 en memoria. El esquema se crea al arrancar y `data.sql` carga datos de ejemplo; sus usuarios usan la contraseña de desarrollo `password`. No deben utilizarse esos datos ni esa contraseña en producción.
-
-Para ejecutar la suite disponible:
+Para ejecutar la suite actual:
 
 ```bash
 JWT_SIGNING_KEY="$(openssl rand -base64 32)" ./mvnw test
 ```
 
-## Autenticación y autorización
+## Módulo `user`
 
-La API no mantiene sesiones de servidor: el cliente obtiene un JWT y lo envía en cada petición protegida.
+| Campo | Descripción |
+|---|---|
+| `id` | Identificador persistente. |
+| `name` | Nombre obligatorio. |
+| `lastName` | Apellidos opcionales. |
+| `email` | Dirección única, normalizada completamente a minúsculas. |
+| `passwordHash` | Hash BCrypt; nunca se expone por la API. |
+| `role` | Rol del usuario persistido como texto. |
+| `enabled` | Estado de acceso del usuario. |
+| `createdAt` / `updatedAt` | Marcas temporales gestionadas por JPA. |
 
-```http
-Authorization: Bearer <accessToken>
-```
+Los DTO validan la entrada. El constructor y los métodos que alteran `User` tienen visibilidad de paquete, de modo que los casos de uso del módulo controlan su creación y modificación.
 
-`POST /api/auth/login` valida el email y la contraseña, y devuelve un token con:
-
-- `iss`: emisor configurado (`g3`).
-- `sub`: email normalizado del usuario.
-- `role`: único rol del usuario, por ejemplo `ROLE_ADMINISTRATOR`.
-- `iat` y `exp`: emisión y caducidad. La duración actual es de 15 minutos.
-
-Los roles disponibles son:
+### Roles disponibles
 
 ```text
 ROLE_ADMINISTRATOR
@@ -60,24 +59,40 @@ ROLE_INSPECTOR
 ROLE_MAINTENANCE_TECHNICIAN
 ```
 
-Las operaciones bajo `/api/users` requieren `ROLE_ADMINISTRATOR`. Un token ausente, inválido o caducado recibe `401`; un token válido sin ese rol recibe `403`.
+Los nombres de los roles se persisten y se exponen como código de API. Renombrar o eliminar una constante requerirá adaptar los datos persistidos.
 
-## Endpoints
+### Política de actualización
 
-| Método | Ruta | Acceso | Descripción |
-|---|---|---|---|
-| `GET` | `/actuator/health` | Público | Comprobación de salud para despliegue. |
-| `POST` | `/api/auth/login` | Público | Inicia sesión y devuelve un JWT. |
-| `GET` | `/api/users?page=0&size=20` | Administrador | Devuelve usuarios paginados por `id`. Tamaño máximo: `100`. |
-| `GET` | `/api/users/by-email?email=ane&page=0&size=20` | Administrador | Busca usuarios cuyo email contiene el texto indicado, sin distinguir mayúsculas de minúsculas. |
-| `GET` | `/api/users/by-status?enabled=true&page=0&size=20` | Administrador | Devuelve usuarios habilitados o deshabilitados de forma paginada. |
-| `GET` | `/api/users/roles` | Administrador | Devuelve el catálogo de roles. |
-| `GET` | `/api/users/{id}` | Administrador | Obtiene un usuario. |
-| `POST` | `/api/users` | Administrador | Crea un usuario. |
-| `PUT` | `/api/users/{id}` | Administrador | Actualiza datos administrativos, incluido estado y rol. |
-| `PUT` | `/api/users/{id}/password` | Administrador | Restablece la contraseña. |
+`PUT /api/users/{id}` actualiza nombre, apellidos, email, rol y estado. El email se normaliza a minúsculas. La contraseña se restablece por separado mediante `PUT /api/users/{id}/password`, donde se codifica con BCrypt. No existe borrado físico: se utiliza `enabled` para desactivar usuarios.
 
-Ejemplo de inicio de sesión:
+## Autenticación y autorización
+
+`POST /api/auth/login` valida el email y la contraseña y devuelve un JWT de acceso de 15 minutos. El token incluye emisor, email normalizado como sujeto, rol y fechas de emisión y caducidad.
+
+La API es sin estado: no conserva sesiones de servidor. El cliente debe enviar el token en cada petición protegida:
+
+```http
+Authorization: Bearer <accessToken>
+```
+
+`/actuator/health` y `POST /api/auth/login` son públicos. Todas las operaciones bajo `/api/users` requieren un JWT válido con `ROLE_ADMINISTRATOR`. Un token ausente, inválido o caducado devuelve `401`; un token válido sin la autoridad requerida devuelve `403`.
+
+## Endpoints disponibles
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `GET` | `/actuator/health` | Comprobación de salud pública para despliegue. |
+| `POST` | `/api/auth/login` | Inicio de sesión público; devuelve un JWT. |
+| `GET` | `/api/users?page=0&size=20` | Devuelve usuarios paginados, ordenados por `id`. Tamaño máximo: `100`. Requiere administrador. |
+| `GET` | `/api/users/by-email?email=ane&page=0&size=20` | Busca usuarios cuyo email contiene el texto indicado, sin distinguir mayúsculas de minúsculas. Requiere administrador. |
+| `GET` | `/api/users/by-status?enabled=true&page=0&size=20` | Devuelve usuarios habilitados o deshabilitados de forma paginada. Requiere administrador. |
+| `GET` | `/api/users/roles` | Devuelve el catálogo de roles disponibles. Requiere administrador. |
+| `GET` | `/api/users/{id}` | Obtiene un usuario por identificador. Requiere administrador. |
+| `POST` | `/api/users` | Crea un usuario desde un rol administrativo. Requiere administrador. |
+| `PUT` | `/api/users/{id}` | Actualiza los datos administrativos de un usuario, excepto su contraseña. Requiere administrador. |
+| `PUT` | `/api/users/{id}/password` | Restablece la contraseña de un usuario desde un rol administrativo. Requiere administrador. |
+
+El cuerpo de `POST /api/auth/login` incluye:
 
 ```json
 {
@@ -86,15 +101,41 @@ Ejemplo de inicio de sesión:
 }
 ```
 
-## Modelo de usuario
+El cuerpo de `POST /api/users` incluye:
 
-`User` persiste identificador, nombre, apellidos opcionales, email único, hash BCrypt, rol, estado y fechas de creación/actualización. La validación de entrada se concentra en los DTOs. El email se recorta y normaliza íntegramente a minúsculas.
+```json
+{
+  "name": "Ane",
+  "lastName": "García",
+  "email": "ane.garcia@example.com",
+  "password": "contraseña-segura",
+  "role": "ROLE_INSPECTOR"
+}
+```
 
-La actualización administrativa no modifica la contraseña. El restablecimiento se realiza en su endpoint propio y el servicio guarda solamente el hash BCrypt. No hay borrado físico: `enabled` controla el acceso futuro del usuario.
+El cuerpo de `PUT /api/users/{id}` contiene:
 
-Los nombres del enumerador `Role` se persisten y se exponen como código de API. Renombrar o eliminar una constante exige adaptar los datos persistidos y los clientes afectados.
+```json
+{
+  "name": "Ane",
+  "lastName": "García",
+  "email": "ane.garcia@example.com",
+  "role": "ROLE_INSPECTOR",
+  "enabled": true
+}
+```
 
-## Contratos HTTP
+El cuerpo de `PUT /api/users/{id}/password` contiene únicamente la nueva contraseña:
+
+```json
+{
+  "password": "contraseña-segura"
+}
+```
+
+La creación inicial habilita el usuario por defecto.
+
+## Contratos de respuesta
 
 Las respuestas correctas usan `ApiSuccessResponse`:
 
@@ -102,7 +143,7 @@ Las respuestas correctas usan `ApiSuccessResponse`:
 {
   "data": {},
   "message": "Mensaje informativo.",
-  "timestamp": "2026-11-03T22:00:00Z"
+  "timestamp": "2026-11-02T09:00:00Z"
 }
 ```
 
@@ -114,38 +155,40 @@ Los errores usan `ApiErrorResponse`:
   "errors": {
     "email": ["La dirección de correo electrónico debe tener un formato válido."]
   },
-  "timestamp": "2026-11-03T22:00:00Z"
+  "timestamp": "2026-11-02T09:00:00Z"
 }
 ```
 
-`errors` es un mapa vacío cuando el error no se asocia a un campo o parámetro concreto.
+`errors` es un mapa vacío cuando el error no corresponde a campos o parámetros concretos.
 
-## Errores gestionados
+## Manejo de errores HTTP
 
-| Estado | Origen | Tratamiento |
-|---|---|---|
-| `400` | DTO, parámetros inválidos o ausentes, tipos incompatibles o JSON inválido | `GlobalExceptionHandler` devuelve mensajes de validación. |
-| `401` | Credenciales de login inválidas | `GlobalExceptionHandler` devuelve un mensaje genérico. |
-| `401` | JWT ausente, inválido o caducado | `RestAuthenticationEntryPoint` devuelve JSON desde la cadena de seguridad. |
-| `403` | JWT válido sin permiso | `RestAccessDeniedHandler` devuelve JSON desde la cadena de seguridad. |
-| `404` | Usuario inexistente | `UserNotFoundException`. |
-| `405` | Método HTTP no admitido | Se conserva la cabecera `Allow`. |
-| `406` | Cabecera `Accept` incompatible | Se conservan las representaciones admitidas. |
-| `409` | Email ya asignado | `EmailAlreadyInUseException`. |
-| `415` | `Content-Type` no admitido | Se conservan los tipos admitidos. |
-| `500` | Error no previsto | Se registra internamente sin exponer detalles. |
+`GlobalExceptionHandler` transforma las excepciones de la aplicación en respuestas homogéneas. Los errores de JWT se producen antes de llegar al controlador y los componentes de seguridad los traducen al mismo contrato JSON.
+
+| Estado | Caso |
+|---|---|
+| `400` | Validación de DTO, parámetros inválidos o ausentes, tipos incompatibles o JSON inválido. |
+| `401` | Credenciales de inicio de sesión inválidas, JWT ausente, inválido o caducado. |
+| `403` | JWT válido sin permisos para la operación solicitada. |
+| `404` | Usuario no encontrado. |
+| `405` | Método HTTP no admitido; se conserva la cabecera `Allow`. |
+| `406` | La cabecera `Accept` solicita un formato no disponible. |
+| `409` | El email ya está asignado a otro usuario. |
+| `415` | El `Content-Type` de la solicitud no es compatible. |
+| `500` | Error interno no previsto, invariantes internas o carrera concurrente de email. |
+
+La carrera concurrente de creación o actualización con el mismo email queda deliberadamente en el tratamiento genérico `500`; la restricción única de base de datos preserva la integridad.
 
 ## Postman
 
-La colección [postman/G3Application.postman_collection.json](postman/G3Application.postman_collection.json) almacena automáticamente los tokens de administrador e inspector y permite comprobar `200`, `401` y `403`, además de las operaciones de usuarios.
+Las dos colecciones inician sesión como administrador e inspector, guardan sus tokens automáticamente y permiten probar la autorización `200`, `401` y `403`, además de las búsquedas por email parcial y estado:
 
-Por defecto apunta a `http://localhost:8080`. Cambia la variable `baseUrl` para probar otro despliegue.
+- [Entorno local](postman/G3Application.postman_collection.json): `http://localhost:8080`.
+- [Render con JWT](postman/G3Application_Render.postman_collection.json): `https://g3applicationjwt.onrender.com`.
 
-## Despliegue y límites conocidos
+## Pendientes conocidos
 
-- El proyecto incluye `Dockerfile`, `.dockerignore` y `/actuator/health` para despliegues como Render.
-- `JWT_SIGNING_KEY` es obligatoria y debe configurarse como secreto del entorno, nunca en Git.
-- H2, `create-drop` y `data.sql` son solo adecuados para desarrollo. Producción requiere una base persistente, esquema gestionado manualmente y `spring.jpa.hibernate.ddl-auto=validate`.
-- Un cambio de rol, deshabilitación o restablecimiento de contraseña no invalida los JWT ya emitidos: conservan sus permisos hasta su caducidad, actualmente 15 minutos.
-- La comprobación previa de email duplicado no elimina una carrera concurrente. La restricción única de la base de datos protege la integridad, pero ese caso termina hoy como `500` genérico.
-- Las contraseñas se validan actualmente por caracteres; queda pendiente limitar también su tamaño en bytes antes de BCrypt.
+- Validar la longitud de la contraseña en bytes antes de BCrypt.
+- Añadir pruebas MockMvc para los estados `200`, `201`, `400`, `401`, `403`, `404`, `405`, `406`, `409`, `415` y `500`.
+- Implementar refresh token, cierre de sesión o revocación si se necesita invalidar un token antes de su caducidad.
+- Separar configuración de desarrollo y producción. Producción requerirá una base de datos persistente y `spring.jpa.hibernate.ddl-auto=validate`; el esquema se gestionará manualmente, sin herramienta de migraciones.

@@ -1,0 +1,255 @@
+{
+  "info": {
+    "_postman_id": "2a4a59d8-2e5b-4ca1-a8f3-0f89fb7c5f78",
+    "name": "G3Application API - Render",
+    "description": "Colección para el despliegue JWT de Render. Ejecuta primero los inicios de sesión para almacenar los tokens.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "https://g3applicationjwt.onrender.com" },
+    { "key": "page", "value": "0" },
+    { "key": "size", "value": "20" },
+    { "key": "emailSearchTerm", "value": "ane" },
+    { "key": "enabled", "value": "true" },
+    { "key": "userId", "value": "1" },
+    { "key": "newUserEmail", "value": "postman@example.com" },
+    { "key": "administratorToken", "value": "" },
+    { "key": "inspectorToken", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Autenticación",
+      "item": [
+        {
+          "name": "Iniciar sesión como administrador",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test(\"El inicio de sesión del administrador responde 200\", () => {",
+                "    pm.response.to.have.status(200);",
+                "});",
+                "",
+                "const response = pm.response.json();",
+                "pm.collectionVariables.set(\"administratorToken\", response.data.accessToken);"
+              ]
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ane.garcia@example.com\",\n  \"password\": \"password\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Iniciar sesión como inspector",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test(\"El inicio de sesión del inspector responde 200\", () => {",
+                "    pm.response.to.have.status(200);",
+                "});",
+                "",
+                "const response = pm.response.json();",
+                "pm.collectionVariables.set(\"inspectorToken\", response.data.accessToken);"
+              ]
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"jon.ruiz@example.com\",\n  \"password\": \"password\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pruebas de seguridad",
+      "item": [
+        {
+          "name": "El administrador puede listar usuarios",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test(\"El administrador obtiene 200\", () => {",
+                "    pm.response.to.have.status(200);",
+                "});"
+              ]
+            }
+          }],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{administratorToken}}" }],
+            "url": "{{baseUrl}}/api/users?page={{page}}&size={{size}}"
+          }
+        },
+        {
+          "name": "Sin token se rechaza el listado",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test(\"La petición sin token obtiene 401\", () => {",
+                "    pm.response.to.have.status(401);",
+                "});"
+              ]
+            }
+          }],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/users?page={{page}}&size={{size}}"
+          }
+        },
+        {
+          "name": "El inspector no puede listar usuarios",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test(\"El inspector obtiene 403\", () => {",
+                "    pm.response.to.have.status(403);",
+                "});"
+              ]
+            }
+          }],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{inspectorToken}}" }],
+            "url": "{{baseUrl}}/api/users?page={{page}}&size={{size}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Usuarios",
+      "item": [
+        {
+          "name": "Listar usuarios paginados",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{administratorToken}}" }],
+            "url": "{{baseUrl}}/api/users?page={{page}}&size={{size}}"
+          }
+        },
+        {
+          "name": "Buscar usuarios por email parcial",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{administratorToken}}" }],
+            "url": "{{baseUrl}}/api/users/by-email?email={{emailSearchTerm}}&page={{page}}&size={{size}}"
+          }
+        },
+        {
+          "name": "Listar usuarios por estado",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{administratorToken}}" }],
+            "url": "{{baseUrl}}/api/users/by-status?enabled={{enabled}}&page={{page}}&size={{size}}"
+          }
+        },
+        {
+          "name": "Listar roles",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{administratorToken}}" }],
+            "url": "{{baseUrl}}/api/users/roles"
+          }
+        },
+        {
+          "name": "Obtener usuario por identificador",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{administratorToken}}" }],
+            "url": "{{baseUrl}}/api/users/{{userId}}"
+          }
+        },
+        {
+          "name": "Crear usuario",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"newUserEmail\", `postman-${Date.now()}@example.com`);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"El usuario se crea\", () => {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "pm.collectionVariables.set(\"userId\", response.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{administratorToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman\",\n  \"lastName\": \"Demo\",\n  \"email\": \"{{newUserEmail}}\",\n  \"password\": \"Password123!\",\n  \"role\": \"ROLE_INSPECTOR\"\n}"
+            },
+            "url": "{{baseUrl}}/api/users"
+          }
+        },
+        {
+          "name": "Actualizar usuario",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{administratorToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman actualizado\",\n  \"lastName\": \"Demo\",\n  \"email\": \"{{newUserEmail}}\",\n  \"role\": \"ROLE_INSPECTOR\",\n  \"enabled\": true\n}"
+            },
+            "url": "{{baseUrl}}/api/users/{{userId}}"
+          }
+        },
+        {
+          "name": "Restablecer contraseña",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{administratorToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"NuevaClave123!\"\n}"
+            },
+            "url": "{{baseUrl}}/api/users/{{userId}}/password"
+          }
+        }
+      ]
+    }
+  ]
+}

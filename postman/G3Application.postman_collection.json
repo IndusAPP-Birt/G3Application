@@ -1,14 +1,16 @@
 {
   "info": {
     "_postman_id": "f194a86d-ef88-4a50-a079-d662dc4030f2",
-    "name": "G3Application API",
-    "description": "Colección para probar la autenticación JWT, la autorización por rol y los endpoints de usuarios. Ejecuta primero los inicios de sesión para almacenar los tokens.",
+    "name": "G3Application API - Local",
+    "description": "Colección local para probar autenticación JWT, autorización por rol y usuarios. Ejecuta primero los inicios de sesión para almacenar los tokens.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     { "key": "baseUrl", "value": "http://localhost:8080" },
     { "key": "page", "value": "0" },
     { "key": "size", "value": "20" },
+    { "key": "emailSearchTerm", "value": "ane" },
+    { "key": "enabled", "value": "true" },
     { "key": "userId", "value": "1" },
     { "key": "newUserEmail", "value": "postman@example.com" },
     { "key": "administratorToken", "value": "" },
@@ -143,6 +145,22 @@
             "method": "GET",
             "header": [{ "key": "Authorization", "value": "Bearer {{administratorToken}}" }],
             "url": "{{baseUrl}}/api/users?page={{page}}&size={{size}}"
+          }
+        },
+        {
+          "name": "Buscar usuarios por email parcial",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{administratorToken}}" }],
+            "url": "{{baseUrl}}/api/users/by-email?email={{emailSearchTerm}}&page={{page}}&size={{size}}"
+          }
+        },
+        {
+          "name": "Listar usuarios por estado",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{administratorToken}}" }],
+            "url": "{{baseUrl}}/api/users/by-status?enabled={{enabled}}&page={{page}}&size={{size}}"
           }
         },
         {
