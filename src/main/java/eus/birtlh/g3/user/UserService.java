@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Servicio de aplicación que coordina los casos de uso de usuarios.
@@ -86,6 +87,74 @@ public class UserService {
                 ));
 
         return UserMapper.toResponse(user);
+    }
+
+    /**
+     * Obtiene una página de usuarios cuyo correo electrónico contiene el texto indicado.
+     *
+     * <p>Normaliza el término de búsqueda antes de consultar el repositorio y conserva el orden
+     * ascendente por identificador.</p>
+     *
+     * @param page índice de página basado en cero
+     * @param size número de usuarios por página
+     * @param email término parcial con el que filtrar el correo electrónico
+     * @return página de usuarios coincidentes; su contenido puede estar vacío
+     */
+    @Transactional(readOnly = true)
+    public PageResponse<UserResponse> getUsersByEmail(
+            int page,
+            int size,
+            String email
+    ) {
+        Page<User> users = userRepository.findByEmailContainingIgnoreCase(
+                email.strip().toLowerCase(Locale.ROOT),
+                PageRequest.of(page, size, Sort.by("id").ascending())
+        );
+
+        return new PageResponse<>(
+                users.getContent()
+                        .stream()
+                        .map(UserMapper::toResponse)
+                        .toList(),
+                users.getNumber(),
+                users.getSize(),
+                users.getTotalElements(),
+                users.getTotalPages()
+        );
+    }
+
+    /**
+     * Obtiene una página de usuarios según su estado de acceso.
+     *
+     * <p>Conserva el orden ascendente por identificador para que los resultados sean estables
+     * entre páginas.</p>
+     *
+     * @param page índice de página basado en cero
+     * @param size número de usuarios por página
+     * @param enabled {@code true} para usuarios habilitados; {@code false} para deshabilitados
+     * @return página de usuarios con el estado indicado; su contenido puede estar vacío
+     */
+    @Transactional(readOnly = true)
+    public PageResponse<UserResponse> getUsersByEnabled(
+            int page,
+            int size,
+            boolean enabled
+    ) {
+        Page<User> users = userRepository.findByEnabled(
+                enabled,
+                PageRequest.of(page, size, Sort.by("id").ascending())
+        );
+
+        return new PageResponse<>(
+                users.getContent()
+                        .stream()
+                        .map(UserMapper::toResponse)
+                        .toList(),
+                users.getNumber(),
+                users.getSize(),
+                users.getTotalElements(),
+                users.getTotalPages()
+        );
     }
 
     /**

@@ -1,6 +1,8 @@
 package eus.birtlh.g3.user.repository;
 
 import eus.birtlh.g3.user.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
@@ -37,4 +39,23 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * @return usuario encontrado o un {@link Optional} vacío si no existe
      */
     Optional<User> findByEmail(String email);
+
+    /**
+     * Busca usuarios cuyo correo electrónico contiene el texto indicado, sin distinguir
+     * mayúsculas de minúsculas.
+     *
+     * @param email término parcial normalizado con el que filtrar
+     * @param pageable configuración de página, tamaño y orden solicitados
+     * @return página de usuarios coincidentes; puede no contener resultados
+     */
+    Page<User> findByEmailContainingIgnoreCase(String email, Pageable pageable);
+
+    /**
+     * Busca usuarios según su estado de acceso.
+     *
+     * @param enabled {@code true} para usuarios habilitados; {@code false} para deshabilitados
+     * @param pageable configuración de página, tamaño y orden solicitados
+     * @return página de usuarios con el estado indicado; puede no contener resultados
+     */
+    Page<User> findByEnabled(boolean enabled, Pageable pageable);
 }

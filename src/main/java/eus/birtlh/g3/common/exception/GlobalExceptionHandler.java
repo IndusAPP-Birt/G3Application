@@ -13,6 +13,7 @@ import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
@@ -130,6 +131,26 @@ public class GlobalExceptionHandler {
                 .body(ApiErrorResponse.validation(
                         "La solicitud contiene parámetros inválidos.",
                         errors
+                ));
+    }
+
+    /**
+     * Devuelve una respuesta HTTP 400 cuando falta un parámetro obligatorio de la solicitud.
+     *
+     * @param ex excepción que identifica el parámetro de consulta o formulario no recibido
+     * @return respuesta de error con estado HTTP 400 y un mensaje asociado al parámetro ausente
+     */
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ApiErrorResponse> handleMissingServletRequestParameterException(
+            MissingServletRequestParameterException ex
+    ) {
+        return ResponseEntity.badRequest()
+                .body(ApiErrorResponse.validation(
+                        "La solicitud contiene parámetros inválidos.",
+                        Map.of(
+                                ex.getParameterName(),
+                                List.of("El parámetro es obligatorio.")
+                        )
                 ));
     }
 

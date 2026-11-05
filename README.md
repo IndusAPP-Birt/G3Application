@@ -6,7 +6,7 @@ API REST de gestión administrativa de usuarios, desarrollada con Spring Boot. I
 
 | Área | Estado |
 |---|---|
-| Persistencia, validación y paginación de usuarios | Implementado |
+| Persistencia, validación, paginación y búsquedas de usuarios | Implementado |
 | Creación, actualización y restablecimiento administrativo de contraseña | Implementado |
 | Autenticación mediante email y contraseña | Implementado |
 | JWT firmado con HS256 y validador de emisor/caducidad | Implementado |
@@ -69,6 +69,8 @@ Las operaciones bajo `/api/users` requieren `ROLE_ADMINISTRATOR`. Un token ausen
 | `GET` | `/actuator/health` | Público | Comprobación de salud para despliegue. |
 | `POST` | `/api/auth/login` | Público | Inicia sesión y devuelve un JWT. |
 | `GET` | `/api/users?page=0&size=20` | Administrador | Devuelve usuarios paginados por `id`. Tamaño máximo: `100`. |
+| `GET` | `/api/users/by-email?email=ane&page=0&size=20` | Administrador | Busca usuarios cuyo email contiene el texto indicado, sin distinguir mayúsculas de minúsculas. |
+| `GET` | `/api/users/by-status?enabled=true&page=0&size=20` | Administrador | Devuelve usuarios habilitados o deshabilitados de forma paginada. |
 | `GET` | `/api/users/roles` | Administrador | Devuelve el catálogo de roles. |
 | `GET` | `/api/users/{id}` | Administrador | Obtiene un usuario. |
 | `POST` | `/api/users` | Administrador | Crea un usuario. |
@@ -122,7 +124,7 @@ Los errores usan `ApiErrorResponse`:
 
 | Estado | Origen | Tratamiento |
 |---|---|---|
-| `400` | DTO, parámetros, tipos o JSON inválidos | `GlobalExceptionHandler` devuelve mensajes de validación. |
+| `400` | DTO, parámetros inválidos o ausentes, tipos incompatibles o JSON inválido | `GlobalExceptionHandler` devuelve mensajes de validación. |
 | `401` | Credenciales de login inválidas | `GlobalExceptionHandler` devuelve un mensaje genérico. |
 | `401` | JWT ausente, inválido o caducado | `RestAuthenticationEntryPoint` devuelve JSON desde la cadena de seguridad. |
 | `403` | JWT válido sin permiso | `RestAccessDeniedHandler` devuelve JSON desde la cadena de seguridad. |
