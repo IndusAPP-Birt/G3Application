@@ -4,15 +4,14 @@ import eus.birtlh.g3.common.PaginationConstants;
 import eus.birtlh.g3.common.dto.ApiSuccessResponse;
 import eus.birtlh.g3.common.dto.CatalogOptionResponse;
 import eus.birtlh.g3.common.dto.PageResponse;
+import eus.birtlh.g3.user.UserValidationConstraints;
 import eus.birtlh.g3.user.dto.AdminCreateUserRequest;
 import eus.birtlh.g3.user.dto.AdminResetUserPasswordRequest;
 import eus.birtlh.g3.user.dto.AdminUpdateUserRequest;
 import eus.birtlh.g3.user.dto.UserResponse;
 import eus.birtlh.g3.user.UserService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -102,6 +101,104 @@ public class UserController {
                 ApiSuccessResponse.success(
                         userService.getUserById(id),
                         "Usuario obtenido correctamente."
+                )
+        );
+    }
+
+    /**
+     * Obtiene una página de usuarios cuyo correo electrónico contiene el texto indicado.
+     *
+     * <p>El término no necesita ser una dirección de correo completa; permite buscar fragmentos
+     * del nombre local, del dominio o de ambos.</p>
+     *
+     * @param email término parcial obligatorio con el que filtrar el correo electrónico
+     * @param page índice de página basado en cero
+     * @param size número de usuarios por página
+     * @return respuesta HTTP 200 con la página de usuarios coincidentes y su marca temporal
+     */
+    @GetMapping("/by-email")
+    public ResponseEntity<ApiSuccessResponse<PageResponse<UserResponse>>> findUsersByEmail(
+            @RequestParam("email")
+            @NotBlank(message = "La dirección de correo electrónico es obligatoria.")
+            @Size(
+                    max = UserValidationConstraints.MAX_EMAIL_LENGTH,
+                    message = "La dirección de correo electrónico no puede superar los {max} caracteres."
+            )
+            String email,
+
+            @RequestParam(
+                    name = "page",
+                    defaultValue = PaginationConstants.DEFAULT_PAGE_VALUE
+            )
+            @Min(
+                    value = PaginationConstants.MIN_PAGE,
+                    message = "La página debe ser {value} o mayor."
+            )
+            int page,
+
+            @RequestParam(
+                    name = "size",
+                    defaultValue = PaginationConstants.DEFAULT_PAGE_SIZE_VALUE
+            )
+            @Min(
+                    value = PaginationConstants.MIN_PAGE_SIZE,
+                    message = "El tamaño de página debe ser {value} o mayor."
+            )
+            @Max(
+                    value = PaginationConstants.MAX_PAGE_SIZE,
+                    message = "El tamaño de página no puede superar {value}."
+            )
+            int size
+    ) {
+        return ResponseEntity.ok(
+                ApiSuccessResponse.success(
+                        userService.getUsersByEmail(page, size, email),
+                        "Usuarios obtenidos correctamente."
+                )
+        );
+    }
+
+    /**
+     * Obtiene una página de usuarios según su estado de acceso.
+     *
+     * @param enabled {@code true} para usuarios habilitados; {@code false} para deshabilitados
+     * @param page índice de página basado en cero
+     * @param size número de usuarios por página
+     * @return respuesta HTTP 200 con la página de usuarios y su marca temporal
+     */
+    @GetMapping("/by-status")
+    public ResponseEntity<ApiSuccessResponse<PageResponse<UserResponse>>> findUsersByEnabled(
+            @RequestParam("enabled")
+            boolean enabled,
+
+            @RequestParam(
+                    name = "page",
+                    defaultValue = PaginationConstants.DEFAULT_PAGE_VALUE
+            )
+            @Min(
+                    value = PaginationConstants.MIN_PAGE,
+                    message = "La página debe ser {value} o mayor."
+            )
+            int page,
+
+            @RequestParam(
+                    name = "size",
+                    defaultValue = PaginationConstants.DEFAULT_PAGE_SIZE_VALUE
+            )
+            @Min(
+                    value = PaginationConstants.MIN_PAGE_SIZE,
+                    message = "El tamaño de página debe ser {value} o mayor."
+            )
+            @Max(
+                    value = PaginationConstants.MAX_PAGE_SIZE,
+                    message = "El tamaño de página no puede superar {value}."
+            )
+            int size
+    ) {
+        return ResponseEntity.ok(
+                ApiSuccessResponse.success(
+                        userService.getUsersByEnabled(page, size, enabled),
+                        "Usuarios obtenidos correctamente."
                 )
         );
     }

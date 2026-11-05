@@ -10,7 +10,7 @@ centralizado de errores.
 |---|---|
 | Entidad y persistencia de usuarios | Implementado |
 | Creación, actualización y restablecimiento administrativo de contraseñas | Implementado |
-| Listado paginado y catálogo de roles | Implementado |
+| Listado paginado, búsquedas de usuarios y catálogo de roles | Implementado |
 | Respuestas de éxito y error | Implementado |
 | Manejo global de errores HTTP | Implementado |
 | Autenticación y autorización JWT | Pendiente |
@@ -78,6 +78,8 @@ borrado físico: se utiliza `enabled` para desactivar usuarios.
 | Método | Ruta | Descripción |
 |---|---|---|
 | `GET` | `/api/users?page=0&size=20` | Devuelve usuarios paginados, ordenados por `id`. El tamaño máximo es `100`. |
+| `GET` | `/api/users/by-email?email=ane&page=0&size=20` | Busca usuarios cuyo email contiene el texto indicado, sin distinguir mayúsculas de minúsculas. |
+| `GET` | `/api/users/by-status?enabled=true&page=0&size=20` | Devuelve usuarios habilitados o deshabilitados de forma paginada. |
 | `GET` | `/api/users/roles` | Devuelve el catálogo de roles disponibles. |
 | `GET` | `/api/users/{id}` | Obtiene un usuario por identificador. |
 | `POST` | `/api/users` | Crea un usuario desde un rol administrativo. |
@@ -150,7 +152,7 @@ Los errores usan `ApiErrorResponse`:
 
 | Estado | Caso |
 |---|---|
-| `400` | Validación de DTO, parámetros inválidos, tipos incompatibles o JSON inválido. |
+| `400` | Validación de DTO, parámetros inválidos o ausentes, tipos incompatibles o JSON inválido. |
 | `404` | Usuario no encontrado. |
 | `405` | Método HTTP no admitido; se conserva la cabecera `Allow`. |
 | `406` | La cabecera `Accept` solicita un formato no disponible. |
