@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "f194a86d-ef88-4a50-a079-d662dc4030f2",
     "name": "G3Application API - Local",
-    "description": "Colección local para probar autenticación JWT, autorización por rol y usuarios. Ejecuta primero los inicios de sesión para almacenar los tokens.",
+    "description": "Colección local para probar autenticación JWT, perfil autenticado, autorización por rol y usuarios. Ejecuta primero los inicios de sesión para almacenar los tokens.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -155,6 +155,68 @@
             "method": "GET",
             "header": [{ "key": "Authorization", "value": "Bearer {{inspectorToken}}" }],
             "url": "{{baseUrl}}/api/users?page={{page}}&size={{size}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Perfil autenticado",
+      "item": [
+        {
+          "name": "El administrador consulta su perfil",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test(\"El administrador obtiene su perfil\", () => {",
+                "    pm.response.to.have.status(200);",
+                "});"
+              ]
+            }
+          }],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{administratorToken}}" }],
+            "url": "{{baseUrl}}/api/users/me"
+          }
+        },
+        {
+          "name": "El inspector consulta su perfil",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test(\"El inspector obtiene su perfil\", () => {",
+                "    pm.response.to.have.status(200);",
+                "});"
+              ]
+            }
+          }],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{inspectorToken}}" }],
+            "url": "{{baseUrl}}/api/users/me"
+          }
+        },
+        {
+          "name": "Sin token se rechaza el perfil",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "pm.test(\"La petición sin token obtiene 401\", () => {",
+                "    pm.response.to.have.status(401);",
+                "});"
+              ]
+            }
+          }],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/users/me"
           }
         }
       ]

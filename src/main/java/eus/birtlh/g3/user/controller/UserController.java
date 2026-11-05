@@ -14,6 +14,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -81,6 +83,24 @@ public class UserController {
                 ApiSuccessResponse.success(
                         userService.getAllRoles(),
                         "Roles obtenidos correctamente."
+                )
+        );
+    }
+
+    /**
+     * Obtiene el perfil del usuario identificado por el JWT de la petición.
+     *
+     * @param jwt token JWT ya validado por Spring Security
+     * @return respuesta HTTP 200 con el usuario autenticado y su marca temporal
+     */
+    @GetMapping("/me")
+    public ResponseEntity<ApiSuccessResponse<UserResponse>> getAuthenticatedUser(
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        return ResponseEntity.ok(
+                ApiSuccessResponse.success(
+                        userService.getAuthenticatedUser(jwt.getSubject()),
+                        "Usuario obtenido correctamente."
                 )
         );
     }

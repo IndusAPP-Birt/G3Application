@@ -13,7 +13,7 @@ API REST desarrollada con Spring Boot para la gestión administrativa de usuario
 | Manejo global de errores HTTP | Implementado |
 | Autenticación mediante email y contraseña | Implementado |
 | JWT firmado con HS256 y validación de emisor/caducidad | Implementado |
-| Autorización de usuarios por `ROLE_ADMINISTRATOR` | Implementado |
+| Consulta del perfil autenticado y autorización administrativa por `ROLE_ADMINISTRATOR` | Implementado |
 | Pruebas de endpoints con MockMvc | Pendiente |
 | Refresh token, cierre de sesión y revocación de tokens | Pendiente |
 
@@ -75,7 +75,7 @@ La API es sin estado: no conserva sesiones de servidor. El cliente debe enviar e
 Authorization: Bearer <accessToken>
 ```
 
-`/actuator/health` y `POST /api/auth/login` son públicos. Todas las operaciones bajo `/api/users` requieren un JWT válido con `ROLE_ADMINISTRATOR`. Un token ausente, inválido o caducado devuelve `401`; un token válido sin la autoridad requerida devuelve `403`.
+`/actuator/health` y `POST /api/auth/login` son públicos. `GET /api/users/me` requiere un JWT válido, independientemente del rol, y devuelve exclusivamente el perfil asociado al sujeto del token. El resto de operaciones bajo `/api/users` requieren `ROLE_ADMINISTRATOR`. Un token ausente, inválido o caducado devuelve `401`; un token válido sin la autoridad requerida devuelve `403`.
 
 ## Endpoints disponibles
 
@@ -83,6 +83,7 @@ Authorization: Bearer <accessToken>
 |---|---|---|
 | `GET` | `/actuator/health` | Comprobación de salud pública para despliegue. |
 | `POST` | `/api/auth/login` | Inicio de sesión público; devuelve un JWT. |
+| `GET` | `/api/users/me` | Devuelve el perfil asociado al JWT. Requiere autenticación. |
 | `GET` | `/api/users?page=0&size=20` | Devuelve usuarios paginados, ordenados por `id`. Tamaño máximo: `100`. Requiere administrador. |
 | `GET` | `/api/users/by-email?email=ane&page=0&size=20` | Busca usuarios cuyo email contiene el texto indicado, sin distinguir mayúsculas de minúsculas. Requiere administrador. |
 | `GET` | `/api/users/by-status?enabled=true&page=0&size=20` | Devuelve usuarios habilitados o deshabilitados de forma paginada. Requiere administrador. |
@@ -181,7 +182,7 @@ La carrera concurrente de creación o actualización con el mismo email queda de
 
 ## Postman
 
-Las dos colecciones inician sesión como administrador e inspector, guardan sus tokens automáticamente y permiten probar la autorización `200`, `401` y `403`, además de las búsquedas por email parcial y estado:
+Las dos colecciones inician sesión como administrador e inspector, guardan sus tokens automáticamente y permiten probar el perfil autenticado, la autorización `200`, `401` y `403`, además de las búsquedas por email parcial y estado:
 
 - [Entorno local](postman/G3Application.postman_collection.json): `http://localhost:8080`.
 - [Render con JWT](postman/G3Application_Render.postman_collection.json): `https://g3applicationjwt.onrender.com`.
