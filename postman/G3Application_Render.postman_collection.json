@@ -1,0 +1,186 @@
+{
+  "info": {
+    "_postman_id": "25b8305c-39c7-4e77-aa68-f90f5afdb94c",
+    "name": "G3Application API - Render",
+    "description": "Colección de pruebas para la rama develop desplegada en Render, sin autenticación JWT.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://g3application.onrender.com"
+    },
+    {
+      "key": "page",
+      "value": "0"
+    },
+    {
+      "key": "size",
+      "value": "20"
+    },
+    {
+      "key": "emailSearchTerm",
+      "value": "ane"
+    },
+    {
+      "key": "enabled",
+      "value": "true"
+    },
+    {
+      "key": "userId",
+      "value": "1"
+    },
+    {
+      "key": "newUserEmail",
+      "value": "postman@example.com"
+    }
+  ],
+  "item": [
+    {
+      "name": "Comprobar salud",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"El servicio está disponible\", () => {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"El estado es UP\", () => {",
+              "    pm.expect(pm.response.json().status).to.eql(\"UP\");",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/actuator/health"
+      }
+    },
+    {
+      "name": "Usuarios",
+      "item": [
+        {
+          "name": "Listar usuarios paginados",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/users?page={{page}}&size={{size}}"
+          }
+        },
+        {
+          "name": "Buscar usuarios por email",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/users/by-email?email={{emailSearchTerm}}&page={{page}}&size={{size}}"
+          }
+        },
+        {
+          "name": "Listar usuarios por estado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/users/by-status?enabled={{enabled}}&page={{page}}&size={{size}}"
+          }
+        },
+        {
+          "name": "Listar roles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/users/roles"
+          }
+        },
+        {
+          "name": "Obtener usuario por identificador",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/users/{{userId}}"
+          }
+        },
+        {
+          "name": "Crear usuario",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"newUserEmail\", `postman-${Date.now()}@example.com`);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"El usuario se crea\", () => {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "pm.collectionVariables.set(\"userId\", response.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman\",\n  \"lastName\": \"Demo\",\n  \"email\": \"{{newUserEmail}}\",\n  \"password\": \"Password123!\",\n  \"role\": \"ROLE_INSPECTOR\"\n}"
+            },
+            "url": "{{baseUrl}}/api/users"
+          }
+        },
+        {
+          "name": "Actualizar usuario",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman actualizado\",\n  \"lastName\": \"Demo\",\n  \"email\": \"{{newUserEmail}}\",\n  \"role\": \"ROLE_INSPECTOR\",\n  \"enabled\": true\n}"
+            },
+            "url": "{{baseUrl}}/api/users/{{userId}}"
+          }
+        },
+        {
+          "name": "Restablecer contraseña",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"NuevaClave123!\"\n}"
+            },
+            "url": "{{baseUrl}}/api/users/{{userId}}/password"
+          }
+        }
+      ]
+    }
+  ]
+}

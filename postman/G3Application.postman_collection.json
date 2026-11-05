@@ -1,14 +1,14 @@
 {
   "info": {
     "_postman_id": "f194a86d-ef88-4a50-a079-d662dc4030f2",
-    "name": "G3Application API",
-    "description": "Colección de pruebas para los endpoints públicos actuales de G3Application.",
+    "name": "G3Application API - Local",
+    "description": "Colección de pruebas para la rama develop sin autenticación. Todos los endpoints de usuarios son públicos temporalmente.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     {
       "key": "baseUrl",
-      "value": "https://g3application.onrender.com"
+      "value": "http://localhost:8080"
     },
     {
       "key": "page",
@@ -17,6 +17,14 @@
     {
       "key": "size",
       "value": "20"
+    },
+    {
+      "key": "emailSearchTerm",
+      "value": "ane"
+    },
+    {
+      "key": "enabled",
+      "value": "true"
     },
     {
       "key": "userId",
@@ -29,6 +37,31 @@
   ],
   "item": [
     {
+      "name": "Comprobar salud",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"El servicio está disponible\", () => {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"El estado es UP\", () => {",
+              "    pm.expect(pm.response.json().status).to.eql(\"UP\");",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/actuator/health"
+      }
+    },
+    {
       "name": "Usuarios",
       "item": [
         {
@@ -37,6 +70,22 @@
             "method": "GET",
             "header": [],
             "url": "{{baseUrl}}/api/users?page={{page}}&size={{size}}"
+          }
+        },
+        {
+          "name": "Buscar usuarios por email",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/users/by-email?email={{emailSearchTerm}}&page={{page}}&size={{size}}"
+          }
+        },
+        {
+          "name": "Listar usuarios por estado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/users/by-status?enabled={{enabled}}&page={{page}}&size={{size}}"
           }
         },
         {

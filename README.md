@@ -70,13 +70,20 @@ rol y estado. El email se normaliza a minúsculas. La contraseña se restablece 
 mediante `PUT /api/users/{id}/password`, donde se codifica con BCrypt antes de persistirse. No existe
 borrado físico: se utiliza `enabled` para desactivar usuarios.
 
+## Autenticación y autorización
+
+La rama `develop` todavía no incorpora autenticación ni autorización JWT. Por ello, durante esta fase,
+los endpoints bajo `/api/users` son públicos y CSRF está desactivado. Esta configuración es temporal y
+no es adecuada para producción. La rama `feat/auth` contiene la variante que requiere un JWT válido con
+rol de administrador para acceder a dichos endpoints.
+
 ## Endpoints disponibles
 
-> Mientras se implementa JWT, los endpoints de usuarios son públicos temporalmente y CSRF está
-> desactivado. Esta configuración no es adecuada para producción.
+> Todos los endpoints de usuarios son públicos temporalmente en esta rama.
 
 | Método | Ruta | Descripción |
 |---|---|---|
+| `GET` | `/actuator/health` | Comprobación de salud pública para despliegue. |
 | `GET` | `/api/users?page=0&size=20` | Devuelve usuarios paginados, ordenados por `id`. El tamaño máximo es `100`. |
 | `GET` | `/api/users/by-email?email=ane&page=0&size=20` | Busca usuarios cuyo email contiene el texto indicado, sin distinguir mayúsculas de minúsculas. |
 | `GET` | `/api/users/by-status?enabled=true&page=0&size=20` | Devuelve usuarios habilitados o deshabilitados de forma paginada. |
@@ -162,6 +169,14 @@ Los errores usan `ApiErrorResponse`:
 
 La carrera concurrente de creación o actualización con el mismo email queda deliberadamente en el
 tratamiento genérico `500`; la restricción única de base de datos preserva la integridad.
+
+## Postman
+
+Las colecciones cubren la comprobación de salud y todos los endpoints públicos de usuarios, incluidas
+las búsquedas por email parcial y estado:
+
+- [Entorno local](postman/G3Application.postman_collection.json): `http://localhost:8080`.
+- [Render](postman/G3Application_Render.postman_collection.json): `https://g3application.onrender.com`.
 
 ## Pendientes conocidos
 
