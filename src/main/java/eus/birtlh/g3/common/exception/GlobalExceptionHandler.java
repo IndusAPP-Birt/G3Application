@@ -1,6 +1,7 @@
 package eus.birtlh.g3.common.exception;
 
 import eus.birtlh.g3.common.dto.ApiErrorResponse;
+import eus.birtlh.g3.machine.exception.MachineNotFoundException;
 import eus.birtlh.g3.user.exception.EmailAlreadyInUseException;
 import eus.birtlh.g3.user.exception.UserNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +41,20 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleUserNotFoundException(
             UserNotFoundException ex
+    ) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiErrorResponse.error(ex.getMessage()));
+    }
+
+    /**
+     * Devuelve una respuesta HTTP 404 cuando no existe la máquina solicitada.
+     *
+     * @param ex excepción que identifica la máquina no encontrada
+     * @return respuesta de error con estado HTTP 404
+     */
+    @ExceptionHandler(MachineNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleMachineNotFoundException(
+            MachineNotFoundException ex
     ) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ApiErrorResponse.error(ex.getMessage()));
