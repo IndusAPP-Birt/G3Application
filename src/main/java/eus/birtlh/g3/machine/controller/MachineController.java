@@ -5,12 +5,12 @@ import eus.birtlh.g3.common.dto.ApiSuccessResponse;
 import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.machine.MachineService;
 import eus.birtlh.g3.machine.dto.MachineResponse;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Locale;
 
 /**
  * Controlador REST que expone las operaciones HTTP sobre máquinas industriales.
@@ -78,6 +78,35 @@ public class MachineController {
         return ResponseEntity.ok(
                 ApiSuccessResponse.success(
                         machineService.getMachineById(id),
+                        "Máquina obtenida correctamente."
+                )
+        );
+    }
+
+    /**
+     * Obtiene una máquina por su código patrimonial único.
+     *
+     * <p>El código recibido se elimina de espacios exteriores y se normaliza a mayúsculas antes
+     * de delegar la búsqueda en el servicio.</p>
+     *
+     * @param assetCode código patrimonial obligatorio de la máquina solicitada
+     * @return respuesta HTTP 200 con la máquina y su marca temporal
+     */
+    @GetMapping("/by-asset-code")
+    public ResponseEntity<ApiSuccessResponse<MachineResponse>> findMachineByAssetCode(
+            @RequestParam("assetCode")
+            @NotBlank(message = "El código patrimonial es obligatorio.")
+            @Size(
+                    max = 50,
+                    message = "El código patrimonial no puede superar los 50 caracteres."
+            )
+            String assetCode
+    ) {
+        return ResponseEntity.ok(
+                ApiSuccessResponse.success(
+                        machineService.getMachineByAssetCode(
+                                assetCode.strip().toUpperCase(Locale.ROOT)
+                        ),
                         "Máquina obtenida correctamente."
                 )
         );

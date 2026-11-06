@@ -65,4 +65,21 @@ public class MachineService {
 
         return MachineMapper.toResponse(machine);
     }
+
+    /**
+     * Obtiene una máquina por su código patrimonial como DTO de respuesta.
+     *
+     * @param assetCode código patrimonial normalizado de la máquina solicitada
+     * @return DTO público de la máquina encontrada
+     * @throws MachineNotFoundException si no existe una máquina con el código indicado
+     */
+    @Transactional(readOnly = true)
+    public MachineResponse getMachineByAssetCode(String assetCode) {
+        Machine machine = machineRepository.findByAssetCode(assetCode)
+                .orElseThrow(() -> new MachineNotFoundException(
+                        "Máquina con " + assetCode + " no encontrada."
+                ));
+
+        return MachineMapper.toResponse(machine);
+    }
 }
