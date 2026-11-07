@@ -2,6 +2,7 @@ package eus.birtlh.g3.machine.controller;
 
 import eus.birtlh.g3.common.PaginationConstants;
 import eus.birtlh.g3.common.dto.ApiSuccessResponse;
+import eus.birtlh.g3.common.dto.CatalogOptionResponse;
 import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.machine.MachineService;
 import eus.birtlh.g3.machine.MachineStatus;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -60,6 +62,21 @@ public class MachineController {
                 ApiSuccessResponse.success(
                         machineService.getAllMachines(page, size),
                         "Máquinas obtenidas correctamente."
+                )
+        );
+    }
+
+    /**
+     * Obtiene los estados operativos disponibles para su selección en la API.
+     *
+     * @return respuesta HTTP 200 con las opciones de catálogo de estados y su marca temporal
+     */
+    @GetMapping("/statuses")
+    public ResponseEntity<ApiSuccessResponse<List<CatalogOptionResponse>>> listAllStatuses() {
+        return ResponseEntity.ok(
+                ApiSuccessResponse.success(
+                        machineService.getAllStatuses(),
+                        "Estados de máquinas obtenidos correctamente."
                 )
         );
     }

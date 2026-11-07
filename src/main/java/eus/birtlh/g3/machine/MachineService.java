@@ -1,9 +1,11 @@
 package eus.birtlh.g3.machine;
 
+import eus.birtlh.g3.common.dto.CatalogOptionResponse;
 import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.machine.dto.MachineResponse;
 import eus.birtlh.g3.machine.exception.MachineNotFoundException;
 import eus.birtlh.g3.machine.mapper.MachineMapper;
+import eus.birtlh.g3.machine.mapper.MachineStatusMapper;
 import eus.birtlh.g3.machine.repository.MachineRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -11,6 +13,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Servicio de aplicación que coordina los casos de uso de máquinas industriales.
@@ -47,6 +52,18 @@ public class MachineService {
                 machines.getTotalElements(),
                 machines.getTotalPages()
         );
+    }
+
+    /**
+     * Obtiene todos los estados operativos disponibles como opciones de catálogo públicas.
+     *
+     * @return lista de estados disponibles con su código y descripción
+     */
+    @Transactional(readOnly = true)
+    public List<CatalogOptionResponse> getAllStatuses() {
+        return Arrays.stream(MachineStatus.values())
+                .map(MachineStatusMapper::toResponse)
+                .toList();
     }
 
     /**
