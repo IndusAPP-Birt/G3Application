@@ -82,4 +82,38 @@ public class MachineService {
 
         return MachineMapper.toResponse(machine);
     }
+
+    /**
+     * Obtiene una página de máquinas según su estado operativo.
+     *
+     * <p>Conserva el orden ascendente por identificador para que los resultados sean estables
+     * entre páginas.</p>
+     *
+     * @param page índice de página basado en cero
+     * @param size número de máquinas por página
+     * @param status estado con el que filtrar las máquinas
+     * @return página de máquinas con el estado indicado; su contenido puede estar vacío
+     */
+    @Transactional(readOnly = true)
+    public PageResponse<MachineResponse> getMachinesByStatus(
+            int page,
+            int size,
+            MachineStatus status
+    ) {
+        Page<Machine> machines = machineRepository.findByStatus(
+                status,
+                PageRequest.of(page, size, Sort.by("id").ascending())
+        );
+
+        return new PageResponse<>(
+                machines.getContent()
+                        .stream()
+                        .map(MachineMapper::toResponse)
+                        .toList(),
+                machines.getNumber(),
+                machines.getSize(),
+                machines.getTotalElements(),
+                machines.getTotalPages()
+        );
+    }
 }

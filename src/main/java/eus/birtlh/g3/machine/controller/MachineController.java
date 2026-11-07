@@ -4,6 +4,7 @@ import eus.birtlh.g3.common.PaginationConstants;
 import eus.birtlh.g3.common.dto.ApiSuccessResponse;
 import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.machine.MachineService;
+import eus.birtlh.g3.machine.MachineStatus;
 import eus.birtlh.g3.machine.dto.MachineResponse;
 import jakarta.validation.constraints.*;
 import lombok.RequiredArgsConstructor;
@@ -108,6 +109,51 @@ public class MachineController {
                                 assetCode.strip().toUpperCase(Locale.ROOT)
                         ),
                         "Máquina obtenida correctamente."
+                )
+        );
+    }
+
+    /**
+     * Obtiene una página de máquinas según su estado operativo.
+     *
+     * @param status estado obligatorio con el que filtrar las máquinas
+     * @param page índice de página basado en cero
+     * @param size número de máquinas por página
+     * @return respuesta HTTP 200 con la página de máquinas y su marca temporal
+     */
+    @GetMapping("/by-status")
+    public ResponseEntity<ApiSuccessResponse<PageResponse<MachineResponse>>> findMachinesByStatus(
+        @RequestParam("status")
+        MachineStatus status,
+
+        @RequestParam(
+                name = "page",
+                defaultValue = PaginationConstants.DEFAULT_PAGE_VALUE
+        )
+        @Min(
+                value = PaginationConstants.MIN_PAGE,
+                message = "La página debe ser {value} o mayor."
+        )
+        int page,
+
+        @RequestParam(
+                name = "size",
+                defaultValue = PaginationConstants.DEFAULT_PAGE_SIZE_VALUE
+        )
+        @Min(
+                value = PaginationConstants.MIN_PAGE_SIZE,
+                message = "El tamaño de página debe ser {value} o mayor."
+        )
+        @Max(
+                value = PaginationConstants.MAX_PAGE_SIZE,
+                message = "El tamaño de página no puede superar {value}."
+        )
+        int size
+    ) {
+        return ResponseEntity.ok(
+                ApiSuccessResponse.success(
+                        machineService.getMachinesByStatus(page, size, status),
+                        "Máquinas obtenidas correctamente."
                 )
         );
     }
