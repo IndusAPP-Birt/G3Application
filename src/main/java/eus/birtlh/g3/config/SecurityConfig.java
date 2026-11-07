@@ -42,7 +42,10 @@ public class SecurityConfig {
                                 "/api/users",
                                 "/api/machines"
                         ).permitAll()
-                        .requestMatchers(HttpMethod.PUT, "/api/users/**").permitAll()
+                        .requestMatchers(HttpMethod.PUT,
+                                "/api/users/**",
+                                "/api/machines/**")
+                        .permitAll()
                         .anyRequest().authenticated()
                 )
                 .build();

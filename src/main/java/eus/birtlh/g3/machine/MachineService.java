@@ -3,6 +3,7 @@ package eus.birtlh.g3.machine;
 import eus.birtlh.g3.common.dto.CatalogOptionResponse;
 import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.machine.dto.AdminCreateMachineRequest;
+import eus.birtlh.g3.machine.dto.AdminUpdateMachineRequest;
 import eus.birtlh.g3.machine.dto.MachineResponse;
 import eus.birtlh.g3.machine.exception.AssetCodeAlreadyInUseException;
 import eus.birtlh.g3.machine.exception.MachineNotFoundException;
@@ -177,6 +178,47 @@ public class MachineService {
                         request.commissionedAt()
                 )
         );
+
+        return MachineMapper.toResponse(machine);
+    }
+
+    /**
+     * Actualiza los datos administrativos de una máquina, excepto sus campos inmutables.
+     *
+     * <p>Comprueba que el número de serie, si se ha indicado, no pertenezca a otra máquina.
+     * Fuerza la sincronización con la base de datos antes de construir la respuesta para incluir
+     * la fecha {@code updatedAt} actualizada.</p>
+     *
+     * @param id identificador de la máquina que se desea actualizar
+     * @param request datos normalizados y validados que sustituyen los datos actualizables
+     * @return DTO público de la máquina actualizada
+     * @throws MachineNotFoundException si no existe una máquina con el identificador indicado
+     * @throws SerialNumberAlreadyInUseException si el número de serie pertenece a otra máquina
+     */
+    @Transactional
+    public MachineResponse updateMachine(Long id, AdminUpdateMachineRequest request) {
+        Machine machine = machineRepository.findById(id)
+                .orElseThrow(() -> new MachineNotFoundException(
+                        "Máquina con " + id + " no encontrada."
+                ));
+
+        if (
+                request.serialNumber() != null &&
+                        machineRepository.existsBySerialNumberAndIdNot(request.serialNumber(), id)
+        ) {
+            throw new SerialNumberAlreadyInUseException(
+                    "El número de serie " + request.serialNumber() + " ya existe."
+            );
+        }
+
+        machine.changeName(request.name());
+        machine.changeManufacturer(request.manufacturer());
+        machine.changeModel(request.model());
+        machine.changeSerialNumber(request.serialNumber());
+        machine.changeLocation(request.location());
+        machine.changeStatus(request.status());
+
+        machineRepository.flush();
 
         return MachineMapper.toResponse(machine);
     }

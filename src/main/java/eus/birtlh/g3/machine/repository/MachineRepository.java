@@ -49,4 +49,14 @@ public interface MachineRepository extends JpaRepository<Machine, Long> {
      * caso contrario
      */
     boolean existsBySerialNumber(String serialNumber);
+
+    /**
+     * Comprueba si el número de serie ya está asignado a una máquina distinta de la indicada.
+     *
+     * @param serialNumber número de serie que se desea comprobar
+     * @param id identificador de la máquina que se excluye de la comprobación
+     * @return {@code true} si el número de serie pertenece a otra máquina; {@code false} en caso
+     * contrario
+     */
+    boolean existsBySerialNumberAndIdNot(String serialNumber, Long id);
 }

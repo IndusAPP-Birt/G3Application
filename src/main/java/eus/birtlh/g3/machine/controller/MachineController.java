@@ -7,6 +7,7 @@ import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.machine.MachineService;
 import eus.birtlh.g3.machine.MachineStatus;
 import eus.birtlh.g3.machine.dto.AdminCreateMachineRequest;
+import eus.birtlh.g3.machine.dto.AdminUpdateMachineRequest;
 import eus.birtlh.g3.machine.dto.MachineResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
@@ -202,6 +203,30 @@ public class MachineController {
                         "Máquina creada correctamente."
                 )
 
+        );
+    }
+
+    /**
+     * Actualiza los datos administrativos de una máquina, excepto sus campos inmutables.
+     *
+     * @param id identificador positivo de la máquina que se desea actualizar
+     * @param request datos actualizables que sustituyen los datos actuales de la máquina
+     * @return respuesta HTTP 200 con la máquina actualizada y su marca temporal
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiSuccessResponse<MachineResponse>> updateMachine(
+            @PathVariable
+            @Positive(message = "El identificador debe ser mayor que cero.")
+            Long id,
+
+            @Valid
+            @RequestBody AdminUpdateMachineRequest request
+    ) {
+        return ResponseEntity.ok(
+                ApiSuccessResponse.success(
+                        machineService.updateMachine(id, request),
+                        "Máquina actualizada correctamente."
+                )
         );
     }
 }
