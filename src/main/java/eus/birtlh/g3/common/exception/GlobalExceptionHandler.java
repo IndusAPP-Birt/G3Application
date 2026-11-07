@@ -1,7 +1,9 @@
 package eus.birtlh.g3.common.exception;
 
 import eus.birtlh.g3.common.dto.ApiErrorResponse;
+import eus.birtlh.g3.machine.exception.AssetCodeAlreadyInUseException;
 import eus.birtlh.g3.machine.exception.MachineNotFoundException;
+import eus.birtlh.g3.machine.exception.SerialNumberAlreadyInUseException;
 import eus.birtlh.g3.user.exception.EmailAlreadyInUseException;
 import eus.birtlh.g3.user.exception.UserNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -69,6 +71,34 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(EmailAlreadyInUseException.class)
     public ResponseEntity<ApiErrorResponse> handleEmailAlreadyInUseException(
             EmailAlreadyInUseException ex
+    ) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiErrorResponse.error(ex.getMessage()));
+    }
+
+    /**
+     * Devuelve una respuesta HTTP 409 cuando el código patrimonial ya está en uso.
+     *
+     * @param ex excepción que identifica el conflicto de código patrimonial
+     * @return respuesta de error con estado HTTP 409
+     */
+    @ExceptionHandler(AssetCodeAlreadyInUseException.class)
+    public ResponseEntity<ApiErrorResponse> handleAssetCodeAlreadyInUseException(
+            AssetCodeAlreadyInUseException ex
+    ) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiErrorResponse.error(ex.getMessage()));
+    }
+
+    /**
+     * Devuelve una respuesta HTTP 409 cuando el número de serie ya está en uso.
+     *
+     * @param ex excepción que identifica el conflicto de número de serie
+     * @return respuesta de error con estado HTTP 409
+     */
+    @ExceptionHandler(SerialNumberAlreadyInUseException.class)
+    public ResponseEntity<ApiErrorResponse> handleSerialNumberAlreadyInUseException(
+            SerialNumberAlreadyInUseException ex
     ) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(ApiErrorResponse.error(ex.getMessage()));

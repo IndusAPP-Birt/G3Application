@@ -31,4 +31,22 @@ public interface MachineRepository extends JpaRepository<Machine, Long> {
      * @return página de máquinas con el estado indicado; puede no contener resultados
      */
     Page<Machine> findByStatus(MachineStatus status, Pageable pageable);
+
+    /**
+     * Comprueba si ya existe una máquina con el código patrimonial indicado.
+     *
+     * @param assetCode código patrimonial normalizado que se desea comprobar
+     * @return {@code true} si el código ya está asignado a una máquina; {@code false} en caso
+     * contrario
+     */
+    boolean existsByAssetCode(String assetCode);
+
+    /**
+     * Comprueba si ya existe una máquina con el número de serie indicado.
+     *
+     * @param serialNumber número de serie que se desea comprobar
+     * @return {@code true} si el número de serie ya está asignado a una máquina; {@code false} en
+     * caso contrario
+     */
+    boolean existsBySerialNumber(String serialNumber);
 }

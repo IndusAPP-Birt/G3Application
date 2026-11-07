@@ -6,11 +6,14 @@ import eus.birtlh.g3.common.dto.CatalogOptionResponse;
 import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.machine.MachineService;
 import eus.birtlh.g3.machine.MachineStatus;
+import eus.birtlh.g3.machine.dto.AdminCreateMachineRequest;
 import eus.birtlh.g3.machine.dto.MachineResponse;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.List;
 import java.util.Locale;
@@ -172,6 +175,33 @@ public class MachineController {
                         machineService.getMachinesByStatus(page, size, status),
                         "Máquinas obtenidas correctamente."
                 )
+        );
+    }
+
+    /**
+     * Registra una máquina a partir de una solicitud administrativa validada.
+     *
+     * @param request datos de la máquina que se desea registrar
+     * @return respuesta HTTP 201 con la máquina creada y la cabecera {@code Location} del recurso
+     */
+    @PostMapping
+    public ResponseEntity<ApiSuccessResponse<MachineResponse>> createMachine(
+            @Valid
+            @RequestBody AdminCreateMachineRequest request
+    ) {
+        MachineResponse machine = machineService.createMachine(request);
+
+        return ResponseEntity.created(
+                ServletUriComponentsBuilder.fromCurrentRequest()
+                        .path("/{id}")
+                        .buildAndExpand(machine.id())
+                        .toUri()
+        ).body(
+                ApiSuccessResponse.success(
+                        machine,
+                        "Máquina creada correctamente."
+                )
+
         );
     }
 }

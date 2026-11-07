@@ -32,10 +32,17 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/actuator/health").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/users", "/api/users/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/users",
+                                "/api/users/**",
+                                "/api/machines",
+                                "/api/machines/**"
+                        ).permitAll()
+                        .requestMatchers(HttpMethod.POST,
+                                "/api/users",
+                                "/api/machines"
+                        ).permitAll()
                         .requestMatchers(HttpMethod.PUT, "/api/users/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/machines", "/api/machines/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .build();

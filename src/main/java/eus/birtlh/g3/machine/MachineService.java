@@ -2,8 +2,11 @@ package eus.birtlh.g3.machine;
 
 import eus.birtlh.g3.common.dto.CatalogOptionResponse;
 import eus.birtlh.g3.common.dto.PageResponse;
+import eus.birtlh.g3.machine.dto.AdminCreateMachineRequest;
 import eus.birtlh.g3.machine.dto.MachineResponse;
+import eus.birtlh.g3.machine.exception.AssetCodeAlreadyInUseException;
 import eus.birtlh.g3.machine.exception.MachineNotFoundException;
+import eus.birtlh.g3.machine.exception.SerialNumberAlreadyInUseException;
 import eus.birtlh.g3.machine.mapper.MachineMapper;
 import eus.birtlh.g3.machine.mapper.MachineStatusMapper;
 import eus.birtlh.g3.machine.repository.MachineRepository;
@@ -132,5 +135,49 @@ public class MachineService {
                 machines.getTotalElements(),
                 machines.getTotalPages()
         );
+    }
+
+    /**
+     * Registra una máquina a partir de los datos validados de una solicitud administrativa.
+     *
+     * <p>Comprueba la unicidad del código patrimonial y, si se ha indicado, del número de serie.
+     * La máquina se crea inicialmente en estado {@link MachineStatus#ACTIVE}.</p>
+     *
+     * @param request datos normalizados y validados de la máquina que se desea registrar
+     * @return DTO público de la máquina creada
+     * @throws AssetCodeAlreadyInUseException si ya existe una máquina con el código patrimonial
+     *                                        indicado
+     * @throws SerialNumberAlreadyInUseException si el número de serie indicado ya está asignado
+     */
+    @Transactional
+    public MachineResponse createMachine(AdminCreateMachineRequest request) {
+        if (machineRepository.existsByAssetCode(request.assetCode())) {
+            throw new AssetCodeAlreadyInUseException(
+                    "El código patrimonial " + request.assetCode() + " ya existe."
+            );
+        }
+
+        if (
+                request.serialNumber() != null &&
+                machineRepository.existsBySerialNumber(request.serialNumber())
+        ) {
+            throw new SerialNumberAlreadyInUseException(
+                    "El número de serie " + request.serialNumber() + " ya existe."
+            );
+        }
+
+        Machine machine = machineRepository.save(
+                new Machine(
+                        request.assetCode(),
+                        request.name(),
+                        request.manufacturer(),
+                        request.model(),
+                        request.serialNumber(),
+                        request.location(),
+                        request.commissionedAt()
+                )
+        );
+
+        return MachineMapper.toResponse(machine);
     }
 }
