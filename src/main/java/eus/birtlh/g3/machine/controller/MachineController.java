@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Controlador REST que expone las operaciones HTTP sobre máquinas industriales.
@@ -32,6 +31,21 @@ import java.util.Locale;
 public class MachineController {
 
     private final MachineService machineService;
+
+    /**
+     * Obtiene los estados operativos disponibles para su selección en la API.
+     *
+     * @return respuesta HTTP 200 con las opciones de catálogo de estados y su marca temporal
+     */
+    @GetMapping("/statuses")
+    public ResponseEntity<ApiSuccessResponse<List<CatalogOptionResponse>>> listAllStatuses() {
+        return ResponseEntity.ok(
+                ApiSuccessResponse.success(
+                        machineService.getAllStatuses(),
+                        "Estados de máquinas obtenidos correctamente."
+                )
+        );
+    }
 
     /**
      * Obtiene una página de máquinas registradas.
@@ -72,21 +86,6 @@ public class MachineController {
     }
 
     /**
-     * Obtiene los estados operativos disponibles para su selección en la API.
-     *
-     * @return respuesta HTTP 200 con las opciones de catálogo de estados y su marca temporal
-     */
-    @GetMapping("/statuses")
-    public ResponseEntity<ApiSuccessResponse<List<CatalogOptionResponse>>> listAllStatuses() {
-        return ResponseEntity.ok(
-                ApiSuccessResponse.success(
-                        machineService.getAllStatuses(),
-                        "Estados de máquinas obtenidos correctamente."
-                )
-        );
-    }
-
-    /**
      * Obtiene una máquina por su identificador.
      *
      * @param id identificador positivo de la máquina solicitada
@@ -107,30 +106,109 @@ public class MachineController {
     }
 
     /**
-     * Obtiene una máquina por su código patrimonial único.
+     * Obtiene una página de máquinas cuyo código patrimonial contiene el texto indicado.
      *
-     * <p>El código recibido se elimina de espacios exteriores y se normaliza a mayúsculas antes
-     * de delegar la búsqueda en el servicio.</p>
+     * <p>El término se elimina de espacios exteriores antes de delegar la búsqueda, que no
+     * distingue entre mayúsculas y minúsculas.</p>
      *
-     * @param assetCode código patrimonial obligatorio de la máquina solicitada
-     * @return respuesta HTTP 200 con la máquina y su marca temporal
+     * @param assetCode texto parcial obligatorio con el que filtrar el código patrimonial
+     * @param page índice de página basado en cero
+     * @param size número de máquinas por página
+     * @return respuesta HTTP 200 con la página de máquinas coincidentes y su marca temporal
      */
     @GetMapping("/by-asset-code")
-    public ResponseEntity<ApiSuccessResponse<MachineResponse>> findMachineByAssetCode(
+    public ResponseEntity<ApiSuccessResponse<PageResponse<MachineResponse>>> findMachinesByAssetCode(
             @RequestParam("assetCode")
             @NotBlank(message = "El código patrimonial es obligatorio.")
             @Size(
+                    min = 2,
                     max = 50,
-                    message = "El código patrimonial no puede superar los 50 caracteres."
+                    message = "El código patrimonial debe tener entre 2 y 50 caracteres."
             )
-            String assetCode
+            String assetCode,
+
+            @RequestParam(
+                    name = "page",
+                    defaultValue = PaginationConstants.DEFAULT_PAGE_VALUE
+            )
+            @Min(
+                    value = PaginationConstants.MIN_PAGE,
+                    message = "La página debe ser {value} o mayor."
+            )
+            int page,
+
+            @RequestParam(
+                    name = "size",
+                    defaultValue = PaginationConstants.DEFAULT_PAGE_SIZE_VALUE
+            )
+            @Min(
+                    value = PaginationConstants.MIN_PAGE_SIZE,
+                    message = "El tamaño de página debe ser {value} o mayor."
+            )
+            @Max(
+                    value = PaginationConstants.MAX_PAGE_SIZE,
+                    message = "El tamaño de página no puede superar {value}."
+            )
+            int size
     ) {
         return ResponseEntity.ok(
                 ApiSuccessResponse.success(
-                        machineService.getMachineByAssetCode(
-                                assetCode.strip().toUpperCase(Locale.ROOT)
-                        ),
-                        "Máquina obtenida correctamente."
+                        machineService.getMachinesByAssetCode(page, size, assetCode.strip()),
+                        "Máquinas obtenidas correctamente."
+                )
+        );
+    }
+
+    /**
+     * Obtiene una página de máquinas cuyo número de serie contiene el texto indicado.
+     *
+     * <p>El término se elimina de espacios exteriores antes de delegar la búsqueda, que no
+     * distingue entre mayúsculas y minúsculas.</p>
+     *
+     * @param serialNumber texto parcial obligatorio con el que filtrar el número de serie
+     * @param page índice de página basado en cero
+     * @param size número de máquinas por página
+     * @return respuesta HTTP 200 con la página de máquinas coincidentes y su marca temporal
+     */
+    @GetMapping("/by-serial-number")
+    public ResponseEntity<ApiSuccessResponse<PageResponse<MachineResponse>>> findMachinesBySerialNumber(
+            @RequestParam("serialNumber")
+            @NotBlank(message = "El número de serie es obligatorio.")
+            @Size(
+                    min = 2,
+                    max = 100,
+                    message = "El número de serie, debe tener entre 2 y 100 caracteres."
+            )
+            String serialNumber,
+
+            @RequestParam(
+                    name = "page",
+                    defaultValue = PaginationConstants.DEFAULT_PAGE_VALUE
+            )
+            @Min(
+                    value = PaginationConstants.MIN_PAGE,
+                    message = "La página debe ser {value} o mayor."
+            )
+            int page,
+
+            @RequestParam(
+                    name = "size",
+                    defaultValue = PaginationConstants.DEFAULT_PAGE_SIZE_VALUE
+            )
+            @Min(
+                    value = PaginationConstants.MIN_PAGE_SIZE,
+                    message = "El tamaño de página debe ser {value} o mayor."
+            )
+            @Max(
+                    value = PaginationConstants.MAX_PAGE_SIZE,
+                    message = "El tamaño de página no puede superar {value}."
+            )
+            int size
+    ) {
+        return ResponseEntity.ok(
+                ApiSuccessResponse.success(
+                        machineService.getMachinesBySerialNumber(page, size, serialNumber.strip()),
+                        "Máquinas obtenidas correctamente."
                 )
         );
     }

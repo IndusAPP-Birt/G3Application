@@ -35,6 +35,18 @@ public class MachineService {
     private final MachineRepository machineRepository;
 
     /**
+     * Obtiene todos los estados operativos disponibles como opciones de catálogo públicas.
+     *
+     * @return lista de estados disponibles con su código y descripción
+     */
+    @Transactional(readOnly = true)
+    public List<CatalogOptionResponse> getAllStatuses() {
+        return Arrays.stream(MachineStatus.values())
+                .map(MachineStatusMapper::toResponse)
+                .toList();
+    }
+
+    /**
      * Obtiene una página de máquinas registradas como DTOs de respuesta.
      *
      * @param page índice de página basado en cero
@@ -60,18 +72,6 @@ public class MachineService {
     }
 
     /**
-     * Obtiene todos los estados operativos disponibles como opciones de catálogo públicas.
-     *
-     * @return lista de estados disponibles con su código y descripción
-     */
-    @Transactional(readOnly = true)
-    public List<CatalogOptionResponse> getAllStatuses() {
-        return Arrays.stream(MachineStatus.values())
-                .map(MachineStatusMapper::toResponse)
-                .toList();
-    }
-
-    /**
      * Obtiene una máquina por su identificador como DTO de respuesta.
      *
      * @param id identificador de la máquina solicitada
@@ -89,20 +89,65 @@ public class MachineService {
     }
 
     /**
-     * Obtiene una máquina por su código patrimonial como DTO de respuesta.
+     * Obtiene una página de máquinas cuyo código patrimonial contiene el texto indicado.
      *
-     * @param assetCode código patrimonial normalizado de la máquina solicitada
-     * @return DTO público de la máquina encontrada
-     * @throws MachineNotFoundException si no existe una máquina con el código indicado
+     * @param page índice de página basado en cero
+     * @param size número de máquinas por página
+     * @param assetCode texto parcial del código patrimonial con el que filtrar
+     * @return página de máquinas coincidentes; su contenido puede estar vacío
      */
     @Transactional(readOnly = true)
-    public MachineResponse getMachineByAssetCode(String assetCode) {
-        Machine machine = machineRepository.findByAssetCode(assetCode)
-                .orElseThrow(() -> new MachineNotFoundException(
-                        "Máquina con " + assetCode + " no encontrada."
-                ));
+    public PageResponse<MachineResponse> getMachinesByAssetCode(
+            int page,
+            int size,
+            String assetCode
+    ) {
+        Page<Machine> machines = machineRepository.findByAssetCodeContainingIgnoreCase(
+                assetCode,
+                PageRequest.of(page, size, Sort.by("id").ascending())
+        );
 
-        return MachineMapper.toResponse(machine);
+        return new PageResponse<>(
+                machines.getContent()
+                        .stream()
+                        .map(MachineMapper::toResponse)
+                        .toList(),
+                machines.getNumber(),
+                machines.getSize(),
+                machines.getTotalElements(),
+                machines.getTotalPages()
+        );
+    }
+
+    /**
+     * Obtiene una página de máquinas cuyo número de serie contiene el texto indicado.
+     *
+     * @param page índice de página basado en cero
+     * @param size número de máquinas por página
+     * @param serialNumber texto parcial del número de serie con el que filtrar
+     * @return página de máquinas coincidentes; su contenido puede estar vacío
+     */
+    @Transactional(readOnly = true)
+    public PageResponse<MachineResponse> getMachinesBySerialNumber(
+            int page,
+            int size,
+            String serialNumber
+    ) {
+        Page<Machine> machines = machineRepository.findBySerialNumberContainingIgnoreCase(
+                serialNumber,
+                PageRequest.of(page, size, Sort.by("id").ascending())
+        );
+
+        return new PageResponse<>(
+                machines.getContent()
+                        .stream()
+                        .map(MachineMapper::toResponse)
+                        .toList(),
+                machines.getNumber(),
+                machines.getSize(),
+                machines.getTotalElements(),
+                machines.getTotalPages()
+        );
     }
 
     /**

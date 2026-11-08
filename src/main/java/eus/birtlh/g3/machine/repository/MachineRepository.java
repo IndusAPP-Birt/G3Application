@@ -6,8 +6,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.Optional;
-
 /**
  * Repositorio de persistencia para la entidad {@link Machine}.
  *
@@ -16,12 +14,24 @@ import java.util.Optional;
 public interface MachineRepository extends JpaRepository<Machine, Long> {
 
     /**
-     * Busca una máquina por su código patrimonial único.
+     * Busca máquinas cuyo código patrimonial contiene el texto indicado, sin distinguir entre
+     * mayúsculas y minúsculas.
      *
-     * @param assetCode código patrimonial normalizado que identifica la máquina
-     * @return máquina encontrada o un {@link Optional} vacío si no existe
+     * @param assetCode texto parcial del código patrimonial con el que filtrar
+     * @param pageable configuración de página, tamaño y orden solicitados
+     * @return página de máquinas coincidentes; puede no contener resultados
      */
-    Optional<Machine> findByAssetCode(String assetCode);
+    Page<Machine> findByAssetCodeContainingIgnoreCase(String assetCode, Pageable pageable);
+
+    /**
+     * Busca máquinas cuyo número de serie contiene el texto indicado, sin distinguir entre
+     * mayúsculas y minúsculas.
+     *
+     * @param serialNumber texto parcial del número de serie con el que filtrar
+     * @param pageable configuración de página, tamaño y orden solicitados
+     * @return página de máquinas coincidentes; puede no contener resultados
+     */
+    Page<Machine> findBySerialNumberContainingIgnoreCase(String serialNumber, Pageable pageable);
 
     /**
      * Busca máquinas según su estado operativo.
@@ -42,6 +52,15 @@ public interface MachineRepository extends JpaRepository<Machine, Long> {
     boolean existsByAssetCode(String assetCode);
 
     /**
+     * Comprueba si el código patrimonial ya está asignado a una máquina distinta de la indicada.
+     *
+     * @param assetCode código patrimonial normalizado que se desea comprobar
+     * @param id identificador de la máquina que se excluye de la comprobación
+     * @return {@code true} si el código pertenece a otra máquina; {@code false} en caso contrario
+     */
+    boolean existsByAssetCodeAndIdNot(String assetCode, Long id);
+
+    /**
      * Comprueba si ya existe una máquina con el número de serie indicado.
      *
      * @param serialNumber número de serie que se desea comprobar
@@ -59,13 +78,4 @@ public interface MachineRepository extends JpaRepository<Machine, Long> {
      * contrario
      */
     boolean existsBySerialNumberAndIdNot(String serialNumber, Long id);
-
-    /**
-     * Comprueba si el código patrimonial ya está asignado a una máquina distinta de la indicada.
-     *
-     * @param assetCode código patrimonial normalizado que se desea comprobar
-     * @param id identificador de la máquina que se excluye de la comprobación
-     * @return {@code true} si el código pertenece a otra máquina; {@code false} en caso contrario
-     */
-    boolean existsByAssetCodeAndIdNot(String assetCode, Long id);
 }
