@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "f194a86d-ef88-4a50-a079-d662dc4030f2",
     "name": "G3Application API - Local",
-    "description": "Colección de pruebas para la rama develop sin autenticación. Todos los endpoints de usuarios son públicos temporalmente.",
+    "description": "Colección de pruebas para la rama develop sin autenticación JWT. Los endpoints de usuarios y máquinas son públicos temporalmente.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -27,12 +27,44 @@
       "value": "true"
     },
     {
+      "key": "role",
+      "value": "ROLE_INSPECTOR"
+    },
+    {
       "key": "userId",
       "value": "1"
     },
     {
       "key": "newUserEmail",
       "value": "postman@example.com"
+    },
+    {
+      "key": "machineId",
+      "value": "1"
+    },
+    {
+      "key": "assetCodeSearchTerm",
+      "value": "MAQ"
+    },
+    {
+      "key": "serialNumberSearchTerm",
+      "value": "FAG"
+    },
+    {
+      "key": "machineStatus",
+      "value": "ACTIVE"
+    },
+    {
+      "key": "newMachineAssetCode",
+      "value": "MAQ-POSTMAN"
+    },
+    {
+      "key": "updatedMachineAssetCode",
+      "value": "MAQ-UPDATED"
+    },
+    {
+      "key": "newMachineSerialNumber",
+      "value": "SN-POSTMAN"
     }
   ],
   "item": [
@@ -65,11 +97,27 @@
       "name": "Usuarios",
       "item": [
         {
+          "name": "Listar roles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/users/roles"
+          }
+        },
+        {
           "name": "Listar usuarios paginados",
           "request": {
             "method": "GET",
             "header": [],
             "url": "{{baseUrl}}/api/users?page={{page}}&size={{size}}"
+          }
+        },
+        {
+          "name": "Obtener usuario por identificador",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/users/{{userId}}"
           }
         },
         {
@@ -89,19 +137,11 @@
           }
         },
         {
-          "name": "Listar roles",
+          "name": "Listar usuarios por rol",
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/api/users/roles"
-          }
-        },
-        {
-          "name": "Obtener usuario por identificador",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/api/users/{{userId}}"
+            "url": "{{baseUrl}}/api/users/by-role?role={{role}}&page={{page}}&size={{size}}"
           }
         },
         {
@@ -125,8 +165,7 @@
                   "    pm.response.to.have.status(201);",
                   "});",
                   "",
-                  "const response = pm.response.json();",
-                  "pm.collectionVariables.set(\"userId\", response.data.id);"
+                  "pm.collectionVariables.set(\"userId\", pm.response.json().data.id);"
                 ]
               }
             }
@@ -178,6 +217,137 @@
               "raw": "{\n  \"password\": \"NuevaClave123!\"\n}"
             },
             "url": "{{baseUrl}}/api/users/{{userId}}/password"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Máquinas",
+      "item": [
+        {
+          "name": "Listar estados de máquina",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/machines/statuses"
+          }
+        },
+        {
+          "name": "Listar máquinas paginadas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/machines?page={{page}}&size={{size}}"
+          }
+        },
+        {
+          "name": "Obtener máquina por identificador",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/machines/{{machineId}}"
+          }
+        },
+        {
+          "name": "Buscar máquinas por código patrimonial",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/machines/by-asset-code?assetCode={{assetCodeSearchTerm}}&page={{page}}&size={{size}}"
+          }
+        },
+        {
+          "name": "Buscar máquinas por número de serie",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/machines/by-serial-number?serialNumber={{serialNumberSearchTerm}}&page={{page}}&size={{size}}"
+          }
+        },
+        {
+          "name": "Listar máquinas por estado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/machines/by-status?status={{machineStatus}}&page={{page}}&size={{size}}"
+          }
+        },
+        {
+          "name": "Crear máquina",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const suffix = Date.now();",
+                  "pm.collectionVariables.set(\"newMachineAssetCode\", `MAQ-POSTMAN-${suffix}`);",
+                  "pm.collectionVariables.set(\"updatedMachineAssetCode\", `MAQ-UPDATED-${suffix}`);",
+                  "pm.collectionVariables.set(\"newMachineSerialNumber\", `SN-POSTMAN-${suffix}`);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"La máquina se crea\", () => {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.collectionVariables.set(\"machineId\", pm.response.json().data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assetCode\": \"{{newMachineAssetCode}}\",\n  \"name\": \"Máquina de prueba Postman\",\n  \"manufacturer\": \"Postman Industries\",\n  \"model\": \"PM-100\",\n  \"serialNumber\": \"{{newMachineSerialNumber}}\",\n  \"location\": \"Laboratorio de pruebas\",\n  \"commissionedAt\": \"2025-01-15\"\n}"
+            },
+            "url": "{{baseUrl}}/api/machines"
+          }
+        },
+        {
+          "name": "Actualizar máquina",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Máquina Postman actualizada\",\n  \"manufacturer\": \"Postman Industries\",\n  \"model\": \"PM-200\",\n  \"serialNumber\": \"{{newMachineSerialNumber}}\",\n  \"location\": \"Laboratorio de pruebas - puesto 2\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": "{{baseUrl}}/api/machines/{{machineId}}"
+          }
+        },
+        {
+          "name": "Corregir código patrimonial",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assetCode\": \"{{updatedMachineAssetCode}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/machines/{{machineId}}/asset-code"
           }
         }
       ]

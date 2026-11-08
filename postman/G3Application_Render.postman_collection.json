@@ -2,107 +2,72 @@
   "info": {
     "_postman_id": "25b8305c-39c7-4e77-aa68-f90f5afdb94c",
     "name": "G3Application API - Render",
-    "description": "Colección de pruebas para la rama develop desplegada en Render, sin autenticación JWT.",
+    "description": "Colección de pruebas para la rama develop desplegada en Render, sin autenticación JWT. Los endpoints de usuarios y máquinas son públicos temporalmente.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    {
-      "key": "baseUrl",
-      "value": "https://g3application.onrender.com"
-    },
-    {
-      "key": "page",
-      "value": "0"
-    },
-    {
-      "key": "size",
-      "value": "20"
-    },
-    {
-      "key": "emailSearchTerm",
-      "value": "ane"
-    },
-    {
-      "key": "enabled",
-      "value": "true"
-    },
-    {
-      "key": "userId",
-      "value": "1"
-    },
-    {
-      "key": "newUserEmail",
-      "value": "postman@example.com"
-    }
+    {"key": "baseUrl", "value": "https://g3application.onrender.com"},
+    {"key": "page", "value": "0"},
+    {"key": "size", "value": "20"},
+    {"key": "emailSearchTerm", "value": "ane"},
+    {"key": "enabled", "value": "true"},
+    {"key": "role", "value": "ROLE_INSPECTOR"},
+    {"key": "userId", "value": "1"},
+    {"key": "newUserEmail", "value": "postman@example.com"},
+    {"key": "machineId", "value": "1"},
+    {"key": "assetCodeSearchTerm", "value": "MAQ"},
+    {"key": "serialNumberSearchTerm", "value": "FAG"},
+    {"key": "machineStatus", "value": "ACTIVE"},
+    {"key": "newMachineAssetCode", "value": "MAQ-POSTMAN"},
+    {"key": "updatedMachineAssetCode", "value": "MAQ-UPDATED"},
+    {"key": "newMachineSerialNumber", "value": "SN-POSTMAN"}
   ],
   "item": [
     {
       "name": "Comprobar salud",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"El servicio está disponible\", () => {",
-              "    pm.response.to.have.status(200);",
-              "});",
-              "",
-              "pm.test(\"El estado es UP\", () => {",
-              "    pm.expect(pm.response.json().status).to.eql(\"UP\");",
-              "});"
-            ]
-          }
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "pm.test(\"El servicio está disponible\", () => {",
+            "    pm.response.to.have.status(200);",
+            "});",
+            "",
+            "pm.test(\"El estado es UP\", () => {",
+            "    pm.expect(pm.response.json().status).to.eql(\"UP\");",
+            "});"
+          ]
         }
-      ],
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": "{{baseUrl}}/actuator/health"
-      }
+      }],
+      "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/actuator/health"}
     },
     {
       "name": "Usuarios",
       "item": [
         {
-          "name": "Listar usuarios paginados",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/api/users?page={{page}}&size={{size}}"
-          }
-        },
-        {
-          "name": "Buscar usuarios por email",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/api/users/by-email?email={{emailSearchTerm}}&page={{page}}&size={{size}}"
-          }
-        },
-        {
-          "name": "Listar usuarios por estado",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/api/users/by-status?enabled={{enabled}}&page={{page}}&size={{size}}"
-          }
-        },
-        {
           "name": "Listar roles",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/api/users/roles"
-          }
+          "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/users/roles"}
+        },
+        {
+          "name": "Listar usuarios paginados",
+          "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/users?page={{page}}&size={{size}}"}
         },
         {
           "name": "Obtener usuario por identificador",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": "{{baseUrl}}/api/users/{{userId}}"
-          }
+          "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/users/{{userId}}"}
+        },
+        {
+          "name": "Buscar usuarios por email",
+          "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/users/by-email?email={{emailSearchTerm}}&page={{page}}&size={{size}}"}
+        },
+        {
+          "name": "Listar usuarios por estado",
+          "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/users/by-status?enabled={{enabled}}&page={{page}}&size={{size}}"}
+        },
+        {
+          "name": "Listar usuarios por rol",
+          "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/users/by-role?role={{role}}&page={{page}}&size={{size}}"}
         },
         {
           "name": "Crear usuario",
@@ -111,9 +76,7 @@
               "listen": "prerequest",
               "script": {
                 "type": "text/javascript",
-                "exec": [
-                  "pm.collectionVariables.set(\"newUserEmail\", `postman-${Date.now()}@example.com`);"
-                ]
+                "exec": ["pm.collectionVariables.set(\"newUserEmail\", `postman-${Date.now()}@example.com`);"]
               }
             },
             {
@@ -125,24 +88,15 @@
                   "    pm.response.to.have.status(201);",
                   "});",
                   "",
-                  "const response = pm.response.json();",
-                  "pm.collectionVariables.set(\"userId\", response.data.id);"
+                  "pm.collectionVariables.set(\"userId\", pm.response.json().data.id);"
                 ]
               }
             }
           ],
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Postman\",\n  \"lastName\": \"Demo\",\n  \"email\": \"{{newUserEmail}}\",\n  \"password\": \"Password123!\",\n  \"role\": \"ROLE_INSPECTOR\"\n}"
-            },
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"name\": \"Postman\",\n  \"lastName\": \"Demo\",\n  \"email\": \"{{newUserEmail}}\",\n  \"password\": \"Password123!\",\n  \"role\": \"ROLE_INSPECTOR\"\n}"},
             "url": "{{baseUrl}}/api/users"
           }
         },
@@ -150,16 +104,8 @@
           "name": "Actualizar usuario",
           "request": {
             "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Postman actualizado\",\n  \"lastName\": \"Demo\",\n  \"email\": \"{{newUserEmail}}\",\n  \"role\": \"ROLE_INSPECTOR\",\n  \"enabled\": true\n}"
-            },
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"name\": \"Postman actualizado\",\n  \"lastName\": \"Demo\",\n  \"email\": \"{{newUserEmail}}\",\n  \"role\": \"ROLE_INSPECTOR\",\n  \"enabled\": true\n}"},
             "url": "{{baseUrl}}/api/users/{{userId}}"
           }
         },
@@ -167,17 +113,92 @@
           "name": "Restablecer contraseña",
           "request": {
             "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"password\": \"NuevaClave123!\"\n}"
-            },
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"password\": \"NuevaClave123!\"\n}"},
             "url": "{{baseUrl}}/api/users/{{userId}}/password"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Máquinas",
+      "item": [
+        {
+          "name": "Listar estados de máquina",
+          "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/machines/statuses"}
+        },
+        {
+          "name": "Listar máquinas paginadas",
+          "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/machines?page={{page}}&size={{size}}"}
+        },
+        {
+          "name": "Obtener máquina por identificador",
+          "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/machines/{{machineId}}"}
+        },
+        {
+          "name": "Buscar máquinas por código patrimonial",
+          "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/machines/by-asset-code?assetCode={{assetCodeSearchTerm}}&page={{page}}&size={{size}}"}
+        },
+        {
+          "name": "Buscar máquinas por número de serie",
+          "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/machines/by-serial-number?serialNumber={{serialNumberSearchTerm}}&page={{page}}&size={{size}}"}
+        },
+        {
+          "name": "Listar máquinas por estado",
+          "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/machines/by-status?status={{machineStatus}}&page={{page}}&size={{size}}"}
+        },
+        {
+          "name": "Crear máquina",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const suffix = Date.now();",
+                  "pm.collectionVariables.set(\"newMachineAssetCode\", `MAQ-POSTMAN-${suffix}`);",
+                  "pm.collectionVariables.set(\"updatedMachineAssetCode\", `MAQ-UPDATED-${suffix}`);",
+                  "pm.collectionVariables.set(\"newMachineSerialNumber\", `SN-POSTMAN-${suffix}`);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"La máquina se crea\", () => {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.collectionVariables.set(\"machineId\", pm.response.json().data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"assetCode\": \"{{newMachineAssetCode}}\",\n  \"name\": \"Máquina de prueba Postman\",\n  \"manufacturer\": \"Postman Industries\",\n  \"model\": \"PM-100\",\n  \"serialNumber\": \"{{newMachineSerialNumber}}\",\n  \"location\": \"Laboratorio de pruebas\",\n  \"commissionedAt\": \"2025-01-15\"\n}"},
+            "url": "{{baseUrl}}/api/machines"
+          }
+        },
+        {
+          "name": "Actualizar máquina",
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"name\": \"Máquina Postman actualizada\",\n  \"manufacturer\": \"Postman Industries\",\n  \"model\": \"PM-200\",\n  \"serialNumber\": \"{{newMachineSerialNumber}}\",\n  \"location\": \"Laboratorio de pruebas - puesto 2\",\n  \"status\": \"ACTIVE\"\n}"},
+            "url": "{{baseUrl}}/api/machines/{{machineId}}"
+          }
+        },
+        {
+          "name": "Corregir código patrimonial",
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"assetCode\": \"{{updatedMachineAssetCode}}\"\n}"},
+            "url": "{{baseUrl}}/api/machines/{{machineId}}/asset-code"
           }
         }
       ]
