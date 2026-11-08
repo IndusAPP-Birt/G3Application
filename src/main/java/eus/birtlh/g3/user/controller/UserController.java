@@ -4,6 +4,7 @@ import eus.birtlh.g3.common.PaginationConstants;
 import eus.birtlh.g3.common.dto.ApiSuccessResponse;
 import eus.birtlh.g3.common.dto.CatalogOptionResponse;
 import eus.birtlh.g3.common.dto.PageResponse;
+import eus.birtlh.g3.user.Role;
 import eus.birtlh.g3.user.UserValidationConstraints;
 import eus.birtlh.g3.user.dto.AdminCreateUserRequest;
 import eus.birtlh.g3.user.dto.AdminResetUserPasswordRequest;
@@ -31,6 +32,21 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+
+    /**
+     * Obtiene los roles disponibles para su selección en la API.
+     *
+     * @return respuesta HTTP 200 con las opciones de catálogo de roles y su marca temporal
+     */
+    @GetMapping("/roles")
+    public ResponseEntity<ApiSuccessResponse<List<CatalogOptionResponse>>> listAllRoles() {
+        return ResponseEntity.ok(
+                ApiSuccessResponse.success(
+                        userService.getAllRoles(),
+                        "Roles obtenidos correctamente."
+                )
+        );
+    }
 
     /**
      * Obtiene una página de usuarios registrados.
@@ -66,21 +82,6 @@ public class UserController {
                 ApiSuccessResponse.success(
                         userService.getAllUsers(page, size),
                         "Usuarios obtenidos correctamente."
-                )
-        );
-    }
-
-    /**
-     * Obtiene los roles disponibles para su selección en la API.
-     *
-     * @return respuesta HTTP 200 con las opciones de catálogo de roles y su marca temporal
-     */
-    @GetMapping("/roles")
-    public ResponseEntity<ApiSuccessResponse<List<CatalogOptionResponse>>> listAllRoles() {
-        return ResponseEntity.ok(
-                ApiSuccessResponse.success(
-                        userService.getAllRoles(),
-                        "Roles obtenidos correctamente."
                 )
         );
     }
@@ -198,6 +199,51 @@ public class UserController {
         return ResponseEntity.ok(
                 ApiSuccessResponse.success(
                         userService.getUsersByEnabled(page, size, enabled),
+                        "Usuarios obtenidos correctamente."
+                )
+        );
+    }
+
+    /**
+     * Obtiene una página de usuarios según el rol que tienen asignado.
+     *
+     * @param role rol obligatorio con el que filtrar los usuarios
+     * @param page índice de página basado en cero
+     * @param size número de usuarios por página
+     * @return respuesta HTTP 200 con la página de usuarios coincidentes y su marca temporal
+     */
+    @GetMapping("/by-role")
+    public ResponseEntity<ApiSuccessResponse<PageResponse<UserResponse>>> findUsersByRole(
+            @RequestParam("role")
+            Role role,
+
+            @RequestParam(
+                    name = "page",
+                    defaultValue = PaginationConstants.DEFAULT_PAGE_VALUE
+            )
+            @Min(
+                    value = PaginationConstants.MIN_PAGE,
+                    message = "La página debe ser {value} o mayor."
+            )
+            int page,
+
+            @RequestParam(
+                    name = "size",
+                    defaultValue = PaginationConstants.DEFAULT_PAGE_SIZE_VALUE
+            )
+            @Min(
+                    value = PaginationConstants.MIN_PAGE_SIZE,
+                    message = "El tamaño de página debe ser {value} o mayor."
+            )
+            @Max(
+                    value = PaginationConstants.MAX_PAGE_SIZE,
+                    message = "El tamaño de página no puede superar {value}."
+            )
+            int size
+    ) {
+        return ResponseEntity.ok(
+                ApiSuccessResponse.success(
+                        userService.getUsersByRole(page, size, role),
                         "Usuarios obtenidos correctamente."
                 )
         );

@@ -37,6 +37,17 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     /**
+     * Obtiene todos los roles disponibles como opciones de catálogo públicas.
+     *
+     * @return lista de roles disponibles con su código y descripción
+     */
+    public List<CatalogOptionResponse> getAllRoles() {
+        return Arrays.stream(Role.values())
+                .map(RoleMapper::toResponse)
+                .toList();
+    }
+
+    /**
      * Obtiene una página de usuarios registrados como DTOs de respuesta.
      *
      * @param page índice de página basado en cero
@@ -59,17 +70,6 @@ public class UserService {
                 users.getTotalElements(),
                 users.getTotalPages()
         );
-    }
-
-    /**
-     * Obtiene todos los roles disponibles como opciones de catálogo públicas.
-     *
-     * @return lista de roles disponibles con su código y descripción
-     */
-    public List<CatalogOptionResponse> getAllRoles() {
-        return Arrays.stream(Role.values())
-                .map(RoleMapper::toResponse)
-                .toList();
     }
 
     /**
@@ -142,6 +142,40 @@ public class UserService {
     ) {
         Page<User> users = userRepository.findByEnabled(
                 enabled,
+                PageRequest.of(page, size, Sort.by("id").ascending())
+        );
+
+        return new PageResponse<>(
+                users.getContent()
+                        .stream()
+                        .map(UserMapper::toResponse)
+                        .toList(),
+                users.getNumber(),
+                users.getSize(),
+                users.getTotalElements(),
+                users.getTotalPages()
+        );
+    }
+
+    /**
+     * Obtiene una página de usuarios según el rol que tienen asignado.
+     *
+     * <p>Conserva el orden ascendente por identificador para que los resultados sean estables
+     * entre páginas.</p>
+     *
+     * @param page índice de página basado en cero
+     * @param size número de usuarios por página
+     * @param role rol con el que filtrar los usuarios
+     * @return página de usuarios con el rol indicado; su contenido puede estar vacío
+     */
+    @Transactional(readOnly = true)
+    public PageResponse<UserResponse> getUsersByRole(
+            int page,
+            int size,
+            Role role
+    ) {
+        Page<User> users = userRepository.findByRole(
+                role,
                 PageRequest.of(page, size, Sort.by("id").ascending())
         );
 
