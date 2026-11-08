@@ -69,4 +69,27 @@ public class PreventivePlanService {
 
         return PreventivePlanMapper.toResponse(preventivePlan);
     }
+
+    @Transactional(readOnly = true)
+    public PageResponse<PreventivePlanResponse> getPreventivePlansByMachineId(
+            int page,
+            int size,
+            long machineId
+    ) {
+        Page<PreventivePlan> preventivePlans = preventivePlanRepository.findByMachineId(
+                machineId,
+                PageRequest.of(page, size, Sort.by("id").ascending())
+        );
+
+        return new PageResponse<>(
+                preventivePlans.getContent()
+                        .stream()
+                        .map(PreventivePlanMapper::toResponse)
+                        .toList(),
+                preventivePlans.getNumber(),
+                preventivePlans.getSize(),
+                preventivePlans.getTotalElements(),
+                preventivePlans.getTotalPages()
+        );
+    }
 }

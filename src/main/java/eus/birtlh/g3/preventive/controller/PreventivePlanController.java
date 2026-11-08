@@ -87,4 +87,42 @@ public class PreventivePlanController {
                 )
         );
     }
+
+    @GetMapping("/by-machine/{machineId}")
+    public ResponseEntity<ApiSuccessResponse<PageResponse<PreventivePlanResponse>>> findPreventivePlanByMachineId(
+            @PathVariable
+            @Positive(message = "El identificador debe ser mayor que cero.")
+            Long machineId,
+
+            @RequestParam(
+                    name = "page",
+                    defaultValue = PaginationConstants.DEFAULT_PAGE_VALUE
+            )
+            @Min(
+                    value = PaginationConstants.MIN_PAGE,
+                    message = "La página debe ser {value} o mayor."
+            )
+            int page,
+
+            @RequestParam(
+                    name = "size",
+                    defaultValue = PaginationConstants.DEFAULT_PAGE_SIZE_VALUE
+            )
+            @Min(
+                    value = PaginationConstants.MIN_PAGE_SIZE,
+                    message = "El tamaño de página debe ser {value} o mayor."
+            )
+            @Max(
+                    value = PaginationConstants.MAX_PAGE_SIZE,
+                    message = "El tamaño de página no puede superar {value}."
+            )
+            int size
+    ) {
+        return ResponseEntity.ok(
+                ApiSuccessResponse.success(
+                        preventivePlanService.getPreventivePlansByMachineId(page, size, machineId),
+                        "Planes preventivos obtenidos correctamente."
+                )
+        );
+    }
 }
