@@ -13,8 +13,9 @@ import java.time.LocalDate;
  *
  * <p>La validación de los datos de entrada se realiza en los DTOs. Por ello, el constructor y
  * los métodos que modifican el estado tienen visibilidad de paquete: solo los casos de uso del
- * módulo {@code machine} pueden crear o modificar máquinas. El código patrimonial y la fecha de
- * puesta en servicio son inmutables una vez creada la entidad.</p>
+ * módulo {@code machine} pueden crear o modificar máquinas. La fecha de puesta en servicio es
+ * inmutable una vez creada la entidad; el código patrimonial puede corregirse mediante un caso
+ * de uso específico.</p>
  */
 @Entity
 @Table(
@@ -40,7 +41,7 @@ public class Machine {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "asset_code", nullable = false, updatable = false, length = 50)
+    @Column(name = "asset_code", nullable = false, length = 50)
     private String assetCode;
 
     @Column(nullable = false, length = 100)
@@ -76,7 +77,7 @@ public class Machine {
      *
      * <p>Las máquinas se registran inicialmente en estado {@link MachineStatus#ACTIVE}.</p>
      *
-     * @param assetCode código patrimonial único e inmutable de la máquina
+     * @param assetCode código patrimonial único de la máquina
      * @param name nombre descriptivo de la máquina
      * @param manufacturer fabricante de la máquina; puede ser {@code null}
      * @param model modelo de la máquina; puede ser {@code null}
@@ -118,6 +119,18 @@ public class Machine {
     @PreUpdate
     private void onUpdate() {
         this.updatedAt = Instant.now();
+    }
+
+    /**
+     * Corrige el código patrimonial de la máquina.
+     *
+     * <p>Este cambio se realiza mediante un caso de uso independiente para evitar mezclar una
+     * corrección de identificación con la actualización ordinaria de los datos operativos.</p>
+     *
+     * @param assetCode código patrimonial único ya validado
+     */
+    void changeAssetCode(String assetCode) {
+        this.assetCode = assetCode;
     }
 
     /**
