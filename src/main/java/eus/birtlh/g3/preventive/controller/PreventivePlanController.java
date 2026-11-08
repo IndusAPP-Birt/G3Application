@@ -1,0 +1,72 @@
+package eus.birtlh.g3.preventive.controller;
+
+import eus.birtlh.g3.common.PaginationConstants;
+import eus.birtlh.g3.common.dto.ApiSuccessResponse;
+import eus.birtlh.g3.common.dto.PageResponse;
+import eus.birtlh.g3.preventive.PreventivePlanService;
+import eus.birtlh.g3.preventive.dto.PreventivePlanResponse;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ * Controlador REST que expone las operaciones HTTP sobre planes preventivos.
+ *
+ * <p>Delega los casos de uso en {@link PreventivePlanService} y devuelve sus resultados mediante
+ * el contrato estándar {@link ApiSuccessResponse}.</p>
+ */
+@RestController
+@RequestMapping("/api/preventive-plans")
+@RequiredArgsConstructor
+public class PreventivePlanController {
+
+    private final PreventivePlanService preventivePlanService;
+
+    // TODO: Añadir GET /by-machine/{machineId} para consultar los planes de una máquina.
+    // TODO: Añadir GET /by-status?active={true|false} para filtrar planes activos o inactivos.
+    // TODO: Añadir GET /by-name?name={texto} para buscar planes por nombre parcial.
+    // TODO: Añadir GET /by-next-due-date?from={fecha}&to={fecha} para consultar la planificación.
+
+    /**
+     * Obtiene una página de planes preventivos registrados.
+     *
+     * @param page índice de página basado en cero
+     * @param size número de planes preventivos por página
+     * @return respuesta HTTP 200 con la página de planes preventivos y su marca temporal
+     */
+    @GetMapping
+    public ResponseEntity<ApiSuccessResponse<PageResponse<PreventivePlanResponse>>> findAllPreventivePlans(
+            @RequestParam(
+                    name = "page",
+                    defaultValue = PaginationConstants.DEFAULT_PAGE_VALUE)
+            @Min(
+                    value = PaginationConstants.MIN_PAGE,
+                    message = "La página debe ser {value} o mayor."
+            )
+            int page,
+
+            @RequestParam(name = "size",
+                    defaultValue = PaginationConstants.DEFAULT_PAGE_SIZE_VALUE)
+            @Min(
+                    value = PaginationConstants.MIN_PAGE_SIZE,
+                    message = "El tamaño de página debe ser {value} o mayor."
+            )
+            @Max(
+                    value = PaginationConstants.MAX_PAGE_SIZE,
+                    message = "El tamaño de página no puede superar {value}."
+            )
+            int size
+    ) {
+        return ResponseEntity.ok(
+                ApiSuccessResponse.success(
+                        preventivePlanService.getAllPreventivePlans(page, size),
+                        "Planes preventivos obtenidos correctamente."
+                )
+        );
+    }
+}
