@@ -2,6 +2,7 @@ package eus.birtlh.g3.preventive;
 
 import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.preventive.dto.PreventivePlanResponse;
+import eus.birtlh.g3.preventive.exceptions.PreventivePlanNotFoundException;
 import eus.birtlh.g3.preventive.mapper.PreventivePlanMapper;
 import eus.birtlh.g3.preventive.repository.PreventivePlanRepository;
 import lombok.RequiredArgsConstructor;
@@ -50,5 +51,22 @@ public class PreventivePlanService {
                 preventivePlans.getTotalElements(),
                 preventivePlans.getTotalPages()
         );
+    }
+
+    /**
+     * Obtiene un plan preventivo por su identificador como DTO de respuesta.
+     *
+     * @param id identificador del plan preventivo solicitado
+     * @return DTO público del plan preventivo encontrado
+     * @throws PreventivePlanNotFoundException si no existe un plan con el identificador indicado
+     */
+    @Transactional(readOnly = true)
+    public PreventivePlanResponse getPreventivePlanById(Long id) {
+        PreventivePlan preventivePlan = preventivePlanRepository.findById(id)
+                .orElseThrow(() -> new PreventivePlanNotFoundException(
+                        "Plan preventivo con " + id + " no encontrado."
+                ));
+
+        return PreventivePlanMapper.toResponse(preventivePlan);
     }
 }

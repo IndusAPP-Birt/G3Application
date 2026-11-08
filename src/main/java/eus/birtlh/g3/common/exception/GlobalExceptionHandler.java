@@ -4,6 +4,7 @@ import eus.birtlh.g3.common.dto.ApiErrorResponse;
 import eus.birtlh.g3.machine.exception.AssetCodeAlreadyInUseException;
 import eus.birtlh.g3.machine.exception.MachineNotFoundException;
 import eus.birtlh.g3.machine.exception.SerialNumberAlreadyInUseException;
+import eus.birtlh.g3.preventive.exceptions.PreventivePlanNotFoundException;
 import eus.birtlh.g3.user.exception.EmailAlreadyInUseException;
 import eus.birtlh.g3.user.exception.UserNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -57,6 +58,20 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MachineNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleMachineNotFoundException(
             MachineNotFoundException ex
+    ) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiErrorResponse.error(ex.getMessage()));
+    }
+
+    /**
+     * Devuelve una respuesta HTTP 404 cuando no existe el plan preventivo solicitado.
+     *
+     * @param ex excepción que identifica el plan preventivo no encontrado
+     * @return respuesta de error con estado HTTP 404
+     */
+    @ExceptionHandler(PreventivePlanNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handlePreventivePlanNotFoundException(
+            PreventivePlanNotFoundException ex
     ) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ApiErrorResponse.error(ex.getMessage()));

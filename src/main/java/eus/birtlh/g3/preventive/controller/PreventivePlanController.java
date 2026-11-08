@@ -7,12 +7,10 @@ import eus.birtlh.g3.preventive.PreventivePlanService;
 import eus.birtlh.g3.preventive.dto.PreventivePlanResponse;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * Controlador REST que expone las operaciones HTTP sobre planes preventivos.
@@ -66,6 +64,26 @@ public class PreventivePlanController {
                 ApiSuccessResponse.success(
                         preventivePlanService.getAllPreventivePlans(page, size),
                         "Planes preventivos obtenidos correctamente."
+                )
+        );
+    }
+
+    /**
+     * Obtiene un plan preventivo por su identificador.
+     *
+     * @param id identificador positivo del plan preventivo solicitado
+     * @return respuesta HTTP 200 con el plan preventivo y su marca temporal
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiSuccessResponse<PreventivePlanResponse>> findPreventivePlanById(
+            @PathVariable
+            @Positive(message = "El identificador debe ser mayor que cero.")
+            Long id
+    ) {
+        return ResponseEntity.ok(
+                ApiSuccessResponse.success(
+                        preventivePlanService.getPreventivePlanById(id),
+                        "Plan preventivo obtenido correctamente."
                 )
         );
     }
