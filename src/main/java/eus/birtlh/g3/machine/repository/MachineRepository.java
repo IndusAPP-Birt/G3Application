@@ -59,4 +59,13 @@ public interface MachineRepository extends JpaRepository<Machine, Long> {
      * contrario
      */
     boolean existsBySerialNumberAndIdNot(String serialNumber, Long id);
+
+    /**
+     * Comprueba si el código patrimonial ya está asignado a una máquina distinta de la indicada.
+     *
+     * @param assetCode código patrimonial normalizado que se desea comprobar
+     * @param id identificador de la máquina que se excluye de la comprobación
+     * @return {@code true} si el código pertenece a otra máquina; {@code false} en caso contrario
+     */
+    boolean existsByAssetCodeAndIdNot(String assetCode, Long id);
 }

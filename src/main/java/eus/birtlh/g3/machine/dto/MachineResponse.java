@@ -12,7 +12,7 @@ import java.time.LocalDate;
  * máquina, sin incorporar datos de sus futuros planes preventivos ni de sus ejecuciones.</p>
  *
  * @param id identificador único de la máquina
- * @param assetCode código patrimonial único e inmutable de la máquina
+ * @param assetCode código patrimonial único de la máquina
  * @param name nombre descriptivo de la máquina
  * @param manufacturer fabricante de la máquina; puede ser {@code null}
  * @param model modelo de la máquina; puede ser {@code null}

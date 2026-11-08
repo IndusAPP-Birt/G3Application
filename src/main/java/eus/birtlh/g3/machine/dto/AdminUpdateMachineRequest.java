@@ -9,9 +9,10 @@ import jakarta.validation.constraints.Size;
 /**
  * Datos necesarios para que un administrador actualice completamente una {@link Machine}.
  *
- * <p>No incluye el código patrimonial ni la fecha de puesta en servicio, ya que son inmutables.
- * Antes de validarse, elimina los espacios extremos de todos los textos y conserva las
- * mayúsculas y minúsculas introducidas por el cliente.</p>
+ * <p>No incluye el código patrimonial, que se corrige mediante un caso de uso específico, ni la
+ * fecha de puesta en servicio, que es inmutable. Antes de validarse, elimina los espacios
+ * extremos de todos los textos y conserva las mayúsculas y minúsculas introducidas por el
+ * cliente.</p>
  *
  * @param name nombre descriptivo de la máquina
  * @param manufacturer fabricante de la máquina; puede ser {@code null}

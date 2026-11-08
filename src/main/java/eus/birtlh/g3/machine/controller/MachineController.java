@@ -7,6 +7,7 @@ import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.machine.MachineService;
 import eus.birtlh.g3.machine.MachineStatus;
 import eus.birtlh.g3.machine.dto.AdminCreateMachineRequest;
+import eus.birtlh.g3.machine.dto.AdminUpdateAssetCodeRequest;
 import eus.birtlh.g3.machine.dto.AdminUpdateMachineRequest;
 import eus.birtlh.g3.machine.dto.MachineResponse;
 import jakarta.validation.Valid;
@@ -207,7 +208,10 @@ public class MachineController {
     }
 
     /**
-     * Actualiza los datos administrativos de una máquina, excepto sus campos inmutables.
+     * Actualiza los datos administrativos ordinarios de una máquina.
+     *
+     * <p>El código patrimonial se corrige mediante un caso de uso independiente y la fecha de
+     * puesta en servicio permanece inmutable.</p>
      *
      * @param id identificador positivo de la máquina que se desea actualizar
      * @param request datos actualizables que sustituyen los datos actuales de la máquina
@@ -226,6 +230,30 @@ public class MachineController {
                 ApiSuccessResponse.success(
                         machineService.updateMachine(id, request),
                         "Máquina actualizada correctamente."
+                )
+        );
+    }
+
+    /**
+     * Corrige el código patrimonial de una máquina mediante un caso de uso específico.
+     *
+     * @param id identificador positivo de la máquina cuyo código se desea corregir
+     * @param request solicitud con el nuevo código patrimonial normalizado y validado
+     * @return respuesta HTTP 200 con la máquina actualizada y su marca temporal
+     */
+    @PutMapping("/{id}/asset-code")
+    public ResponseEntity<ApiSuccessResponse<MachineResponse>> updateMachineAssetCode(
+            @PathVariable
+            @Positive(message = "El identificador debe ser mayor que cero.")
+            Long id,
+
+            @Valid
+            @RequestBody AdminUpdateAssetCodeRequest request
+    ) {
+        return ResponseEntity.ok(
+                ApiSuccessResponse.success(
+                        machineService.updateMachineAssetCode(id, request),
+                        "Código patrimonial de la máquina actualizado correctamente."
                 )
         );
     }

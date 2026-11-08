@@ -3,6 +3,7 @@ package eus.birtlh.g3.machine;
 import eus.birtlh.g3.common.dto.CatalogOptionResponse;
 import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.machine.dto.AdminCreateMachineRequest;
+import eus.birtlh.g3.machine.dto.AdminUpdateAssetCodeRequest;
 import eus.birtlh.g3.machine.dto.AdminUpdateMachineRequest;
 import eus.birtlh.g3.machine.dto.MachineResponse;
 import eus.birtlh.g3.machine.exception.AssetCodeAlreadyInUseException;
@@ -183,7 +184,10 @@ public class MachineService {
     }
 
     /**
-     * Actualiza los datos administrativos de una máquina, excepto sus campos inmutables.
+     * Actualiza los datos administrativos ordinarios de una máquina.
+     *
+     * <p>El código patrimonial se corrige mediante un caso de uso independiente y la fecha de
+     * puesta en servicio permanece inmutable.</p>
      *
      * <p>Comprueba que el número de serie, si se ha indicado, no pertenezca a otra máquina.
      * Fuerza la sincronización con la base de datos antes de construir la respuesta para incluir
@@ -217,6 +221,42 @@ public class MachineService {
         machine.changeSerialNumber(request.serialNumber());
         machine.changeLocation(request.location());
         machine.changeStatus(request.status());
+
+        machineRepository.flush();
+
+        return MachineMapper.toResponse(machine);
+    }
+
+    /**
+     * Corrige el código patrimonial de una máquina registrada.
+     *
+     * <p>Comprueba que el código normalizado no esté asignado a otra máquina. Fuerza la
+     * sincronización con la base de datos antes de construir la respuesta para incluir la fecha
+     * {@code updatedAt} actualizada.</p>
+     *
+     * @param id identificador de la máquina cuyo código se desea corregir
+     * @param request datos normalizados y validados con el nuevo código patrimonial
+     * @return DTO público de la máquina actualizada
+     * @throws MachineNotFoundException si no existe una máquina con el identificador indicado
+     * @throws AssetCodeAlreadyInUseException si el código patrimonial pertenece a otra máquina
+     */
+    @Transactional
+    public MachineResponse updateMachineAssetCode(
+            Long id,
+            AdminUpdateAssetCodeRequest request
+    ) {
+        Machine machine = machineRepository.findById(id)
+                .orElseThrow(() -> new MachineNotFoundException(
+                        "Máquina con " + id + " no encontrada."
+                ));
+
+        if (machineRepository.existsByAssetCodeAndIdNot(request.assetCode(), id)) {
+            throw new AssetCodeAlreadyInUseException(
+                    "El código patrimonial " + request.assetCode() + " ya existe."
+            );
+        }
+
+        machine.changeAssetCode(request.assetCode());
 
         machineRepository.flush();
 
