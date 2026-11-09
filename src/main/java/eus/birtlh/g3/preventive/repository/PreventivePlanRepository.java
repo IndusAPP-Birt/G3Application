@@ -20,4 +20,13 @@ public interface PreventivePlanRepository extends JpaRepository<PreventivePlan, 
      * @return página de planes preventivos de la máquina; puede no contener resultados
      */
     Page<PreventivePlan> findByMachineId(Long machineId, Pageable pageable);
+
+    /**
+     * Busca los planes preventivos según su estado de activación.
+     *
+     * @param active {@code true} para los planes activos; {@code false} para los inactivos
+     * @param pageable configuración de página, tamaño y orden solicitados
+     * @return página de planes preventivos con el estado solicitado; puede no contener resultados
+     */
+    Page<PreventivePlan> findByActive(Boolean active, Pageable pageable);
 }

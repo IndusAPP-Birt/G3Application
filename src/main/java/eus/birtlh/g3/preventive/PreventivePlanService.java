@@ -103,4 +103,38 @@ public class PreventivePlanService {
                 preventivePlans.getTotalPages()
         );
     }
+
+    /**
+     * Obtiene una página de planes preventivos filtrada por su estado de activación.
+     *
+     * <p>Conserva el orden ascendente por identificador para que los resultados sean estables
+     * entre páginas.</p>
+     *
+     * @param page índice de página basado en cero
+     * @param size número de planes preventivos por página
+     * @param active {@code true} para los planes activos; {@code false} para los inactivos
+     * @return página de planes preventivos con el estado solicitado; su contenido puede estar vacío
+     */
+    @Transactional(readOnly = true)
+    public PageResponse<PreventivePlanResponse> getPreventivePlansByActive(
+            int page,
+            int size,
+            boolean active
+    ) {
+        Page<PreventivePlan> preventivePlans = preventivePlanRepository.findByActive(
+                active,
+                PageRequest.of(page, size, Sort.by("id").ascending())
+        );
+
+        return new PageResponse<>(
+                preventivePlans.getContent()
+                        .stream()
+                        .map(PreventivePlanMapper::toResponse)
+                        .toList(),
+                preventivePlans.getNumber(),
+                preventivePlans.getSize(),
+                preventivePlans.getTotalElements(),
+                preventivePlans.getTotalPages()
+        );
+    }
 }

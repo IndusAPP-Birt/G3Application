@@ -25,7 +25,6 @@ public class PreventivePlanController {
 
     private final PreventivePlanService preventivePlanService;
 
-    // TODO: Añadir GET /by-status?active={true|false} para filtrar planes activos o inactivos.
     // TODO: Añadir GET /by-name?name={texto} para buscar planes por nombre parcial.
     // TODO: Añadir GET /by-next-due-date?from={fecha}&to={fecha} para consultar la planificación.
 
@@ -128,6 +127,51 @@ public class PreventivePlanController {
         return ResponseEntity.ok(
                 ApiSuccessResponse.success(
                         preventivePlanService.getPreventivePlansByMachineId(page, size, machineId),
+                        "Planes preventivos obtenidos correctamente."
+                )
+        );
+    }
+
+    /**
+     * Obtiene una página de planes preventivos según estén activos o inactivos.
+     *
+     * @param active {@code true} para los planes activos; {@code false} para los inactivos
+     * @param page índice de página basado en cero
+     * @param size número de planes preventivos por página
+     * @return respuesta HTTP 200 con la página de planes preventivos y su marca temporal
+     */
+    @GetMapping("/by-status")
+    public ResponseEntity<ApiSuccessResponse<PageResponse<PreventivePlanResponse>>> findPreventivePlansByActive(
+            @RequestParam("active")
+            boolean active,
+
+            @RequestParam(
+                    name = "page",
+                    defaultValue = PaginationConstants.DEFAULT_PAGE_VALUE
+            )
+            @Min(
+                    value = PaginationConstants.MIN_PAGE,
+                    message = "La página debe ser {value} o mayor."
+            )
+            int page,
+
+            @RequestParam(
+                    name = "size",
+                    defaultValue = PaginationConstants.DEFAULT_PAGE_SIZE_VALUE
+            )
+            @Min(
+                    value = PaginationConstants.MIN_PAGE_SIZE,
+                    message = "El tamaño de página debe ser {value} o mayor."
+            )
+            @Max(
+                    value = PaginationConstants.MAX_PAGE_SIZE,
+                    message = "El tamaño de página no puede superar {value}."
+            )
+            int size
+    ) {
+        return ResponseEntity.ok(
+                ApiSuccessResponse.success(
+                        preventivePlanService.getPreventivePlansByActive(page, size, active),
                         "Planes preventivos obtenidos correctamente."
                 )
         );
