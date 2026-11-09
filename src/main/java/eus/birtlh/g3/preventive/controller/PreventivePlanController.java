@@ -25,7 +25,6 @@ public class PreventivePlanController {
 
     private final PreventivePlanService preventivePlanService;
 
-    // TODO: Añadir GET /by-machine/{machineId} para consultar los planes de una máquina.
     // TODO: Añadir GET /by-status?active={true|false} para filtrar planes activos o inactivos.
     // TODO: Añadir GET /by-name?name={texto} para buscar planes por nombre parcial.
     // TODO: Añadir GET /by-next-due-date?from={fecha}&to={fecha} para consultar la planificación.
@@ -88,8 +87,16 @@ public class PreventivePlanController {
         );
     }
 
+    /**
+     * Obtiene una página de planes preventivos asociados a una máquina.
+     *
+     * @param machineId identificador positivo de la máquina con la que filtrar
+     * @param page índice de página basado en cero
+     * @param size número de planes preventivos por página
+     * @return respuesta HTTP 200 con la página de planes preventivos y su marca temporal
+     */
     @GetMapping("/by-machine/{machineId}")
-    public ResponseEntity<ApiSuccessResponse<PageResponse<PreventivePlanResponse>>> findPreventivePlanByMachineId(
+    public ResponseEntity<ApiSuccessResponse<PageResponse<PreventivePlanResponse>>> findPreventivePlansByMachineId(
             @PathVariable
             @Positive(message = "El identificador debe ser mayor que cero.")
             Long machineId,

@@ -70,6 +70,17 @@ public class PreventivePlanService {
         return PreventivePlanMapper.toResponse(preventivePlan);
     }
 
+    /**
+     * Obtiene una página de planes preventivos asociados a una máquina.
+     *
+     * <p>Incluye tanto los planes activos como los desactivados y conserva el orden ascendente
+     * por identificador para que los resultados sean estables entre páginas.</p>
+     *
+     * @param page índice de página basado en cero
+     * @param size número de planes preventivos por página
+     * @param machineId identificador de la máquina con la que filtrar
+     * @return página de planes preventivos de la máquina; su contenido puede estar vacío
+     */
     @Transactional(readOnly = true)
     public PageResponse<PreventivePlanResponse> getPreventivePlansByMachineId(
             int page,
