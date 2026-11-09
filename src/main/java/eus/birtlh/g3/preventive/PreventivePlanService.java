@@ -1,6 +1,10 @@
 package eus.birtlh.g3.preventive;
 
 import eus.birtlh.g3.common.dto.PageResponse;
+import eus.birtlh.g3.machine.Machine;
+import eus.birtlh.g3.machine.exception.MachineNotFoundException;
+import eus.birtlh.g3.machine.repository.MachineRepository;
+import eus.birtlh.g3.preventive.dto.AdminCreatePreventivePlanRequest;
 import eus.birtlh.g3.preventive.dto.PreventivePlanResponse;
 import eus.birtlh.g3.preventive.exceptions.InvalidPreventivePlanDateRangeException;
 import eus.birtlh.g3.preventive.exceptions.PreventivePlanNotFoundException;
@@ -26,6 +30,7 @@ import java.time.LocalDate;
 public class PreventivePlanService {
 
     private final PreventivePlanRepository preventivePlanRepository;
+    private final MachineRepository machineRepository;
 
     /**
      * Obtiene una página de planes preventivos como DTOs de respuesta.
@@ -221,5 +226,33 @@ public class PreventivePlanService {
                 preventivePlans.getTotalElements(),
                 preventivePlans.getTotalPages()
         );
+    }
+
+    /**
+     * Crea un plan preventivo activo para una máquina existente.
+     *
+     * @param request datos validados y normalizados del plan que se desea crear
+     * @return DTO público del plan preventivo creado
+     * @throws MachineNotFoundException si no existe la máquina indicada en la solicitud
+     */
+    @Transactional
+    public PreventivePlanResponse createPreventivePlan(AdminCreatePreventivePlanRequest request) {
+        Machine machine = machineRepository.findById(request.machineId())
+                .orElseThrow(() -> new MachineNotFoundException(
+                        "Máquina con " + request.machineId() + " no encontrada."
+                ));
+
+        PreventivePlan preventivePlan = preventivePlanRepository.save(
+                new PreventivePlan(
+                        machine,
+                        request.name(),
+                        request.description(),
+                        request.intervalDays(),
+                        request.noticeDays(),
+                        request.nextDueDate()
+                )
+        );
+
+        return PreventivePlanMapper.toResponse(preventivePlan);
     }
 }

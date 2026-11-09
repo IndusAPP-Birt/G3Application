@@ -4,7 +4,9 @@ import eus.birtlh.g3.common.PaginationConstants;
 import eus.birtlh.g3.common.dto.ApiSuccessResponse;
 import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.preventive.PreventivePlanService;
+import eus.birtlh.g3.preventive.dto.AdminCreatePreventivePlanRequest;
 import eus.birtlh.g3.preventive.dto.PreventivePlanResponse;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -14,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.time.LocalDate;
 
@@ -286,6 +289,32 @@ public class PreventivePlanController {
                                 page, size, from, to
                         ),
                         "Planes preventivos obtenidos correctamente."
+                )
+        );
+    }
+
+    /**
+     * Crea un plan preventivo a partir de una solicitud administrativa validada.
+     *
+     * @param request datos del plan preventivo que se desea crear
+     * @return respuesta HTTP 201 con el plan creado y la cabecera {@code Location} del recurso
+     */
+    @PostMapping
+    public ResponseEntity<ApiSuccessResponse<PreventivePlanResponse>> createPreventivePlan(
+            @Valid
+            @RequestBody AdminCreatePreventivePlanRequest request
+    ) {
+        PreventivePlanResponse preventivePlan = preventivePlanService.createPreventivePlan(request);
+
+        return ResponseEntity.created(
+                ServletUriComponentsBuilder.fromCurrentRequest()
+                        .path("/{id}")
+                        .buildAndExpand(preventivePlan.id())
+                        .toUri()
+        ).body(
+                ApiSuccessResponse.success(
+                        preventivePlan,
+                        "Plan preventivo creado correctamente."
                 )
         );
     }
