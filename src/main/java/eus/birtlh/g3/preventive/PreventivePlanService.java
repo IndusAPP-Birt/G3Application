@@ -242,6 +242,8 @@ public class PreventivePlanService {
                         "Máquina con " + request.machineId() + " no encontrada."
                 ));
 
+        // TODO: Definir y aplicar el criterio de unicidad de los planes por máquina; revisar si
+        //       debe prohibirse repetir el nombre o permitirse cuando cambie la configuración.
         PreventivePlan preventivePlan = preventivePlanRepository.save(
                 new PreventivePlan(
                         machine,
