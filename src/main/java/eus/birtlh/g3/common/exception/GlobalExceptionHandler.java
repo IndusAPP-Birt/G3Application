@@ -4,6 +4,7 @@ import eus.birtlh.g3.common.dto.ApiErrorResponse;
 import eus.birtlh.g3.machine.exception.AssetCodeAlreadyInUseException;
 import eus.birtlh.g3.machine.exception.MachineNotFoundException;
 import eus.birtlh.g3.machine.exception.SerialNumberAlreadyInUseException;
+import eus.birtlh.g3.preventive.exceptions.InvalidPreventivePlanDateRangeException;
 import eus.birtlh.g3.preventive.exceptions.PreventivePlanNotFoundException;
 import eus.birtlh.g3.user.exception.EmailAlreadyInUseException;
 import eus.birtlh.g3.user.exception.UserNotFoundException;
@@ -74,6 +75,21 @@ public class GlobalExceptionHandler {
             PreventivePlanNotFoundException ex
     ) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiErrorResponse.error(ex.getMessage()));
+    }
+
+    /**
+     * Devuelve una respuesta HTTP 400 cuando el rango de fechas de una consulta de planes
+     * preventivos no es válido.
+     *
+     * @param ex excepción que identifica el rango de fechas inválido
+     * @return respuesta de error con estado HTTP 400
+     */
+    @ExceptionHandler(InvalidPreventivePlanDateRangeException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidPreventivePlanDateRangeException(
+            InvalidPreventivePlanDateRangeException ex
+    ) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ApiErrorResponse.error(ex.getMessage()));
     }
 
