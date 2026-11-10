@@ -38,7 +38,8 @@ public class SecurityConfig {
                                 "/api/machines",
                                 "/api/machines/**",
                                 "/api/preventive-plans",
-                                "/api/preventive-plans/**"
+                                "/api/preventive-plans/**",
+                                "/api/preventives"
                         ).permitAll()
                         .requestMatchers(HttpMethod.POST,
                                 "/api/users",

@@ -114,3 +114,116 @@ VALUES
     (12, 'Plan de mantenimiento temporalmente suspendido',
      'Plan conservado como histórico mientras la máquina no requiere mantenimiento activo.',
      90, 14, DATEADD('DAY', 14, CURRENT_DATE), FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+INSERT INTO preventive_plans (
+    machine_id,
+    name,
+    description,
+    interval_days,
+    notice_days,
+    next_due_date,
+    active,
+    created_at,
+    updated_at
+)
+SELECT
+    machine.id,
+    CASE MOD(machine.id, 5)
+        WHEN 0 THEN 'Revisión mensual de seguridad'
+        WHEN 1 THEN 'Mantenimiento trimestral de lubricación'
+        WHEN 2 THEN 'Inspección semestral de transmisión'
+        WHEN 3 THEN 'Revisión mensual de cintas y rodillos'
+        ELSE 'Mantenimiento anual del compresor'
+    END,
+    'Plan preventivo generado para la maquinaria industrial registrada.',
+    CASE MOD(machine.id, 5)
+        WHEN 0 THEN 30
+        WHEN 1 THEN 90
+        WHEN 2 THEN 180
+        WHEN 3 THEN 30
+        ELSE 365
+    END,
+    CASE MOD(machine.id, 5)
+        WHEN 0 THEN 7
+        WHEN 1 THEN 14
+        WHEN 2 THEN 21
+        WHEN 3 THEN 7
+        ELSE 30
+    END,
+    DATEADD('DAY', MOD(machine.id * 7, 90) + 1, CURRENT_DATE),
+    CASE WHEN machine.status = 'ACTIVE' THEN TRUE ELSE FALSE END,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
+FROM machines AS machine
+WHERE machine.id BETWEEN 13 AND 100;
+
+INSERT INTO preventive_plans (
+    machine_id,
+    name,
+    description,
+    interval_days,
+    notice_days,
+    next_due_date,
+    active,
+    created_at,
+    updated_at
+)
+SELECT
+    machine.id,
+    'Calibración periódica de precisión',
+    'Verificar tolerancias, ajustar parámetros y registrar los resultados de calibración.',
+    180,
+    30,
+    DATEADD('DAY', MOD(machine.id * 11, 180) + 15, CURRENT_DATE),
+    TRUE,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
+FROM machines AS machine
+WHERE machine.status = 'ACTIVE'
+  AND MOD(machine.id, 3) = 0;
+
+INSERT INTO preventives (
+    preventive_plan_id,
+    assigned_inspector_id,
+    due_date,
+    status,
+    work_performed,
+    assigned_at,
+    started_at,
+    completed_at,
+    created_at,
+    updated_at
+)
+SELECT
+    plan.id,
+    CASE
+        WHEN MOD(plan.id, 4) = 0 THEN NULL
+        ELSE 6 + MOD(plan.id - 1, 20)
+    END,
+    DATEADD('DAY', MOD(plan.id * 3, 29) - 14, CURRENT_DATE),
+    CASE MOD(plan.id, 4)
+        WHEN 0 THEN 'PENDING'
+        WHEN 1 THEN 'ASSIGNED'
+        WHEN 2 THEN 'IN_PROGRESS'
+        ELSE 'COMPLETED'
+    END,
+    CASE
+        WHEN MOD(plan.id, 4) = 3 THEN 'Trabajo preventivo realizado según el plan: ' || plan.name
+        ELSE NULL
+    END,
+    CASE
+        WHEN MOD(plan.id, 4) = 0 THEN NULL
+        ELSE DATEADD('DAY', -5, CURRENT_TIMESTAMP)
+    END,
+    CASE
+        WHEN MOD(plan.id, 4) IN (2, 3) THEN DATEADD('DAY', -3, CURRENT_TIMESTAMP)
+        ELSE NULL
+    END,
+    CASE
+        WHEN MOD(plan.id, 4) = 3 THEN DATEADD('DAY', -1, CURRENT_TIMESTAMP)
+        ELSE NULL
+    END,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
+FROM preventive_plans AS plan
+WHERE plan.active = TRUE;
