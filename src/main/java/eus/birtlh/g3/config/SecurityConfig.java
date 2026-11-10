@@ -13,8 +13,8 @@ import org.springframework.security.web.SecurityFilterChain;
  * Configuración de autorización HTTP de la aplicación.
  *
  * <p>Mientras se implementa la autenticación, permite temporalmente el acceso público a la
- * consulta, creación y actualización de usuarios, y exige autenticación para el resto de
- * rutas.</p>
+ * consulta, creación y actualización de usuarios, máquinas y planes preventivos, y exige
+ * autenticación para el resto de rutas.</p>
  */
 @Configuration
 public class SecurityConfig {

@@ -34,6 +34,8 @@ public class PreventivePlanController {
 
     private final PreventivePlanService preventivePlanService;
 
+    // TODO: Añadir PUT /{id}/next-due-date para reprogramar la próxima fecha prevista.
+
     /**
      * Obtiene una página de planes preventivos registrados.
      *

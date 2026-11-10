@@ -1,51 +1,25 @@
 # G3 Application
 
-API REST desarrollada con Spring Boot para la gestión administrativa de usuarios y maquinaria
-industrial. El estado actual de la rama `develop` cubre ambos módulos: persistencia, validación,
-paginación, contratos HTTP y manejo centralizado de errores.
+API REST para la administración de usuarios, maquinaria industrial y planes de mantenimiento
+preventivo. La API emplea recursos JSON, validación de entrada, paginación homogénea y respuestas
+con un contrato común.
 
-## Estado actual
+## Convenciones de la API
 
-| Área | Estado |
-|---|---|
-| Entidad, persistencia y operaciones administrativas de usuarios | Implementado |
-| Filtros paginados de usuarios por email, estado y rol | Implementado |
-| Entidad, persistencia y operaciones administrativas de máquinas | Implementado |
-| Filtros paginados de máquinas por código, número de serie y estado | Implementado |
-| Respuestas de éxito y error | Implementado |
-| Manejo global de errores HTTP | Implementado |
-| Planes y tareas preventivas | Pendiente |
-| Autenticación y autorización JWT | Pendiente en `develop`; disponible en `feat/auth` |
-| Pruebas de endpoints con MockMvc | Pendiente |
+- Los identificadores de recursos son positivos.
+- Los listados paginados aceptan `page` y `size`. La página se numera desde cero; el tamaño por
+  defecto es `20` y el máximo es `100`.
+- Los resultados paginados se ordenan ascendentemente por identificador para ofrecer páginas
+  estables.
+- Los filtros se exponen mediante rutas específicas y no se combinan entre sí.
 
-## Requisitos y ejecución
+## Usuarios
 
-- Java 21
-- Maven Wrapper incluido
+Un usuario contiene nombre, apellidos opcionales, correo electrónico, contraseña protegida con
+BCrypt, rol, estado de acceso y marcas temporales. El correo se normaliza a minúsculas y su hash
+no forma parte de las respuestas públicas.
 
-Durante el desarrollo se utiliza H2 en memoria, el esquema se crea al arrancar y se cargan datos de
-ejemplo desde `data.sql`.
-
-```bash
-./mvnw spring-boot:run
-```
-
-Para ejecutar la suite actual:
-
-```bash
-./mvnw test
-```
-
-## Módulo `user`
-
-La entidad `User` contiene nombre, apellidos opcionales, email único, hash BCrypt de contraseña,
-rol, estado de acceso y marcas temporales. El email se normaliza completamente a minúsculas y el
-hash nunca se expone por la API.
-
-Los DTO validan la entrada. El constructor y los métodos que alteran `User` tienen visibilidad de
-paquete, de modo que los casos de uso del módulo controlan su creación y modificación.
-
-### Roles disponibles
+### Roles
 
 ```text
 ROLE_ADMINISTRATOR
@@ -53,20 +27,27 @@ ROLE_INSPECTOR
 ROLE_MAINTENANCE_TECHNICIAN
 ```
 
-Los nombres de los roles se persisten y se exponen como código de API. Renombrar o eliminar una
-constante requerirá adaptar los datos persistidos.
+### Endpoints
 
-### Política de actualización
+| Método | Ruta | Operación |
+|---|---|---|
+| `GET` | `/api/users/roles` | Obtiene el catálogo de roles. |
+| `GET` | `/api/users` | Obtiene usuarios paginados. |
+| `GET` | `/api/users/{id}` | Obtiene un usuario por identificador. |
+| `GET` | `/api/users/by-email` | Filtra usuarios por coincidencia parcial de correo. |
+| `GET` | `/api/users/by-status` | Filtra usuarios por estado de acceso. |
+| `GET` | `/api/users/by-role` | Filtra usuarios por rol. |
+| `POST` | `/api/users` | Crea un usuario administrativo. |
+| `PUT` | `/api/users/{id}` | Actualiza los datos administrativos de un usuario. |
+| `PUT` | `/api/users/{id}/password` | Restablece la contraseña de un usuario. |
 
-`PUT /api/users/{id}` actualiza nombre, apellidos, email, rol y estado de acceso. La contraseña se
-restablece independientemente mediante `PUT /api/users/{id}/password`, donde se codifica con BCrypt
-antes de persistirse. No existe borrado físico: se utiliza `enabled` para desactivar usuarios.
+La contraseña se actualiza mediante un recurso específico. La desactivación se gestiona mediante
+el campo `enabled`, sin borrado físico.
 
-## Módulo `machine`
+## Máquinas
 
-La entidad `Machine` identifica maquinaria industrial mediante un código patrimonial único e
-incluye nombre, fabricante, modelo, número de serie opcional, ubicación, fecha de puesta en
-servicio, estado operativo y marcas temporales.
+Una máquina se identifica mediante un código patrimonial único e incluye datos de fabricación,
+serie, ubicación, fecha de puesta en servicio, estado operativo y marcas temporales.
 
 ```text
 ACTIVE
@@ -74,118 +55,112 @@ INACTIVE
 RETIRED
 ```
 
-- El código patrimonial se normaliza a mayúsculas y se corrige exclusivamente mediante su caso de
-  uso específico.
-- El número de serie es opcional, pero único cuando se informa.
-- La fecha de puesta en servicio no puede ser futura y permanece inmutable tras el registro.
-- No existe borrado físico: una máquina deja de operar mediante el estado `RETIRED`.
+- El código patrimonial se normaliza a mayúsculas y se modifica mediante un caso de uso dedicado.
+- El número de serie es opcional y único cuando se informa.
+- La fecha de puesta en servicio es inmutable.
+- El estado `RETIRED` conserva el histórico de la máquina.
 
-## Autenticación y autorización
+### Endpoints
 
-La rama `develop` todavía no incorpora autenticación ni autorización JWT. Durante esta fase, los
-endpoints bajo `/api/users` y `/api/machines` son públicos y CSRF está desactivado. Esta
-configuración es temporal y no es adecuada para producción.
-
-La rama `feat/auth` contiene la variante que requiere un JWT válido con rol de administrador para
-acceder a las operaciones administrativas.
-
-## Endpoints disponibles
-
-Todos los parámetros `page` se basan en cero. El tamaño por defecto es `20` y el máximo es `100`.
-
-| Método | Ruta | Descripción |
+| Método | Ruta | Operación |
 |---|---|---|
-| `GET` | `/actuator/health` | Comprobación de salud pública para despliegue. |
-
-### Usuarios
-
-| Método | Ruta | Descripción |
-|---|---|---|
-| `GET` | `/api/users/roles` | Devuelve el catálogo de roles disponibles. |
-| `GET` | `/api/users?page=0&size=20` | Devuelve usuarios paginados, ordenados por `id`. |
-| `GET` | `/api/users/{id}` | Obtiene un usuario por identificador. |
-| `GET` | `/api/users/by-email?email=ane&page=0&size=20` | Busca usuarios cuyo email contiene el texto indicado, sin distinguir mayúsculas de minúsculas. |
-| `GET` | `/api/users/by-status?enabled=true&page=0&size=20` | Devuelve usuarios habilitados o deshabilitados de forma paginada. |
-| `GET` | `/api/users/by-role?role=ROLE_INSPECTOR&page=0&size=20` | Devuelve usuarios con el rol indicado de forma paginada. |
-| `POST` | `/api/users` | Crea un usuario desde una solicitud administrativa. |
-| `PUT` | `/api/users/{id}` | Actualiza los datos administrativos de un usuario, excepto su contraseña. |
-| `PUT` | `/api/users/{id}/password` | Restablece la contraseña de un usuario desde una solicitud administrativa. |
-
-### Máquinas
-
-| Método | Ruta | Descripción |
-|---|---|---|
-| `GET` | `/api/machines/statuses` | Devuelve el catálogo de estados operativos. |
-| `GET` | `/api/machines?page=0&size=20` | Devuelve máquinas paginadas, ordenadas por `id`. |
+| `GET` | `/api/machines/statuses` | Obtiene el catálogo de estados operativos. |
+| `GET` | `/api/machines` | Obtiene máquinas paginadas. |
 | `GET` | `/api/machines/{id}` | Obtiene una máquina por identificador. |
-| `GET` | `/api/machines/by-asset-code?assetCode=MAQ&page=0&size=20` | Busca máquinas cuyo código patrimonial contiene el texto indicado. |
-| `GET` | `/api/machines/by-serial-number?serialNumber=FAG&page=0&size=20` | Busca máquinas cuyo número de serie contiene el texto indicado. |
-| `GET` | `/api/machines/by-status?status=ACTIVE&page=0&size=20` | Devuelve máquinas con el estado indicado de forma paginada. |
+| `GET` | `/api/machines/by-asset-code` | Filtra por coincidencia parcial de código patrimonial. |
+| `GET` | `/api/machines/by-serial-number` | Filtra por coincidencia parcial de número de serie. |
+| `GET` | `/api/machines/by-status` | Filtra por estado operativo. |
 | `POST` | `/api/machines` | Registra una máquina. |
-| `PUT` | `/api/machines/{id}` | Actualiza los datos administrativos ordinarios de una máquina. |
-| `PUT` | `/api/machines/{id}/asset-code` | Corrige el código patrimonial de una máquina. |
+| `PUT` | `/api/machines/{id}` | Actualiza los datos administrativos ordinarios. |
+| `PUT` | `/api/machines/{id}/asset-code` | Corrige el código patrimonial. |
 
-Los filtros de cada módulo se exponen mediante rutas independientes; no se combinan entre sí. Un
-parámetro de consulta no declarado por un endpoint se ignora.
+## Planes preventivos
+
+Un plan preventivo pertenece de forma permanente a una máquina y define una recurrencia de
+mantenimiento. Contiene nombre, descripción opcional, intervalo entre ejecuciones, margen de
+aviso, próxima fecha prevista, estado de activación y marcas temporales.
+
+La máquina asociada no puede cambiarse tras crear el plan. La próxima fecha prevista forma parte
+de la planificación y se gestiona de forma independiente de la actualización administrativa del
+plan.
+
+### Endpoints
+
+| Método | Ruta | Operación |
+|---|---|---|
+| `GET` | `/api/preventive-plans` | Obtiene planes preventivos paginados. |
+| `GET` | `/api/preventive-plans/{id}` | Obtiene un plan preventivo por identificador. |
+| `GET` | `/api/preventive-plans/by-machine/{machineId}` | Filtra planes por máquina. |
+| `GET` | `/api/preventive-plans/by-status` | Filtra planes por estado de activación. |
+| `GET` | `/api/preventive-plans/by-name` | Filtra por coincidencia parcial de nombre. |
+| `GET` | `/api/preventive-plans/by-next-due-date` | Filtra por un rango inclusivo de próxima fecha prevista. |
+| `POST` | `/api/preventive-plans` | Crea un plan preventivo activo. |
+| `PUT` | `/api/preventive-plans/{id}` | Actualiza la configuración y el estado de activación. |
+
+## Observabilidad
+
+| Método | Ruta | Operación |
+|---|---|---|
+| `GET` | `/actuator/health` | Comprueba la disponibilidad del servicio. |
 
 ## Contratos de respuesta
 
-Las respuestas correctas usan `ApiSuccessResponse`:
+Las respuestas correctas incluyen los siguientes campos:
 
-```json
-{
-  "data": {},
-  "message": "Mensaje informativo.",
-  "timestamp": "2026-11-02T09:00:00Z"
-}
-```
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `data` | Objeto, lista o página | Resultado del recurso u operación solicitada. |
+| `message` | Texto | Descripción legible del resultado. |
+| `timestamp` | Fecha y hora ISO-8601 | Momento en que se construye la respuesta. |
 
-Los errores usan `ApiErrorResponse`:
+Una respuesta paginada contiene, dentro de `data`, el contenido solicitado y su metadato de
+paginación: número de página, tamaño, total de elementos y total de páginas.
 
-```json
-{
-  "message": "La solicitud contiene datos inválidos.",
-  "errors": {
-    "email": ["La dirección de correo electrónico es obligatoria."]
-  },
-  "timestamp": "2026-11-02T09:00:00Z"
-}
-```
+Las respuestas de error incluyen:
 
-`errors` es un mapa vacío cuando el error no corresponde a campos o parámetros concretos.
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `message` | Texto | Descripción legible del error. |
+| `errors` | Mapa de listas de texto | Errores asociados a campos o parámetros, cuando procede. |
+| `timestamp` | Fecha y hora ISO-8601 | Momento en que se construye la respuesta. |
+
+`errors` puede estar vacío cuando el error no pertenece a un campo o parámetro concreto.
 
 ## Manejo de errores HTTP
 
-`GlobalExceptionHandler` transforma las excepciones conocidas en respuestas homogéneas.
-
 | Estado | Caso |
 |---|---|
-| `400` | Validación de DTO, parámetros inválidos o ausentes, tipos incompatibles o JSON inválido. |
-| `404` | Usuario o máquina no encontrados. |
+| `400` | Validación de solicitudes, parámetros ausentes o incompatibles, formato inválido o rango de fechas no válido. |
+| `404` | Recurso solicitado no encontrado. |
 | `405` | Método HTTP no admitido; se conserva la cabecera `Allow`. |
-| `406` | La cabecera `Accept` solicita un formato no disponible. |
-| `409` | Email, código patrimonial o número de serie ya asignados. |
-| `415` | El `Content-Type` de la solicitud no es compatible. |
-| `500` | Error interno no previsto, invariantes internas o carrera concurrente sobre un valor único. |
+| `406` | Representación no disponible para la cabecera `Accept` solicitada. |
+| `409` | Conflicto con un valor que debe ser único. |
+| `415` | Tipo de contenido no compatible. |
+| `500` | Error interno no previsto. |
 
-Las carreras concurrentes sobre valores únicos no tienen tratamiento específico por decisión de
-alcance. La restricción única de base de datos preserva la integridad y la respuesta resultante se
-mantiene como error interno genérico.
+## Flujo deseado de mantenimiento preventivo
 
-## Postman
+```text
+Máquina
+  └── Plan preventivo (uno o varios por máquina)
+        ├── Configuración: intervalo, aviso, próxima fecha y activación
+        └── Generación automática de preventivos
+              └── Preventivo: ejecución concreta para una fecha prevista
+                    ├── Pendiente de asignación
+                    ├── Administrador asigna un inspector
+                    ├── Inspector inicia y registra el trabajo realizado
+                    └── Inspector completa la ejecución
+```
 
-Existen colecciones para el entorno local y Render con la comprobación de salud y todos los
-endpoints actuales de usuarios y máquinas:
-
-- [Entorno local](postman/G3Application.postman_collection.json): `http://localhost:8080`.
-- [Render](postman/G3Application_Render.postman_collection.json): `https://g3application.onrender.com`.
-
-## Pendientes conocidos
-
-- Definir e implementar planes preventivos y sus tareas asociadas.
-- Añadir pruebas MockMvc para los escenarios HTTP principales de usuarios y máquinas.
-- Validar la longitud de la contraseña en bytes antes de BCrypt.
-- Implementar autenticación JWT, autoridades y respuestas JSON de seguridad para `401` y `403`.
-- Separar configuración de desarrollo y producción. Producción requerirá una base de datos
-  persistente y `spring.jpa.hibernate.ddl-auto=validate`; el esquema se gestionará manualmente,
-  sin herramienta de migraciones.
+1. Se registra una máquina como activo mantenible.
+2. Se asocian uno o varios planes preventivos a esa máquina. Cada plan representa una necesidad
+   de mantenimiento independiente y define su propia frecuencia, margen de aviso y calendario.
+3. Un proceso de planificación revisa los planes activos. Cuando una próxima fecha entra en su
+   ventana de aviso, genera un preventivo para esa fecha y avanza la siguiente fecha del plan.
+4. El preventivo conserva de forma inmutable el plan de origen y la fecha prevista, creando una
+   trazabilidad estable entre la configuración y su ejecución.
+5. Un administrador asigna cada preventivo pendiente a un usuario con rol de inspector. La
+   ejecución pasa entonces por un ciclo operativo: pendiente, asignada, iniciada y completada.
+   El cierre debe registrar el trabajo realizado antes de marcarla como completada.
+6. Desactivar un plan impide generar nuevas ejecuciones, pero preserva tanto el plan como el
+   histórico de preventivos ya creados.
