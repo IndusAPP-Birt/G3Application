@@ -6,6 +6,7 @@ import eus.birtlh.g3.machine.exception.MachineNotFoundException;
 import eus.birtlh.g3.machine.exception.SerialNumberAlreadyInUseException;
 import eus.birtlh.g3.preventive.exceptions.InvalidPreventivePlanDateRangeException;
 import eus.birtlh.g3.preventive.exceptions.PreventivePlanNotFoundException;
+import eus.birtlh.g3.preventive.exceptions.PreventiveWorkReportRequiredException;
 import eus.birtlh.g3.user.exception.EmailAlreadyInUseException;
 import eus.birtlh.g3.user.exception.UserNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -90,6 +91,21 @@ public class GlobalExceptionHandler {
             InvalidPreventivePlanDateRangeException ex
     ) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiErrorResponse.error(ex.getMessage()));
+    }
+
+    /**
+     * Devuelve una respuesta HTTP 400 cuando se intenta completar un preventivo sin registrar
+     * el trabajo realizado.
+     *
+     * @param ex excepción que identifica la ausencia del informe de trabajo
+     * @return respuesta de error con estado HTTP 400
+     */
+    @ExceptionHandler(PreventiveWorkReportRequiredException.class)
+    public ResponseEntity<ApiErrorResponse> handlePreventiveWorkReportRequiredException(
+            PreventiveWorkReportRequiredException ex
+    ) {
+        return ResponseEntity.badRequest()
                 .body(ApiErrorResponse.error(ex.getMessage()));
     }
 
