@@ -5,6 +5,7 @@ import eus.birtlh.g3.machine.Machine;
 import eus.birtlh.g3.machine.exception.MachineNotFoundException;
 import eus.birtlh.g3.machine.repository.MachineRepository;
 import eus.birtlh.g3.preventive.dto.AdminCreatePreventivePlanRequest;
+import eus.birtlh.g3.preventive.dto.AdminUpdatePreventivePlanRequest;
 import eus.birtlh.g3.preventive.dto.PreventivePlanResponse;
 import eus.birtlh.g3.preventive.exceptions.InvalidPreventivePlanDateRangeException;
 import eus.birtlh.g3.preventive.exceptions.PreventivePlanNotFoundException;
@@ -254,6 +255,38 @@ public class PreventivePlanService {
                         request.nextDueDate()
                 )
         );
+
+        return PreventivePlanMapper.toResponse(preventivePlan);
+    }
+
+    /**
+     * Actualiza completamente un plan preventivo existente.
+     *
+     * <p>No modifica la máquina asociada ni la próxima fecha prevista, cuya planificación se
+     * gestiona mediante un caso de uso específico.</p>
+     *
+     * @param id identificador del plan preventivo que se desea actualizar
+     * @param request datos validados y normalizados con los que actualizar el plan
+     * @return DTO público del plan preventivo actualizado
+     * @throws PreventivePlanNotFoundException si no existe un plan con el identificador indicado
+     */
+    @Transactional
+    public PreventivePlanResponse updatePreventivePlan(Long id, AdminUpdatePreventivePlanRequest request) {
+        PreventivePlan preventivePlan = preventivePlanRepository.findById(id)
+                .orElseThrow(() -> new PreventivePlanNotFoundException(
+                        "Plan preventivo con " + id + " no encontrado."
+                ));
+
+        preventivePlan.changeName(request.name());
+        preventivePlan.changeDescription(request.description());
+        preventivePlan.changeIntervalDays(request.intervalDays());
+        preventivePlan.changeNoticeDays(request.noticeDays());
+
+        if (request.active()) {
+            preventivePlan.activate();
+        } else {
+            preventivePlan.deactivate();
+        }
 
         return PreventivePlanMapper.toResponse(preventivePlan);
     }

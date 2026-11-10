@@ -5,6 +5,7 @@ import eus.birtlh.g3.common.dto.ApiSuccessResponse;
 import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.preventive.PreventivePlanService;
 import eus.birtlh.g3.preventive.dto.AdminCreatePreventivePlanRequest;
+import eus.birtlh.g3.preventive.dto.AdminUpdatePreventivePlanRequest;
 import eus.birtlh.g3.preventive.dto.PreventivePlanResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -315,6 +316,30 @@ public class PreventivePlanController {
                 ApiSuccessResponse.success(
                         preventivePlan,
                         "Plan preventivo creado correctamente."
+                )
+        );
+    }
+
+    /**
+     * Actualiza completamente un plan preventivo existente.
+     *
+     * @param id identificador positivo del plan preventivo que se desea actualizar
+     * @param request datos validados con los que actualizar el plan
+     * @return respuesta HTTP 200 con el plan actualizado y su marca temporal
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiSuccessResponse<PreventivePlanResponse>> updatePreventivePlan(
+            @PathVariable
+            @Positive(message = "El identificador debe ser mayor que cero.")
+            Long id,
+
+            @Valid
+            @RequestBody AdminUpdatePreventivePlanRequest request
+    ) {
+        return ResponseEntity.ok(
+                ApiSuccessResponse.success(
+                        preventivePlanService.updatePreventivePlan(id, request),
+                        "Plan preventivo actualizado correctamente."
                 )
         );
     }

@@ -47,8 +47,9 @@ public class SecurityConfig {
                         ).permitAll()
                         .requestMatchers(HttpMethod.PUT,
                                 "/api/users/**",
-                                "/api/machines/**")
-                        .permitAll()
+                                "/api/machines/**",
+                                "/api/preventive-plans/**"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .build();
