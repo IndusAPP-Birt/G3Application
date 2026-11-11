@@ -32,6 +32,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/actuator/health").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/g3-console.html").permitAll()
                         .requestMatchers(HttpMethod.GET,
                                 "/api/users",
                                 "/api/users/**",
