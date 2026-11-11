@@ -1,8 +1,8 @@
 # G3 Application
 
-API REST para la administración de usuarios, maquinaria industrial y planes de mantenimiento
-preventivo. La API emplea recursos JSON, validación de entrada, paginación homogénea y respuestas
-con un contrato común.
+API REST para la administración de usuarios, maquinaria industrial, planes de mantenimiento y sus
+ejecuciones preventivas. La API emplea recursos JSON, validación de entrada, paginación homogénea
+y respuestas con un contrato común.
 
 ## Convenciones de la API
 
@@ -97,6 +97,56 @@ plan.
 | `POST` | `/api/preventive-plans` | Crea un plan preventivo activo. |
 | `PUT` | `/api/preventive-plans/{id}` | Actualiza la configuración y el estado de activación. |
 
+## Ejecuciones preventivas
+
+Un preventivo representa la ejecución concreta de un plan para una fecha prevista. Conserva de
+forma inmutable el plan de origen y la fecha prevista, e incorpora el inspector asignado, el
+trabajo realizado y las marcas temporales de cada transición.
+
+```text
+PENDING → ASSIGNED → IN_PROGRESS → COMPLETED
+```
+
+- Solo se asigna un usuario con rol `ROLE_INSPECTOR` a un preventivo pendiente.
+- Solo se inicia un preventivo asignado.
+- El trabajo realizado se puede registrar o corregir mientras la ejecución está en progreso.
+- Solo se completa un preventivo en progreso que tenga trabajo registrado.
+
+### Endpoints
+
+| Método | Ruta | Operación |
+|---|---|---|
+| `GET` | `/api/preventives` | Obtiene preventivos paginados. |
+| `GET` | `/api/preventives/{id}` | Obtiene un preventivo por identificador. |
+| `GET` | `/api/preventives/by-plan/{preventivePlanId}` | Filtra preventivos por plan de origen. |
+| `GET` | `/api/preventives/by-status` | Filtra preventivos por estado. |
+| `GET` | `/api/preventives/by-inspector/{inspectorId}` | Filtra preventivos por inspector asignado. |
+| `GET` | `/api/preventives/by-due-date` | Filtra por un rango inclusivo de fecha prevista. |
+| `PUT` | `/api/preventives/{id}/assignment` | Asigna un inspector a un preventivo pendiente. |
+| `PUT` | `/api/preventives/{id}/start` | Inicia un preventivo asignado. |
+| `PUT` | `/api/preventives/{id}/work-performed` | Registra o corrige el trabajo realizado. |
+| `PUT` | `/api/preventives/{id}/completion` | Completa un preventivo con trabajo registrado. |
+
+### Generación automática
+
+Un proceso programado revisa los planes activos por lotes de hasta cien elementos. Para cada plan,
+genera un preventivo pendiente cuando su próxima fecha prevista entra en la ventana de aviso:
+
+```text
+nextDueDate ≤ fecha actual + noticeDays
+```
+
+Tras crear la ejecución, el plan avanza su próxima fecha prevista según `intervalDays`. La
+restricción formada por plan y fecha prevista impide duplicar una misma ejecución.
+
+La programación se configura mediante propiedades, que admiten sobrescritura por variables de
+entorno:
+
+| Propiedad | Variable de entorno | Valor predeterminado |
+|---|---|---|
+| `preventive.generation.cron` | `PREVENTIVE_GENERATION_CRON` | Cada cinco minutos. |
+| `preventive.generation.zone` | `PREVENTIVE_GENERATION_ZONE` | `Europe/Madrid`. |
+
 ## Observabilidad
 
 | Método | Ruta | Operación |
@@ -130,11 +180,11 @@ Las respuestas de error incluyen:
 
 | Estado | Caso |
 |---|---|
-| `400` | Validación de solicitudes, parámetros ausentes o incompatibles, formato inválido o rango de fechas no válido. |
+| `400` | Validación de solicitudes, parámetros ausentes o incompatibles, formato inválido, rango de fechas no válido, ausencia de trabajo registrado o asignación de un usuario sin rol de inspector. |
 | `404` | Recurso solicitado no encontrado. |
 | `405` | Método HTTP no admitido; se conserva la cabecera `Allow`. |
 | `406` | Representación no disponible para la cabecera `Accept` solicitada. |
-| `409` | Conflicto con un valor que debe ser único. |
+| `409` | Conflicto con un valor que debe ser único o transición de estado no permitida. |
 | `415` | Tipo de contenido no compatible. |
 | `500` | Error interno no previsto. |
 
@@ -155,8 +205,9 @@ Máquina
 1. Se registra una máquina como activo mantenible.
 2. Se asocian uno o varios planes preventivos a esa máquina. Cada plan representa una necesidad
    de mantenimiento independiente y define su propia frecuencia, margen de aviso y calendario.
-3. Un proceso de planificación revisa los planes activos. Cuando una próxima fecha entra en su
-   ventana de aviso, genera un preventivo para esa fecha y avanza la siguiente fecha del plan.
+3. Un proceso programado revisa los planes activos por lotes. Cuando `nextDueDate` es igual o
+   anterior a la fecha actual más `noticeDays`, genera un preventivo pendiente para esa fecha y
+   avanza la siguiente fecha del plan según su intervalo.
 4. El preventivo conserva de forma inmutable el plan de origen y la fecha prevista, creando una
    trazabilidad estable entre la configuración y su ejecución.
 5. Un administrador asigna cada preventivo pendiente a un usuario con rol de inspector. La
