@@ -13,6 +13,16 @@ y respuestas con un contrato común.
   estables.
 - Los filtros se exponen mediante rutas específicas y no se combinan entre sí.
 
+## Consola de pruebas
+
+La aplicación publica una consola web ligera en `/g3-console.html`. Permite consultar, filtrar,
+crear y actualizar los recursos disponibles desde el mismo origen que la API. Conserva la última
+respuesta de cada operación durante la sesión de la página e incluye la paginación en el área de
+resultados.
+
+Al desplegar la aplicación, la consola queda disponible en la misma URL pública del servicio; por
+ejemplo, `https://servicio.onrender.com/g3-console.html`.
+
 ## Usuarios
 
 Un usuario contiene nombre, apellidos opcionales, correo electrónico, contraseña protegida con
@@ -152,6 +162,20 @@ entorno:
 | Método | Ruta | Operación |
 |---|---|---|
 | `GET` | `/actuator/health` | Comprueba la disponibilidad del servicio. |
+
+## Colecciones Postman
+
+Las colecciones de Postman incluyen todos los endpoints publicados y variables para sus
+identificadores, filtros y rangos de fechas:
+
+| Archivo | Destino | Variable `baseUrl` |
+|---|---|---|
+| `postman/G3Application.postman_collection.json` | Desarrollo local | `http://localhost:8080` |
+| `postman/G3Application_Render.postman_collection.json` | Render | URL pública del servicio desplegado |
+
+Las operaciones de creación actualizan las variables de identificador necesarias para continuar
+con las actualizaciones asociadas. Antes de ejecutar una colección contra Render, se debe ajustar
+`baseUrl` a la URL efectiva del servicio.
 
 ## Contratos de respuesta
 
