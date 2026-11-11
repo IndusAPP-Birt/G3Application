@@ -2,6 +2,7 @@ package eus.birtlh.g3.preventive;
 
 import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.preventive.dto.PreventiveResponse;
+import eus.birtlh.g3.preventive.exceptions.PreventiveNotFoundException;
 import eus.birtlh.g3.preventive.mapper.PreventiveMapper;
 import eus.birtlh.g3.preventive.repository.PreventiveRepository;
 import lombok.RequiredArgsConstructor;
@@ -50,5 +51,22 @@ public class PreventiveService {
                 preventives.getTotalElements(),
                 preventives.getTotalPages()
         );
+    }
+
+    /**
+     * Obtiene un preventivo por su identificador como DTO de respuesta.
+     *
+     * @param id identificador del preventivo solicitado
+     * @return DTO público del preventivo encontrado
+     * @throws PreventiveNotFoundException si no existe un preventivo con el identificador indicado
+     */
+    @Transactional(readOnly = true)
+    public PreventiveResponse getPreventiveById(Long id) {
+        Preventive preventive = preventiveRepository.findById(id)
+                .orElseThrow(() -> new PreventiveNotFoundException(
+                        "Preventivo con " + id + " no encontrado."
+                ));
+
+        return PreventiveMapper.toResponse(preventive);
     }
 }

@@ -5,6 +5,7 @@ import eus.birtlh.g3.machine.exception.AssetCodeAlreadyInUseException;
 import eus.birtlh.g3.machine.exception.MachineNotFoundException;
 import eus.birtlh.g3.machine.exception.SerialNumberAlreadyInUseException;
 import eus.birtlh.g3.preventive.exceptions.InvalidPreventivePlanDateRangeException;
+import eus.birtlh.g3.preventive.exceptions.PreventiveNotFoundException;
 import eus.birtlh.g3.preventive.exceptions.PreventivePlanNotFoundException;
 import eus.birtlh.g3.preventive.exceptions.PreventiveWorkReportRequiredException;
 import eus.birtlh.g3.user.exception.EmailAlreadyInUseException;
@@ -74,6 +75,20 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(PreventivePlanNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handlePreventivePlanNotFoundException(
             PreventivePlanNotFoundException ex
+    ) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiErrorResponse.error(ex.getMessage()));
+    }
+
+    /**
+     * Devuelve una respuesta HTTP 404 cuando no existe el preventivo solicitado.
+     *
+     * @param ex excepción que identifica el preventivo no encontrado
+     * @return respuesta de error con estado HTTP 404
+     */
+    @ExceptionHandler(PreventiveNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handlePreventiveNotFoundException(
+            PreventiveNotFoundException ex
     ) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ApiErrorResponse.error(ex.getMessage()));
