@@ -25,7 +25,6 @@ public class PreventiveController {
 
     private final PreventiveService preventiveService;
 
-    // TODO: Añadir GET /by-plan/{planId} para consultar las ejecuciones de un plan preventivo.
     // TODO: Añadir GET /by-status?status={estado} para filtrar preventivos por estado.
     // TODO: Añadir GET /by-inspector/{inspectorId} para consultar los preventivos asignados a un
     //       inspector.
@@ -90,6 +89,52 @@ public class PreventiveController {
                 ApiSuccessResponse.success(
                         preventiveService.getPreventiveById(id),
                         "Preventivo obtenido correctamente."
+                )
+        );
+    }
+
+    /**
+     * Obtiene una página de preventivos asociados a un plan preventivo.
+     *
+     * @param preventivePlanId identificador positivo del plan preventivo con el que filtrar
+     * @param page índice de página basado en cero
+     * @param size número de preventivos por página
+     * @return respuesta HTTP 200 con la página de preventivos y su marca temporal
+     */
+    @GetMapping("/by-plan/{preventivePlanId}")
+    public ResponseEntity<ApiSuccessResponse<PageResponse<PreventiveResponse>>> findPreventivesByPreventivePlanId(
+            @PathVariable
+            @Positive(message = "El identificador debe ser mayor que cero.")
+            Long preventivePlanId,
+
+            @RequestParam(
+                    name = "page",
+                    defaultValue = PaginationConstants.DEFAULT_PAGE_VALUE
+            )
+            @Min(
+                    value = PaginationConstants.MIN_PAGE,
+                    message = "La página debe ser {value} o mayor."
+            )
+            int page,
+
+            @RequestParam(
+                    name = "size",
+                    defaultValue = PaginationConstants.DEFAULT_PAGE_SIZE_VALUE
+            )
+            @Min(
+                    value = PaginationConstants.MIN_PAGE_SIZE,
+                    message = "El tamaño de página debe ser {value} o mayor."
+            )
+            @Max(
+                    value = PaginationConstants.MAX_PAGE_SIZE,
+                    message = "El tamaño de página no puede superar {value}."
+            )
+            int size
+    ) {
+        return ResponseEntity.ok(
+                ApiSuccessResponse.success(
+                        preventiveService.getPreventivesByPreventivePlanId(page, size, preventivePlanId),
+                        "Preventivos obtenidos correctamente."
                 )
         );
     }

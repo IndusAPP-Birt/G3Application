@@ -34,7 +34,7 @@ public final class PreventiveMapper {
 
         return new PreventiveResponse(
                 preventive.getId(),
-                PreventivePlanMapper.toResponse(preventive.getPlan()),
+                PreventivePlanMapper.toResponse(preventive.getPreventivePlan()),
                 preventive.getAssignedInspector() == null
                 ? null : UserMapper.toResponse(preventive.getAssignedInspector()),
                 preventive.getDueDate(),

@@ -69,4 +69,38 @@ public class PreventiveService {
 
         return PreventiveMapper.toResponse(preventive);
     }
+
+    /**
+     * Obtiene una página de preventivos asociados a un plan preventivo.
+     *
+     * <p>Conserva el orden ascendente por identificador para que los resultados sean estables
+     * entre páginas.</p>
+     *
+     * @param page índice de página basado en cero
+     * @param size número de preventivos por página
+     * @param preventivePlanId identificador del plan preventivo con el que filtrar
+     * @return página de preventivos del plan; su contenido puede estar vacío
+     */
+    @Transactional(readOnly = true)
+    public PageResponse<PreventiveResponse> getPreventivesByPreventivePlanId(
+            int page,
+            int size,
+            long preventivePlanId
+    ) {
+        Page<Preventive> preventives = preventiveRepository.findByPreventivePlanId(
+                preventivePlanId,
+                PageRequest.of(page, size, Sort.by("id").ascending())
+        );
+
+        return new PageResponse<>(
+                preventives.getContent()
+                        .stream()
+                        .map(PreventiveMapper::toResponse)
+                        .toList(),
+                preventives.getNumber(),
+                preventives.getSize(),
+                preventives.getTotalElements(),
+                preventives.getTotalPages()
+        );
+    }
 }

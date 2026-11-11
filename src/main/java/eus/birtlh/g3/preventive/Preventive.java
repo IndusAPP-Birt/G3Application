@@ -40,7 +40,7 @@ public class Preventive {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "preventive_plan_id", nullable = false, updatable = false)
-    private PreventivePlan plan;
+    private PreventivePlan preventivePlan;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assigned_inspector_id")
@@ -74,11 +74,11 @@ public class Preventive {
     /**
      * Crea un preventivo pendiente a partir de un plan y una fecha prevista de ejecución.
      *
-     * @param plan plan preventivo del que procede esta ejecución
+     * @param preventivePlan plan preventivo del que procede esta ejecución
      * @param dueDate fecha prevista inmutable para realizar el preventivo
      */
-    Preventive(PreventivePlan plan, LocalDate dueDate) {
-        this.plan = plan;
+    Preventive(PreventivePlan preventivePlan, LocalDate dueDate) {
+        this.preventivePlan = preventivePlan;
         this.dueDate = dueDate;
     }
 
