@@ -10,8 +10,11 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 
 /**
  * Controlador REST que expone las operaciones HTTP sobre ejecuciones preventivas.
@@ -26,8 +29,6 @@ public class PreventiveController {
 
     private final PreventiveService preventiveService;
 
-    // TODO: Añadir GET /by-due-date?from={fecha}&to={fecha} para consultar preventivos por fecha
-    //       prevista.
     // TODO: Añadir PUT /{id}/assignment para asignar un inspector a un preventivo.
     // TODO: Añadir PUT /{id}/start para iniciar un preventivo asignado.
     // TODO: Añadir PUT /{id}/work-performed para registrar el trabajo realizado.
@@ -223,6 +224,60 @@ public class PreventiveController {
         return ResponseEntity.ok(
                 ApiSuccessResponse.success(
                         preventiveService.getPreventivesByAssignedInspectorId(page, size, inspectorId),
+                        "Preventivos obtenidos correctamente."
+                )
+        );
+    }
+
+    /**
+     * Obtiene una página de preventivos cuya fecha prevista está comprendida en un rango
+     * inclusivo.
+     *
+     * @param from fecha inicial del rango, incluida, en formato ISO-8601 ({@code yyyy-MM-dd})
+     * @param to fecha final del rango, incluida, en formato ISO-8601 ({@code yyyy-MM-dd})
+     * @param page índice de página basado en cero
+     * @param size número de preventivos por página
+     * @return respuesta HTTP 200 con la página de preventivos y su marca temporal
+     */
+    @GetMapping("/by-due-date")
+    public ResponseEntity<ApiSuccessResponse<PageResponse<PreventiveResponse>>> findPreventivesByDueDate(
+            @RequestParam("from")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate from,
+
+            @RequestParam("to")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate to,
+
+            @RequestParam(
+                    name = "page",
+                    defaultValue = PaginationConstants.DEFAULT_PAGE_VALUE
+            )
+            @Min(
+                    value = PaginationConstants.MIN_PAGE,
+                    message = "La página debe ser {value} o mayor."
+            )
+            int page,
+
+            @RequestParam(
+                    name = "size",
+                    defaultValue = PaginationConstants.DEFAULT_PAGE_SIZE_VALUE
+            )
+            @Min(
+                    value = PaginationConstants.MIN_PAGE_SIZE,
+                    message = "El tamaño de página debe ser {value} o mayor."
+            )
+            @Max(
+                    value = PaginationConstants.MAX_PAGE_SIZE,
+                    message = "El tamaño de página no puede superar {value}."
+            )
+            int size
+    ) {
+        return ResponseEntity.ok(
+                ApiSuccessResponse.success(
+                        preventiveService.getPreventivesByDueDate(
+                                page, size, from, to
+                        ),
                         "Preventivos obtenidos correctamente."
                 )
         );

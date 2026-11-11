@@ -2,6 +2,7 @@ package eus.birtlh.g3.preventive;
 
 import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.preventive.dto.PreventiveResponse;
+import eus.birtlh.g3.preventive.exceptions.InvalidPreventiveDateRangeException;
 import eus.birtlh.g3.preventive.exceptions.PreventiveNotFoundException;
 import eus.birtlh.g3.preventive.mapper.PreventiveMapper;
 import eus.birtlh.g3.preventive.repository.PreventiveRepository;
@@ -11,6 +12,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
 
 /**
  * Servicio de aplicación que coordina los casos de uso de ejecuciones preventivas.
@@ -163,6 +166,52 @@ public class PreventiveService {
         return new PageResponse<>(
                 preventives.getContent()
                         .stream()
+                        .map(PreventiveMapper::toResponse)
+                        .toList(),
+                preventives.getNumber(),
+                preventives.getSize(),
+                preventives.getTotalElements(),
+                preventives.getTotalPages()
+        );
+    }
+
+    /**
+     * Obtiene una página de preventivos cuya fecha prevista está comprendida en un rango de fechas
+     * inclusivo.
+     *
+     * <p>El rango debe situar la fecha inicial antes o en la misma fecha que la final. Los
+     * resultados se ordenan ascendentemente por identificador para que sean estables entre
+     * páginas.</p>
+     *
+     * @param page índice de página basado en cero
+     * @param size número de preventivos por página
+     * @param from fecha inicial del rango, incluida
+     * @param to fecha final del rango, incluida
+     * @return página de preventivos previstos en el rango; su contenido puede estar vacío
+     * @throws InvalidPreventiveDateRangeException si {@code from} es posterior a {@code to}
+     */
+    @Transactional(readOnly = true)
+    public PageResponse<PreventiveResponse> getPreventivesByDueDate(
+            int page,
+            int size,
+            LocalDate from,
+            LocalDate to
+    ) {
+        if (from.isAfter(to)) {
+            throw new InvalidPreventiveDateRangeException(
+                    "La fecha inicial no puede ser posterior a la fecha final."
+            );
+        }
+
+        Page<Preventive> preventives =
+                preventiveRepository.findByDueDateBetween(
+                        from,
+                        to,
+                        PageRequest.of(page, size, Sort.by("id").ascending())
+                );
+
+        return new PageResponse<>(
+                preventives.getContent().stream()
                         .map(PreventiveMapper::toResponse)
                         .toList(),
                 preventives.getNumber(),

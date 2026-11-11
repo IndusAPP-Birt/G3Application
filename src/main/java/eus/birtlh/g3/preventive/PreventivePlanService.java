@@ -7,7 +7,7 @@ import eus.birtlh.g3.machine.repository.MachineRepository;
 import eus.birtlh.g3.preventive.dto.AdminCreatePreventivePlanRequest;
 import eus.birtlh.g3.preventive.dto.AdminUpdatePreventivePlanRequest;
 import eus.birtlh.g3.preventive.dto.PreventivePlanResponse;
-import eus.birtlh.g3.preventive.exceptions.InvalidPreventivePlanDateRangeException;
+import eus.birtlh.g3.preventive.exceptions.InvalidPreventiveDateRangeException;
 import eus.birtlh.g3.preventive.exceptions.PreventivePlanNotFoundException;
 import eus.birtlh.g3.preventive.mapper.PreventivePlanMapper;
 import eus.birtlh.g3.preventive.repository.PreventivePlanRepository;
@@ -196,7 +196,7 @@ public class PreventivePlanService {
      * @param to fecha final del rango, incluida
      * @return página de planes preventivos planificados en el rango; su contenido puede estar
      * vacío
-     * @throws InvalidPreventivePlanDateRangeException si {@code from} es posterior a {@code to}
+     * @throws InvalidPreventiveDateRangeException si {@code from} es posterior a {@code to}
      */
     @Transactional(readOnly = true)
     public PageResponse<PreventivePlanResponse> getPreventivePlansByNextDueDate(
@@ -206,7 +206,7 @@ public class PreventivePlanService {
             LocalDate to
     ) {
         if (from.isAfter(to)) {
-            throw new InvalidPreventivePlanDateRangeException(
+            throw new InvalidPreventiveDateRangeException(
                     "La fecha inicial no puede ser posterior a la fecha final."
             );
         }
