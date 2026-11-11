@@ -30,4 +30,13 @@ public interface PreventiveRepository extends JpaRepository<Preventive, Long> {
      * @return página de preventivos con el estado indicado; puede no contener resultados
      */
     Page<Preventive> findByStatus(PreventiveStatus status, Pageable pageable);
+
+    /**
+     * Busca los preventivos asignados a un inspector.
+     *
+     * @param inspectorId identificador del inspector con el que filtrar
+     * @param pageable configuración de página, tamaño y orden solicitados
+     * @return página de preventivos asignados al inspector; puede no contener resultados
+     */
+    Page<Preventive> findByAssignedInspectorId(Long inspectorId, Pageable pageable);
 }
