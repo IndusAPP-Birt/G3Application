@@ -4,6 +4,7 @@ import eus.birtlh.g3.common.PaginationConstants;
 import eus.birtlh.g3.common.dto.ApiSuccessResponse;
 import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.preventive.PreventiveService;
+import eus.birtlh.g3.preventive.PreventiveStatus;
 import eus.birtlh.g3.preventive.dto.PreventiveResponse;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -25,7 +26,6 @@ public class PreventiveController {
 
     private final PreventiveService preventiveService;
 
-    // TODO: Añadir GET /by-status?status={estado} para filtrar preventivos por estado.
     // TODO: Añadir GET /by-inspector/{inspectorId} para consultar los preventivos asignados a un
     //       inspector.
     // TODO: Añadir GET /by-due-date?from={fecha}&to={fecha} para consultar preventivos por fecha
@@ -134,6 +134,51 @@ public class PreventiveController {
         return ResponseEntity.ok(
                 ApiSuccessResponse.success(
                         preventiveService.getPreventivesByPreventivePlanId(page, size, preventivePlanId),
+                        "Preventivos obtenidos correctamente."
+                )
+        );
+    }
+
+    /**
+     * Obtiene una página de preventivos según su estado.
+     *
+     * @param status estado obligatorio con el que filtrar los preventivos
+     * @param page índice de página basado en cero
+     * @param size número de preventivos por página
+     * @return respuesta HTTP 200 con la página de preventivos y su marca temporal
+     */
+    @GetMapping("/by-status")
+    public ResponseEntity<ApiSuccessResponse<PageResponse<PreventiveResponse>>> findPreventivesByStatus(
+            @RequestParam("status")
+            PreventiveStatus status,
+
+            @RequestParam(
+                    name = "page",
+                    defaultValue = PaginationConstants.DEFAULT_PAGE_VALUE
+            )
+            @Min(
+                    value = PaginationConstants.MIN_PAGE,
+                    message = "La página debe ser {value} o mayor."
+            )
+            int page,
+
+            @RequestParam(
+                    name = "size",
+                    defaultValue = PaginationConstants.DEFAULT_PAGE_SIZE_VALUE
+            )
+            @Min(
+                    value = PaginationConstants.MIN_PAGE_SIZE,
+                    message = "El tamaño de página debe ser {value} o mayor."
+            )
+            @Max(
+                    value = PaginationConstants.MAX_PAGE_SIZE,
+                    message = "El tamaño de página no puede superar {value}."
+            )
+            int size
+    ) {
+        return ResponseEntity.ok(
+                ApiSuccessResponse.success(
+                        preventiveService.getPreventivesByStatus(page, size, status),
                         "Preventivos obtenidos correctamente."
                 )
         );

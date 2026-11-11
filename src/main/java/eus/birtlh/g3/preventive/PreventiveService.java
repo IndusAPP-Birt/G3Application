@@ -103,4 +103,38 @@ public class PreventiveService {
                 preventives.getTotalPages()
         );
     }
+
+    /**
+     * Obtiene una página de preventivos según su estado.
+     *
+     * <p>Conserva el orden ascendente por identificador para que los resultados sean estables
+     * entre páginas.</p>
+     *
+     * @param page índice de página basado en cero
+     * @param size número de preventivos por página
+     * @param status estado con el que filtrar los preventivos
+     * @return página de preventivos con el estado indicado; su contenido puede estar vacío
+     */
+    @Transactional(readOnly = true)
+    public PageResponse<PreventiveResponse> getPreventivesByStatus(
+            int page,
+            int size,
+            PreventiveStatus status
+    ) {
+        Page<Preventive> preventives = preventiveRepository.findByStatus(
+                status,
+                PageRequest.of(page, size, Sort.by("id").ascending())
+        );
+
+        return new PageResponse<>(
+                preventives.getContent()
+                        .stream()
+                        .map(PreventiveMapper::toResponse)
+                        .toList(),
+                preventives.getNumber(),
+                preventives.getSize(),
+                preventives.getTotalElements(),
+                preventives.getTotalPages()
+        );
+    }
 }

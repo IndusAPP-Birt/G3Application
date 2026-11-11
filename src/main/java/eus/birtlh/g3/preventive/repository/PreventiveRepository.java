@@ -1,6 +1,7 @@
 package eus.birtlh.g3.preventive.repository;
 
 import eus.birtlh.g3.preventive.Preventive;
+import eus.birtlh.g3.preventive.PreventiveStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,4 +21,13 @@ public interface PreventiveRepository extends JpaRepository<Preventive, Long> {
      * @return página de preventivos del plan; puede no contener resultados
      */
     Page<Preventive> findByPreventivePlanId(Long id, Pageable pageable);
+
+    /**
+     * Busca los preventivos según su estado.
+     *
+     * @param status estado con el que filtrar
+     * @param pageable configuración de página, tamaño y orden solicitados
+     * @return página de preventivos con el estado indicado; puede no contener resultados
+     */
+    Page<Preventive> findByStatus(PreventiveStatus status, Pageable pageable);
 }
