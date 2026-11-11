@@ -4,10 +4,7 @@ import eus.birtlh.g3.common.dto.ApiErrorResponse;
 import eus.birtlh.g3.machine.exception.AssetCodeAlreadyInUseException;
 import eus.birtlh.g3.machine.exception.MachineNotFoundException;
 import eus.birtlh.g3.machine.exception.SerialNumberAlreadyInUseException;
-import eus.birtlh.g3.preventive.exceptions.InvalidPreventiveDateRangeException;
-import eus.birtlh.g3.preventive.exceptions.PreventiveNotFoundException;
-import eus.birtlh.g3.preventive.exceptions.PreventivePlanNotFoundException;
-import eus.birtlh.g3.preventive.exceptions.PreventiveWorkReportRequiredException;
+import eus.birtlh.g3.preventive.exceptions.*;
 import eus.birtlh.g3.user.exception.EmailAlreadyInUseException;
 import eus.birtlh.g3.user.exception.UserNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -110,6 +107,21 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Devuelve una respuesta HTTP 400 cuando el usuario seleccionado para una asignación no tiene
+     * el rol de inspector.
+     *
+     * @param ex excepción que identifica el rol no válido para la asignación
+     * @return respuesta de error con estado HTTP 400
+     */
+    @ExceptionHandler(UserIsNotInspectorException.class)
+    public ResponseEntity<ApiErrorResponse> handleUserIsNotInspectorException(
+            UserIsNotInspectorException ex
+    ) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiErrorResponse.error(ex.getMessage()));
+    }
+
+    /**
      * Devuelve una respuesta HTTP 400 cuando se intenta completar un preventivo sin registrar
      * el trabajo realizado.
      *
@@ -121,6 +133,21 @@ public class GlobalExceptionHandler {
             PreventiveWorkReportRequiredException ex
     ) {
         return ResponseEntity.badRequest()
+                .body(ApiErrorResponse.error(ex.getMessage()));
+    }
+
+    /**
+     * Devuelve una respuesta HTTP 409 cuando la operación solicitada no es válida para el estado
+     * actual del preventivo.
+     *
+     * @param ex excepción que identifica la transición de estado no permitida
+     * @return respuesta de error con estado HTTP 409
+     */
+    @ExceptionHandler(InvalidPreventiveStatusTransitionException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidPreventiveStatusTransitionException(
+            InvalidPreventiveStatusTransitionException ex
+    ) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(ApiErrorResponse.error(ex.getMessage()));
     }
 

@@ -1,11 +1,18 @@
 package eus.birtlh.g3.preventive;
 
 import eus.birtlh.g3.common.dto.PageResponse;
+import eus.birtlh.g3.preventive.dto.AdminAssignInspectorToPreventiveRequest;
 import eus.birtlh.g3.preventive.dto.PreventiveResponse;
 import eus.birtlh.g3.preventive.exceptions.InvalidPreventiveDateRangeException;
+import eus.birtlh.g3.preventive.exceptions.InvalidPreventiveStatusTransitionException;
 import eus.birtlh.g3.preventive.exceptions.PreventiveNotFoundException;
+import eus.birtlh.g3.preventive.exceptions.UserIsNotInspectorException;
 import eus.birtlh.g3.preventive.mapper.PreventiveMapper;
 import eus.birtlh.g3.preventive.repository.PreventiveRepository;
+import eus.birtlh.g3.user.Role;
+import eus.birtlh.g3.user.User;
+import eus.birtlh.g3.user.exception.UserNotFoundException;
+import eus.birtlh.g3.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,6 +33,7 @@ import java.time.LocalDate;
 public class PreventiveService {
 
     private final PreventiveRepository preventiveRepository;
+    private final UserRepository userRepository;
 
     /**
      * Obtiene una página de preventivos como DTOs de respuesta.
@@ -219,5 +227,53 @@ public class PreventiveService {
                 preventives.getTotalElements(),
                 preventives.getTotalPages()
         );
+    }
+
+    /**
+     * Asigna un inspector a un preventivo pendiente.
+     *
+     * <p>Comprueba que el preventivo y el usuario existan, que este último tenga el rol de
+     * inspector y que el preventivo esté pendiente. La entidad registra la asignación y cambia
+     * su estado a {@link PreventiveStatus#ASSIGNED}.</p>
+     *
+     * @param id identificador del preventivo al que se asignará el inspector
+     * @param request identificador validado del inspector que recibirá la asignación
+     * @return DTO público del preventivo con el inspector asignado
+     * @throws PreventiveNotFoundException si no existe un preventivo con el identificador indicado
+     * @throws UserNotFoundException si no existe el usuario inspector indicado
+     * @throws UserIsNotInspectorException si el usuario indicado no tiene el rol de inspector
+     * @throws InvalidPreventiveStatusTransitionException si el preventivo no está pendiente
+     */
+    @Transactional
+    public PreventiveResponse assignInspectorToPreventive(
+            long id,
+            AdminAssignInspectorToPreventiveRequest request
+    ) {
+        Preventive preventive = preventiveRepository.findById(id)
+                .orElseThrow(() -> new PreventiveNotFoundException(
+                        "Preventivo con " + id + " no encontrado."
+                ));
+
+        if (preventive.getStatus() != PreventiveStatus.PENDING) {
+            throw new InvalidPreventiveStatusTransitionException(
+                    "Solo se puede asignar un inspector a un preventivo pendiente."
+            );
+        }
+
+        User inspector = userRepository.findById(request.inspectorId())
+                .orElseThrow(() -> new UserNotFoundException(
+                        "Usuario con " + request.inspectorId() + " no encontrado."
+                ));
+
+        if (inspector.getRole() != Role.ROLE_INSPECTOR) {
+            throw new UserIsNotInspectorException(
+                    "El usuario indicado no tiene el rol de inspector."
+            );
+        }
+
+        preventive.assignInspector(inspector);
+        preventiveRepository.flush();
+
+        return PreventiveMapper.toResponse(preventive);
     }
 }

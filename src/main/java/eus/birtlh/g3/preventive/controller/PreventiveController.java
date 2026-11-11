@@ -5,7 +5,9 @@ import eus.birtlh.g3.common.dto.ApiSuccessResponse;
 import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.preventive.PreventiveService;
 import eus.birtlh.g3.preventive.PreventiveStatus;
+import eus.birtlh.g3.preventive.dto.AdminAssignInspectorToPreventiveRequest;
 import eus.birtlh.g3.preventive.dto.PreventiveResponse;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
@@ -29,7 +31,6 @@ public class PreventiveController {
 
     private final PreventiveService preventiveService;
 
-    // TODO: Añadir PUT /{id}/assignment para asignar un inspector a un preventivo.
     // TODO: Añadir PUT /{id}/start para iniciar un preventivo asignado.
     // TODO: Añadir PUT /{id}/work-performed para registrar el trabajo realizado.
     // TODO: Añadir PUT /{id}/completion para completar un preventivo con trabajo registrado.
@@ -279,6 +280,30 @@ public class PreventiveController {
                                 page, size, from, to
                         ),
                         "Preventivos obtenidos correctamente."
+                )
+        );
+    }
+
+    /**
+     * Asigna un inspector a un preventivo pendiente.
+     *
+     * @param id identificador positivo del preventivo al que se asignará el inspector
+     * @param request identificador validado del inspector que recibirá la asignación
+     * @return respuesta HTTP 200 con el preventivo actualizado y su marca temporal
+     */
+    @PutMapping("/{id}/assignment")
+    public ResponseEntity<ApiSuccessResponse<PreventiveResponse>> assignInspectorToPreventive(
+            @PathVariable
+            @Positive(message = "El identificador debe ser mayor que cero.")
+            Long id,
+
+            @Valid
+            @RequestBody AdminAssignInspectorToPreventiveRequest request
+    ) {
+        return ResponseEntity.ok(
+                ApiSuccessResponse.success(
+                        preventiveService.assignInspectorToPreventive(id, request),
+                        "Inspector asignado correctamente."
                 )
         );
     }
