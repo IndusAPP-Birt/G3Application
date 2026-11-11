@@ -14,15 +14,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.time.LocalDate;
-
 /**
- * Controlador REST que expone las operaciones HTTP sobre planes preventivos.
+ * Controlador REST que expone las operaciones HTTP sobre plantillas de planes preventivos.
  *
  * <p>Delega los casos de uso en {@link PreventivePlanService} y devuelve sus resultados mediante
  * el contrato estándar {@link ApiSuccessResponse}.</p>
@@ -34,14 +31,12 @@ public class PreventivePlanController {
 
     private final PreventivePlanService preventivePlanService;
 
-    // TODO: Añadir PUT /{id}/next-due-date para reprogramar la próxima fecha prevista.
-
     /**
-     * Obtiene una página de planes preventivos registrados.
+     * Obtiene una página de plantillas preventivas registradas.
      *
      * @param page índice de página basado en cero
-     * @param size número de planes preventivos por página
-     * @return respuesta HTTP 200 con la página de planes preventivos y su marca temporal
+     * @param size número de plantillas preventivas por página
+     * @return respuesta HTTP 200 con la página de plantillas y su marca temporal
      */
     @GetMapping
     public ResponseEntity<ApiSuccessResponse<PageResponse<PreventivePlanResponse>>> findAllPreventivePlans(
@@ -75,10 +70,10 @@ public class PreventivePlanController {
     }
 
     /**
-     * Obtiene un plan preventivo por su identificador.
+     * Obtiene una plantilla preventiva por su identificador.
      *
-     * @param id identificador positivo del plan preventivo solicitado
-     * @return respuesta HTTP 200 con el plan preventivo y su marca temporal
+     * @param id identificador positivo de la plantilla preventiva solicitada
+     * @return respuesta HTTP 200 con la plantilla y su marca temporal
      */
     @GetMapping("/{id}")
     public ResponseEntity<ApiSuccessResponse<PreventivePlanResponse>> findPreventivePlanById(
@@ -95,58 +90,13 @@ public class PreventivePlanController {
     }
 
     /**
-     * Obtiene una página de planes preventivos asociados a una máquina.
+     * Obtiene una página de plantillas preventivas según su disponibilidad para nuevas
+     * asignaciones.
      *
-     * @param machineId identificador positivo de la máquina con la que filtrar
+     * @param active {@code true} para las plantillas activas; {@code false} para las inactivas
      * @param page índice de página basado en cero
-     * @param size número de planes preventivos por página
-     * @return respuesta HTTP 200 con la página de planes preventivos y su marca temporal
-     */
-    @GetMapping("/by-machine/{machineId}")
-    public ResponseEntity<ApiSuccessResponse<PageResponse<PreventivePlanResponse>>> findPreventivePlansByMachineId(
-            @PathVariable
-            @Positive(message = "El identificador debe ser mayor que cero.")
-            Long machineId,
-
-            @RequestParam(
-                    name = "page",
-                    defaultValue = PaginationConstants.DEFAULT_PAGE_VALUE
-            )
-            @Min(
-                    value = PaginationConstants.MIN_PAGE,
-                    message = "La página debe ser {value} o mayor."
-            )
-            int page,
-
-            @RequestParam(
-                    name = "size",
-                    defaultValue = PaginationConstants.DEFAULT_PAGE_SIZE_VALUE
-            )
-            @Min(
-                    value = PaginationConstants.MIN_PAGE_SIZE,
-                    message = "El tamaño de página debe ser {value} o mayor."
-            )
-            @Max(
-                    value = PaginationConstants.MAX_PAGE_SIZE,
-                    message = "El tamaño de página no puede superar {value}."
-            )
-            int size
-    ) {
-        return ResponseEntity.ok(
-                ApiSuccessResponse.success(
-                        preventivePlanService.getPreventivePlansByMachineId(page, size, machineId),
-                        "Planes preventivos obtenidos correctamente."
-                )
-        );
-    }
-
-    /**
-     * Obtiene una página de planes preventivos según estén activos o inactivos.
-     *
-     * @param active {@code true} para los planes activos; {@code false} para los inactivos
-     * @param page índice de página basado en cero
-     * @param size número de planes preventivos por página
-     * @return respuesta HTTP 200 con la página de planes preventivos y su marca temporal
+     * @param size número de plantillas preventivas por página
+     * @return respuesta HTTP 200 con la página de plantillas y su marca temporal
      */
     @GetMapping("/by-status")
     public ResponseEntity<ApiSuccessResponse<PageResponse<PreventivePlanResponse>>> findPreventivePlansByActive(
@@ -186,15 +136,15 @@ public class PreventivePlanController {
     }
 
     /**
-     * Obtiene una página de planes preventivos cuyo nombre contiene el texto indicado.
+     * Obtiene una página de plantillas preventivas cuyo nombre contiene el texto indicado.
      *
      * <p>El término se elimina de espacios exteriores antes de realizar una búsqueda que no
      * distingue entre mayúsculas y minúsculas.</p>
      *
      * @param name texto parcial obligatorio con el que filtrar el nombre
      * @param page índice de página basado en cero
-     * @param size número de planes preventivos por página
-     * @return respuesta HTTP 200 con la página de planes preventivos coincidentes y su marca
+     * @param size número de plantillas preventivas por página
+     * @return respuesta HTTP 200 con la página de plantillas coincidentes y su marca
      * temporal
      */
     @GetMapping("/by-name")
@@ -241,66 +191,11 @@ public class PreventivePlanController {
     }
 
     /**
-     * Obtiene una página de planes preventivos con próxima fecha prevista dentro de un rango.
+     * Crea una plantilla preventiva a partir de una solicitud administrativa validada.
      *
-     * <p>Las fechas se reciben en formato ISO {@code yyyy-MM-dd}; ambos límites se incluyen en
-     * la búsqueda.</p>
-     *
-     * @param from fecha inicial obligatoria del rango, incluida
-     * @param to fecha final obligatoria del rango, incluida
-     * @param page índice de página basado en cero
-     * @param size número de planes preventivos por página
-     * @return respuesta HTTP 200 con la página de planes preventivos y su marca temporal
-     */
-    @GetMapping("/by-next-due-date")
-    public ResponseEntity<ApiSuccessResponse<PageResponse<PreventivePlanResponse>>> findPreventivePlansByNextDueDate(
-            @RequestParam("from")
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-            LocalDate from,
-
-            @RequestParam("to")
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-            LocalDate to,
-
-            @RequestParam(
-                    name = "page",
-                    defaultValue = PaginationConstants.DEFAULT_PAGE_VALUE
-            )
-            @Min(
-                    value = PaginationConstants.MIN_PAGE,
-                    message = "La página debe ser {value} o mayor."
-            )
-            int page,
-
-            @RequestParam(
-                    name = "size",
-                    defaultValue = PaginationConstants.DEFAULT_PAGE_SIZE_VALUE
-            )
-            @Min(
-                    value = PaginationConstants.MIN_PAGE_SIZE,
-                    message = "El tamaño de página debe ser {value} o mayor."
-            )
-            @Max(
-                    value = PaginationConstants.MAX_PAGE_SIZE,
-                    message = "El tamaño de página no puede superar {value}."
-            )
-            int size
-    ) {
-        return ResponseEntity.ok(
-                ApiSuccessResponse.success(
-                        preventivePlanService.getPreventivePlansByNextDueDate(
-                                page, size, from, to
-                        ),
-                        "Planes preventivos obtenidos correctamente."
-                )
-        );
-    }
-
-    /**
-     * Crea un plan preventivo a partir de una solicitud administrativa validada.
-     *
-     * @param request datos del plan preventivo que se desea crear
-     * @return respuesta HTTP 201 con el plan creado y la cabecera {@code Location} del recurso
+     * @param request datos de la plantilla preventiva que se desea crear
+     * @return respuesta HTTP 201 con la plantilla creada y la cabecera {@code Location} del
+     * recurso
      */
     @PostMapping
     public ResponseEntity<ApiSuccessResponse<PreventivePlanResponse>> createPreventivePlan(
@@ -323,11 +218,11 @@ public class PreventivePlanController {
     }
 
     /**
-     * Actualiza completamente un plan preventivo existente.
+     * Actualiza completamente una plantilla preventiva existente.
      *
-     * @param id identificador positivo del plan preventivo que se desea actualizar
-     * @param request datos validados con los que actualizar el plan
-     * @return respuesta HTTP 200 con el plan actualizado y su marca temporal
+     * @param id identificador positivo de la plantilla preventiva que se desea actualizar
+     * @param request datos validados con los que actualizar la plantilla
+     * @return respuesta HTTP 200 con la plantilla actualizada y su marca temporal
      */
     @PutMapping("/{id}")
     public ResponseEntity<ApiSuccessResponse<PreventivePlanResponse>> updatePreventivePlan(

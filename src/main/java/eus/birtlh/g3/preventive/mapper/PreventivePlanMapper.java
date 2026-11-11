@@ -1,27 +1,25 @@
 package eus.birtlh.g3.preventive.mapper;
 
-import eus.birtlh.g3.machine.mapper.MachineMapper;
 import eus.birtlh.g3.preventive.PreventivePlan;
 import eus.birtlh.g3.preventive.dto.PreventivePlanResponse;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 /**
- * Convierte entidades {@link PreventivePlan} persistidas en sus DTOs públicos de respuesta.
+ * Convierte plantillas {@link PreventivePlan} persistidas en sus DTOs públicos de respuesta.
  *
- * <p>La máquina asociada se transforma mediante {@link MachineMapper} para incluir su
- * representación pública completa en la respuesta del plan.</p>
+ * <p>La plantilla no incluye información de activos ni de planificación, que pertenecen a sus
+ * asignaciones específicas.</p>
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class PreventivePlanMapper {
 
     /**
-     * Transforma un plan preventivo persistido en su representación pública.
+     * Transforma una plantilla preventiva persistida en su representación pública.
      *
-     * @param plan plan preventivo que se desea exponer
-     * @return DTO público correspondiente al plan preventivo
-     * @throws IllegalArgumentException si el plan es {@code null}, no está persistido o no tiene
-     *                                  una máquina válida
+     * @param plan plantilla preventiva que se desea exponer
+     * @return DTO público correspondiente a la plantilla
+     * @throws IllegalArgumentException si la plantilla es {@code null} o no está persistida
      */
     public static PreventivePlanResponse toResponse(PreventivePlan plan) {
         if (plan == null) {
@@ -34,12 +32,8 @@ public final class PreventivePlanMapper {
 
         return new PreventivePlanResponse(
                 plan.getId(),
-                MachineMapper.toResponse(plan.getMachine()),
                 plan.getName(),
                 plan.getDescription(),
-                plan.getIntervalDays(),
-                plan.getNoticeDays(),
-                plan.getNextDueDate(),
                 plan.isActive(),
                 plan.getCreatedAt(),
                 plan.getUpdatedAt()
