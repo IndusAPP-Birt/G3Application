@@ -3,9 +3,11 @@ package eus.birtlh.g3.preventive;
 import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.preventive.dto.AdminAssignInspectorToPreventiveRequest;
 import eus.birtlh.g3.preventive.dto.PreventiveResponse;
+import eus.birtlh.g3.preventive.dto.RecordPreventiveWorkRequest;
 import eus.birtlh.g3.preventive.exceptions.InvalidPreventiveDateRangeException;
 import eus.birtlh.g3.preventive.exceptions.InvalidPreventiveStatusTransitionException;
 import eus.birtlh.g3.preventive.exceptions.PreventiveNotFoundException;
+import eus.birtlh.g3.preventive.exceptions.PreventiveWorkReportRequiredException;
 import eus.birtlh.g3.preventive.exceptions.UserIsNotInspectorException;
 import eus.birtlh.g3.preventive.mapper.PreventiveMapper;
 import eus.birtlh.g3.preventive.repository.PreventiveRepository;
@@ -272,6 +274,102 @@ public class PreventiveService {
         }
 
         preventive.assignInspector(inspector);
+        preventiveRepository.flush();
+
+        return PreventiveMapper.toResponse(preventive);
+    }
+
+    /**
+     * Inicia un preventivo que ya tiene un inspector asignado.
+     *
+     * <p>Solo permite la transición desde {@link PreventiveStatus#ASSIGNED}. La entidad registra
+     * el momento de inicio y cambia el estado a {@link PreventiveStatus#IN_PROGRESS}.</p>
+     *
+     * @param id identificador del preventivo que se desea iniciar
+     * @return DTO público del preventivo iniciado
+     * @throws PreventiveNotFoundException si no existe un preventivo con el identificador indicado
+     * @throws InvalidPreventiveStatusTransitionException si el preventivo no está asignado
+     */
+    @Transactional
+    public PreventiveResponse startPreventive(long id) {
+        Preventive preventive = preventiveRepository.findById(id)
+                .orElseThrow(() -> new PreventiveNotFoundException(
+                        "Preventivo con " + id + " no encontrado."
+                ));
+
+        if (preventive.getStatus() != PreventiveStatus.ASSIGNED) {
+            throw new InvalidPreventiveStatusTransitionException(
+                    "Solo se puede iniciar un preventivo asignado."
+            );
+        }
+
+        preventive.start();
+        preventiveRepository.flush();
+
+        return PreventiveMapper.toResponse(preventive);
+    }
+
+    /**
+     * Registra o corrige el trabajo realizado en un preventivo en curso.
+     *
+     * <p>Solo permite registrar el informe mientras el preventivo está en
+     * {@link PreventiveStatus#IN_PROGRESS}; esta operación no modifica su estado.</p>
+     *
+     * @param id identificador del preventivo en el que se registra el trabajo
+     * @param request informe de trabajo validado y normalizado
+     * @return DTO público del preventivo con el trabajo realizado actualizado
+     * @throws PreventiveNotFoundException si no existe un preventivo con el identificador indicado
+     * @throws InvalidPreventiveStatusTransitionException si el preventivo no está en progreso
+     */
+    @Transactional
+    public PreventiveResponse recordWorkPerformed(
+            long id,
+            RecordPreventiveWorkRequest request
+    ) {
+        Preventive preventive = preventiveRepository.findById(id)
+                .orElseThrow(() -> new PreventiveNotFoundException(
+                        "Preventivo con " + id + " no encontrado."
+                ));
+
+        if (preventive.getStatus() != PreventiveStatus.IN_PROGRESS) {
+            throw new InvalidPreventiveStatusTransitionException(
+                    "Solo se puede guardar un trabajo en un preventivo en progreso."
+            );
+        }
+
+        preventive.recordWorkPerformed(request.workPerformed());
+        preventiveRepository.flush();
+
+        return PreventiveMapper.toResponse(preventive);
+    }
+
+    /**
+     * Completa un preventivo en curso que tiene trabajo registrado.
+     *
+     * <p>Solo permite la transición desde {@link PreventiveStatus#IN_PROGRESS}. La entidad
+     * comprueba que exista un informe de trabajo antes de registrar la finalización y cambiar el
+     * estado a {@link PreventiveStatus#COMPLETED}.</p>
+     *
+     * @param id identificador del preventivo que se desea completar
+     * @return DTO público del preventivo completado
+     * @throws PreventiveNotFoundException si no existe un preventivo con el identificador indicado
+     * @throws InvalidPreventiveStatusTransitionException si el preventivo no está en progreso
+     * @throws PreventiveWorkReportRequiredException si no se ha registrado trabajo realizado
+     */
+    @Transactional
+    public PreventiveResponse completePreventive(long id) {
+        Preventive preventive = preventiveRepository.findById(id)
+                .orElseThrow(() -> new PreventiveNotFoundException(
+                        "Preventivo con " + id + " no encontrado."
+                ));
+
+        if (preventive.getStatus() != PreventiveStatus.IN_PROGRESS) {
+            throw new InvalidPreventiveStatusTransitionException(
+                    "Solo se puede completar un preventivo en progreso."
+            );
+        }
+
+        preventive.complete();
         preventiveRepository.flush();
 
         return PreventiveMapper.toResponse(preventive);

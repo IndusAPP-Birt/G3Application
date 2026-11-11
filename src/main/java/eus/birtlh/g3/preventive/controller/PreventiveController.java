@@ -7,6 +7,7 @@ import eus.birtlh.g3.preventive.PreventiveService;
 import eus.birtlh.g3.preventive.PreventiveStatus;
 import eus.birtlh.g3.preventive.dto.AdminAssignInspectorToPreventiveRequest;
 import eus.birtlh.g3.preventive.dto.PreventiveResponse;
+import eus.birtlh.g3.preventive.dto.RecordPreventiveWorkRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -30,10 +31,6 @@ import java.time.LocalDate;
 public class PreventiveController {
 
     private final PreventiveService preventiveService;
-
-    // TODO: Añadir PUT /{id}/start para iniciar un preventivo asignado.
-    // TODO: Añadir PUT /{id}/work-performed para registrar el trabajo realizado.
-    // TODO: Añadir PUT /{id}/completion para completar un preventivo con trabajo registrado.
 
     /**
      * Obtiene una página de preventivos registrados.
@@ -304,6 +301,70 @@ public class PreventiveController {
                 ApiSuccessResponse.success(
                         preventiveService.assignInspectorToPreventive(id, request),
                         "Inspector asignado correctamente."
+                )
+        );
+    }
+
+    /**
+     * Inicia un preventivo que ya tiene un inspector asignado.
+     *
+     * @param id identificador positivo del preventivo que se desea iniciar
+     * @return respuesta HTTP 200 con el preventivo iniciado y su marca temporal
+     */
+    @PutMapping("/{id}/start")
+    public ResponseEntity<ApiSuccessResponse<PreventiveResponse>> startPreventive(
+            @PathVariable
+            @Positive(message = "El identificador debe ser mayor que cero.")
+            Long id
+    ) {
+        return ResponseEntity.ok(
+                ApiSuccessResponse.success(
+                        preventiveService.startPreventive(id),
+                        "Preventivo iniciado correctamente."
+                )
+        );
+    }
+
+    /**
+     * Registra o corrige el trabajo realizado en un preventivo en curso.
+     *
+     * @param id identificador positivo del preventivo en el que se registra el trabajo
+     * @param request informe de trabajo validado que se desea registrar
+     * @return respuesta HTTP 200 con el preventivo actualizado y su marca temporal
+     */
+    @PutMapping("/{id}/work-performed")
+    public ResponseEntity<ApiSuccessResponse<PreventiveResponse>> recordWorkPerformed(
+            @PathVariable
+            @Positive(message = "El identificador debe ser mayor que cero.")
+            Long id,
+
+            @Valid
+            @RequestBody RecordPreventiveWorkRequest request
+    ) {
+        return ResponseEntity.ok(
+                ApiSuccessResponse.success(
+                        preventiveService.recordWorkPerformed(id,  request),
+                        "Trabajo registrado correctamente."
+                )
+        );
+    }
+
+    /**
+     * Completa un preventivo en curso que tiene trabajo registrado.
+     *
+     * @param id identificador positivo del preventivo que se desea completar
+     * @return respuesta HTTP 200 con el preventivo completado y su marca temporal
+     */
+    @PutMapping("/{id}/completion")
+    public ResponseEntity<ApiSuccessResponse<PreventiveResponse>> completePreventive(
+            @PathVariable
+            @Positive(message = "El identificador debe ser mayor que cero.")
+            Long id
+    ) {
+        return ResponseEntity.ok(
+                ApiSuccessResponse.success(
+                        preventiveService.completePreventive(id),
+                        "Preventivo completado correctamente."
                 )
         );
     }
