@@ -11,21 +11,19 @@ import java.time.Instant;
 import java.time.LocalDate;
 
 /**
- * Entidad persistente que representa una ejecución concreta de un {@link PreventivePlan}.
+ * Ejecución concreta de una asignación de plantilla preventiva a una máquina.
  *
- * <p>El preventivo conserva de forma inmutable el plan de origen y su fecha prevista. Se crea en
- * estado {@link PreventiveStatus#PENDING}, puede asignarse a un inspector, iniciarse y
- * completarse tras registrar el trabajo realizado. La validación de las transiciones y la
- * comprobación de que el usuario asignado tiene rol de inspector corresponden a los casos de uso
- * del módulo {@code preventive}.</p>
+ * <p>Conserva una instantánea del nombre y la descripción de la plantilla para preservar el
+ * contexto histórico de la ejecución. Su ciclo de trabajo avanza de pendiente a asignado, en
+ * progreso y completado.</p>
  */
 @Entity
 @Table(
         name = "preventives",
         indexes = {
                 @Index(
-                        name = "preventives_plan_due_date_key",
-                        columnList = "preventive_plan_id, due_date",
+                        name = "preventives_assignment_due_date_key",
+                        columnList = "preventive_plan_assignment_id, due_date",
                         unique = true
                 )
         }
@@ -39,15 +37,21 @@ public class Preventive {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "preventive_plan_id", nullable = false, updatable = false)
-    private PreventivePlan preventivePlan;
+    @JoinColumn(name = "preventive_plan_assignment_id", nullable = false, updatable = false)
+    private PreventivePlanAssignment preventivePlanAssignment;
+
+    @Column(name = "plan_name", nullable = false, length = 150, updatable = false)
+    private String planName;
+
+    @Column(name = "plan_description", length = 1_000, updatable = false)
+    private String planDescription;
+
+    @Column(name = "due_date", nullable = false, updatable = false)
+    private LocalDate dueDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assigned_inspector_id")
     private User assignedInspector;
-
-    @Column(name = "due_date", nullable = false, updatable = false)
-    private LocalDate dueDate;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -72,13 +76,18 @@ public class Preventive {
     private Instant updatedAt;
 
     /**
-     * Crea un preventivo pendiente a partir de un plan y una fecha prevista de ejecución.
+     * Crea un preventivo pendiente desde una asignación y una fecha prevista de ejecución.
      *
-     * @param preventivePlan plan preventivo del que procede esta ejecución
+     * <p>Conserva una copia del nombre y la descripción de la plantilla para preservar el
+     * contexto histórico de la ejecución.</p>
+     *
+     * @param preventivePlanAssignment asignación de plantilla y máquina que origina el preventivo
      * @param dueDate fecha prevista inmutable para realizar el preventivo
      */
-    Preventive(PreventivePlan preventivePlan, LocalDate dueDate) {
-        this.preventivePlan = preventivePlan;
+    Preventive(PreventivePlanAssignment preventivePlanAssignment, LocalDate dueDate) {
+        this.preventivePlanAssignment = preventivePlanAssignment;
+        this.planName = preventivePlanAssignment.getPreventivePlan().getName();
+        this.planDescription = preventivePlanAssignment.getPreventivePlan().getDescription();
         this.dueDate = dueDate;
     }
 

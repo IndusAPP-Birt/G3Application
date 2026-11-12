@@ -91,9 +91,9 @@ public class PreventiveController {
     }
 
     /**
-     * Obtiene una página de preventivos asociados a un plan preventivo.
+     * Obtiene una página de preventivos asociados a una plantilla preventiva.
      *
-     * @param preventivePlanId identificador positivo del plan preventivo con el que filtrar
+     * @param preventivePlanId identificador positivo de la plantilla preventiva con la que filtrar
      * @param page índice de página basado en cero
      * @param size número de preventivos por página
      * @return respuesta HTTP 200 con la página de preventivos y su marca temporal

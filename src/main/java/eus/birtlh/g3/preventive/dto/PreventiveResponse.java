@@ -9,11 +9,15 @@ import java.time.LocalDate;
 /**
  * Datos públicos de una ejecución preventiva persistida, expuestos por la API.
  *
- * <p>Incluye el plan de origen y el inspector asignado mediante sus representaciones públicas.
- * El inspector puede ser {@code null} mientras el preventivo esté pendiente de asignación.</p>
+ * <p>Incluye la asignación de plantilla y máquina de la que procede, junto con una instantánea
+ * histórica de los datos de la plantilla. El inspector puede ser {@code null} mientras el
+ * preventivo esté pendiente de asignación.</p>
  *
  * @param id identificador único del preventivo
- * @param preventivePlan plan preventivo del que procede la ejecución
+ * @param preventivePlanAssignment asignación de plantilla y máquina que origina la ejecución
+ * @param planName nombre histórico de la plantilla en el momento de generar el preventivo
+ * @param planDescription descripción histórica de la plantilla en el momento de generar el
+ *                        preventivo
  * @param assignedInspector inspector responsable; puede ser {@code null}
  * @param dueDate fecha prevista para realizar el preventivo
  * @param status estado actual de la ejecución
@@ -26,7 +30,9 @@ import java.time.LocalDate;
  */
 public record PreventiveResponse(
         long id,
-        PreventivePlanResponse preventivePlan,
+        PreventivePlanAssignmentResponse preventivePlanAssignment,
+        String planName,
+        String planDescription,
         UserResponse assignedInspector,
         LocalDate dueDate,
         PreventiveStatus status,

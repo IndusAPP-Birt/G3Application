@@ -15,14 +15,9 @@ import java.time.LocalDate;
  */
 public interface PreventiveRepository extends JpaRepository<Preventive, Long> {
 
-    /**
-     * Busca los preventivos asociados a un plan preventivo.
-     *
-     * @param id identificador del plan preventivo con el que filtrar
-     * @param pageable configuración de página, tamaño y orden solicitados
-     * @return página de preventivos del plan; puede no contener resultados
-     */
-    Page<Preventive> findByPreventivePlanId(Long id, Pageable pageable);
+    Page<Preventive> findByPreventivePlanAssignmentPreventivePlanId(Long preventivePlanId, Pageable pageable);
+
+    Page<Preventive> findByPreventivePlanAssignmentMachineId(Long planId, Pageable pageable);
 
     /**
      * Busca los preventivos según su estado.

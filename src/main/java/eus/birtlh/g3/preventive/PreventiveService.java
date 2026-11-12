@@ -41,8 +41,8 @@ public class PreventiveService {
      * Obtiene una página de preventivos como DTOs de respuesta.
      *
      * <p>Conserva el orden ascendente por identificador para que los resultados sean estables
-     * entre páginas. La transacción mantiene disponibles el plan y el inspector asociados durante
-     * la conversión mediante {@link PreventiveMapper}.</p>
+     * entre páginas. La transacción mantiene disponibles la asignación de origen y el inspector
+     * asociado durante la conversión mediante {@link PreventiveMapper}.</p>
      *
      * @param page índice de página basado en cero
      * @param size número de preventivos por página
@@ -77,22 +77,22 @@ public class PreventiveService {
     public PreventiveResponse getPreventiveById(Long id) {
         Preventive preventive = preventiveRepository.findById(id)
                 .orElseThrow(() -> new PreventiveNotFoundException(
-                        "Preventivo con " + id + " no encontrado."
+                        "Preventivo con id " + id + " no encontrado."
                 ));
 
         return PreventiveMapper.toResponse(preventive);
     }
 
     /**
-     * Obtiene una página de preventivos asociados a un plan preventivo.
+     * Obtiene una página de preventivos asociados a una plantilla preventiva.
      *
      * <p>Conserva el orden ascendente por identificador para que los resultados sean estables
      * entre páginas.</p>
      *
      * @param page índice de página basado en cero
      * @param size número de preventivos por página
-     * @param preventivePlanId identificador del plan preventivo con el que filtrar
-     * @return página de preventivos del plan; su contenido puede estar vacío
+     * @param preventivePlanId identificador de la plantilla preventiva con la que filtrar
+     * @return página de preventivos de la plantilla; su contenido puede estar vacío
      */
     @Transactional(readOnly = true)
     public PageResponse<PreventiveResponse> getPreventivesByPreventivePlanId(
@@ -100,7 +100,7 @@ public class PreventiveService {
             int size,
             long preventivePlanId
     ) {
-        Page<Preventive> preventives = preventiveRepository.findByPreventivePlanId(
+        Page<Preventive> preventives = preventiveRepository.findByPreventivePlanAssignmentPreventivePlanId(
                 preventivePlanId,
                 PageRequest.of(page, size, Sort.by("id").ascending())
         );
