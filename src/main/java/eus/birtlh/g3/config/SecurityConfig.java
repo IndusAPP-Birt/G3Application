@@ -13,8 +13,8 @@ import org.springframework.security.web.SecurityFilterChain;
  * Configuración de autorización HTTP de la aplicación.
  *
  * <p>Mientras se implementa la autenticación, permite temporalmente el acceso público a la
- * consulta, creación y actualización de usuarios, máquinas, planes preventivos y ejecuciones
- * preventivas, y exige autenticación para el resto de rutas.</p>
+ * consulta, creación y actualización de usuarios, máquinas, planes preventivos, asignaciones de
+ * planes preventivos y ejecuciones preventivas, y exige autenticación para el resto de rutas.</p>
  */
 @Configuration
 public class SecurityConfig {
@@ -40,18 +40,22 @@ public class SecurityConfig {
                                 "/api/machines/**",
                                 "/api/preventive-plans",
                                 "/api/preventive-plans/**",
+                                "/api/preventive-plan-assignments",
+                                "/api/preventive-plan-assignments/**",
                                 "/api/preventives",
                                 "/api/preventives/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.POST,
                                 "/api/users",
                                 "/api/machines",
-                                "/api/preventive-plans"
+                                "/api/preventive-plans",
+                                "/api/preventive-plan-assignments"
                         ).permitAll()
                         .requestMatchers(HttpMethod.PUT,
                                 "/api/users/**",
                                 "/api/machines/**",
                                 "/api/preventive-plans/**",
+                                "/api/preventive-plan-assignments/**",
                                 "/api/preventives/**"
                         ).permitAll()
                         .anyRequest().authenticated()

@@ -78,6 +78,20 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Devuelve una respuesta HTTP 404 cuando no existe la asignación preventiva solicitada.
+     *
+     * @param ex excepción que identifica la asignación preventiva no encontrada
+     * @return respuesta de error con estado HTTP 404
+     */
+    @ExceptionHandler(PreventivePlanAssignmentNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handlePreventivePlanAssignmentNotFoundException(
+            PreventivePlanAssignmentNotFoundException ex
+    ) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiErrorResponse.error(ex.getMessage()));
+    }
+
+    /**
      * Devuelve una respuesta HTTP 404 cuando no existe el preventivo solicitado.
      *
      * @param ex excepción que identifica el preventivo no encontrado
