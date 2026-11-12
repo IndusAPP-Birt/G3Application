@@ -4,8 +4,10 @@ import eus.birtlh.g3.machine.MachineService;
 import eus.birtlh.g3.machine.dto.AdminCreateMachineRequest;
 import eus.birtlh.g3.machine.dto.MachineResponse;
 import eus.birtlh.g3.preventive.dto.AdminCreatePreventivePlanRequest;
+import eus.birtlh.g3.preventive.dto.AdminCreatePreventivePlanAssignmentRequest;
+import eus.birtlh.g3.preventive.dto.PreventivePlanAssignmentResponse;
 import eus.birtlh.g3.preventive.dto.PreventivePlanResponse;
-import eus.birtlh.g3.preventive.repository.PreventivePlanRepository;
+import eus.birtlh.g3.preventive.repository.PreventivePlanAssignmentRepository;
 import eus.birtlh.g3.preventive.repository.PreventiveRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,13 +37,16 @@ class PreventiveGenerationServiceTest {
     private PreventivePlanService preventivePlanService;
 
     @Autowired
-    private PreventivePlanRepository preventivePlanRepository;
+    private PreventivePlanAssignmentService preventivePlanAssignmentService;
+
+    @Autowired
+    private PreventivePlanAssignmentRepository preventivePlanAssignmentRepository;
 
     @Autowired
     private PreventiveRepository preventiveRepository;
 
     @Test
-    void generatesPendingPreventiveAndAdvancesPlanDueDate() {
+    void generatesPendingPreventiveAndAdvancesAssignmentDueDate() {
         MachineResponse machine = machineService.createMachine(
                 new AdminCreateMachineRequest(
                         "GEN-TEST-001",
@@ -56,22 +61,31 @@ class PreventiveGenerationServiceTest {
 
         PreventivePlanResponse plan = preventivePlanService.createPreventivePlan(
                 new AdminCreatePreventivePlanRequest(
-                        machine.id(),
                         "Plan de prueba de generación",
-                        "Plan utilizado por la prueba de generación automática.",
-                        30,
-                        7,
-                        DUE_DATE
+                        "Plan utilizado por la prueba de generación automática."
                 )
         );
 
+        PreventivePlanAssignmentResponse assignment =
+                preventivePlanAssignmentService.createPreventivePlanAssignment(
+                        new AdminCreatePreventivePlanAssignmentRequest(
+                                plan.id(),
+                                machine.id(),
+                                30,
+                                7,
+                                DUE_DATE
+                        )
+                );
+
         int generatedPreventives = preventiveGenerationService.generatePendingPreventives(TODAY);
 
-        Page<Preventive> preventives = preventiveRepository.findByPreventivePlanId(
+        Page<Preventive> preventives = preventiveRepository.findByPreventivePlanAssignmentPreventivePlanId(
                 plan.id(),
                 PageRequest.of(0, 10)
         );
-        PreventivePlan updatedPlan = preventivePlanRepository.findById(plan.id()).orElseThrow();
+        PreventivePlanAssignment updatedAssignment = preventivePlanAssignmentRepository
+                .findById(assignment.id())
+                .orElseThrow();
 
         assertThat(generatedPreventives).isEqualTo(1);
         assertThat(preventives.getContent())
@@ -80,6 +94,6 @@ class PreventiveGenerationServiceTest {
                     assertThat(preventive.getStatus()).isEqualTo(PreventiveStatus.PENDING);
                     assertThat(preventive.getDueDate()).isEqualTo(DUE_DATE);
                 });
-        assertThat(updatedPlan.getNextDueDate()).isEqualTo(DUE_DATE.plusDays(30));
+        assertThat(updatedAssignment.getNextDueDate()).isEqualTo(DUE_DATE.plusDays(30));
     }
 }

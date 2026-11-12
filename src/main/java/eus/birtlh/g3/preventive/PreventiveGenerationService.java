@@ -1,6 +1,6 @@
 package eus.birtlh.g3.preventive;
 
-import eus.birtlh.g3.preventive.repository.PreventivePlanRepository;
+import eus.birtlh.g3.preventive.repository.PreventivePlanAssignmentRepository;
 import eus.birtlh.g3.preventive.repository.PreventiveRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -12,7 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 
 /**
- * Servicio que genera ejecuciones preventivas a partir de los planes activos.
+ * Servicio que genera ejecuciones preventivas a partir de las asignaciones activas de plantillas
+ * a máquinas.
  */
 @Service
 @RequiredArgsConstructor
@@ -20,14 +21,14 @@ public class PreventiveGenerationService {
 
     private static final int BATCH_SIZE = 100;
 
-    private final PreventivePlanRepository preventivePlanRepository;
+    private final PreventivePlanAssignmentRepository preventivePlanAssignmentRepository;
     private final PreventiveRepository preventiveRepository;
 
     /**
-     * Genera preventivos pendientes para los planes activos que han entrado en su ventana de
-     * aviso.
+     * Genera preventivos pendientes para las asignaciones activas que han entrado en su ventana
+     * de aviso.
      *
-     * <p>Tras generar un preventivo, avanza la próxima fecha prevista del plan según su
+     * <p>Tras generar un preventivo, avanza la próxima fecha prevista de la asignación según su
      * intervalo configurado.</p>
      *
      * @param today fecha de referencia para evaluar la planificación
@@ -37,29 +38,32 @@ public class PreventiveGenerationService {
     public int generatePendingPreventives(LocalDate today) {
         int generatedPreventives = 0;
         int pageNumber = 0;
-        Page<PreventivePlan> preventivePlans;
+        Page<PreventivePlanAssignment> preventivePlanAssignments;
 
         do {
-            preventivePlans = preventivePlanRepository.findByActive(
+            preventivePlanAssignments = preventivePlanAssignmentRepository.findByActive(
                     true,
                     PageRequest.of(pageNumber, BATCH_SIZE, Sort.by("id").ascending())
             );
 
-            for (PreventivePlan preventivePlan : preventivePlans) {
-                LocalDate generationDate = today.plusDays(preventivePlan.getNoticeDays());
+            for (PreventivePlanAssignment preventivePlanAssignment : preventivePlanAssignments) {
+                LocalDate generationDate = today.plusDays(preventivePlanAssignment.getNoticeDays());
 
-                if (!preventivePlan.getNextDueDate().isAfter(generationDate)) {
+                if (!preventivePlanAssignment.getNextDueDate().isAfter(generationDate)) {
                     preventiveRepository.save(
-                            new Preventive(preventivePlan, preventivePlan.getNextDueDate())
+                            new Preventive(
+                                    preventivePlanAssignment,
+                                    preventivePlanAssignment.getNextDueDate()
+                            )
                     );
 
-                    preventivePlan.advanceNextDueDate();
+                    preventivePlanAssignment.advanceNextDueDate();
                     generatedPreventives++;
                 }
             }
 
             pageNumber++;
-        } while (preventivePlans.hasNext());
+        } while (preventivePlanAssignments.hasNext());
 
         return generatedPreventives;
     }
