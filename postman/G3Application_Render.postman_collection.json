@@ -1,0 +1,69 @@
+{
+  "info": {
+    "_postman_id": "25b8305c-39c7-4e77-aa68-f90f5afdb94c",
+    "name": "G3 API - Render",
+    "description": "Colección completa para el servicio desplegado en Render. Sustituye baseUrl por la URL pública real del servicio antes de usarla.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key":"baseUrl","value":"https://g3application.onrender.com"},
+    {"key":"page","value":"0"}, {"key":"size","value":"20"},
+    {"key":"userId","value":"1"}, {"key":"inspectorId","value":"2"},
+    {"key":"machineId","value":"1"}, {"key":"preventivePlanId","value":"1"}, {"key":"preventiveId","value":"1"},
+    {"key":"emailSearchTerm","value":"inspector"}, {"key":"enabled","value":"true"}, {"key":"role","value":"ROLE_INSPECTOR"},
+    {"key":"assetCodeSearchTerm","value":"MAQ"}, {"key":"serialNumberSearchTerm","value":"SN"}, {"key":"machineStatus","value":"ACTIVE"},
+    {"key":"planActive","value":"true"}, {"key":"planNameSearchTerm","value":"Revisión"}, {"key":"preventiveStatus","value":"PENDING"},
+    {"key":"from","value":"2026-01-01"}, {"key":"to","value":"2026-12-31"},
+    {"key":"newUserEmail","value":"postman@example.com"}, {"key":"newMachineAssetCode","value":"MAQ-POSTMAN"}, {"key":"newMachineSerialNumber","value":"SN-POSTMAN"}
+  ],
+  "item": [
+    {"name":"Observabilidad","item":[
+      {"name":"Comprobar salud","request":{"method":"GET","header":[],"url":"{{baseUrl}}/actuator/health"}}
+    ]},
+    {"name":"Usuarios","item":[
+      {"name":"Listar roles","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/users/roles"}},
+      {"name":"Listar usuarios","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/users?page={{page}}&size={{size}}"}},
+      {"name":"Obtener usuario","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/users/{{userId}}"}},
+      {"name":"Buscar por correo","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/users/by-email?email={{emailSearchTerm}}&page={{page}}&size={{size}}"}},
+      {"name":"Filtrar por estado","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/users/by-status?enabled={{enabled}}&page={{page}}&size={{size}}"}},
+      {"name":"Filtrar por rol","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/users/by-role?role={{role}}&page={{page}}&size={{size}}"}},
+      {"name":"Crear usuario","request":{"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"name\": \"Postman\",\n  \"lastName\": \"Demo\",\n  \"email\": \"{{newUserEmail}}\",\n  \"password\": \"Password123!\",\n  \"role\": \"ROLE_INSPECTOR\"\n}"},"url":"{{baseUrl}}/api/users"}},
+      {"name":"Actualizar usuario","request":{"method":"PUT","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"name\": \"Postman actualizado\",\n  \"lastName\": \"Demo\",\n  \"email\": \"{{newUserEmail}}\",\n  \"role\": \"ROLE_INSPECTOR\",\n  \"enabled\": true\n}"},"url":"{{baseUrl}}/api/users/{{userId}}"}},
+      {"name":"Restablecer contraseña","request":{"method":"PUT","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"password\": \"NuevaClave123!\"\n}"},"url":"{{baseUrl}}/api/users/{{userId}}/password"}}
+    ]},
+    {"name":"Máquinas","item":[
+      {"name":"Listar estados","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/machines/statuses"}},
+      {"name":"Listar máquinas","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/machines?page={{page}}&size={{size}}"}},
+      {"name":"Obtener máquina","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/machines/{{machineId}}"}},
+      {"name":"Buscar por código","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/machines/by-asset-code?assetCode={{assetCodeSearchTerm}}&page={{page}}&size={{size}}"}},
+      {"name":"Buscar por serie","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/machines/by-serial-number?serialNumber={{serialNumberSearchTerm}}&page={{page}}&size={{size}}"}},
+      {"name":"Filtrar por estado","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/machines/by-status?status={{machineStatus}}&page={{page}}&size={{size}}"}},
+      {"name":"Crear máquina","request":{"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"assetCode\": \"{{newMachineAssetCode}}\",\n  \"name\": \"Máquina de prueba Postman\",\n  \"manufacturer\": \"Postman Industries\",\n  \"model\": \"PM-100\",\n  \"serialNumber\": \"{{newMachineSerialNumber}}\",\n  \"location\": \"Laboratorio de pruebas\",\n  \"commissionedAt\": \"2025-01-15\"\n}"},"url":"{{baseUrl}}/api/machines"}},
+      {"name":"Actualizar máquina","request":{"method":"PUT","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"name\": \"Máquina Postman actualizada\",\n  \"manufacturer\": \"Postman Industries\",\n  \"model\": \"PM-200\",\n  \"serialNumber\": \"{{newMachineSerialNumber}}\",\n  \"location\": \"Laboratorio de pruebas\",\n  \"status\": \"ACTIVE\"\n}"},"url":"{{baseUrl}}/api/machines/{{machineId}}"}},
+      {"name":"Actualizar código patrimonial","request":{"method":"PUT","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"assetCode\": \"MAQ-POSTMAN-ACTUALIZADA\"\n}"},"url":"{{baseUrl}}/api/machines/{{machineId}}/asset-code"}}
+    ]},
+    {"name":"Planes preventivos","item":[
+      {"name":"Listar planes","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/preventive-plans?page={{page}}&size={{size}}"}},
+      {"name":"Obtener plan","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/preventive-plans/{{preventivePlanId}}"}},
+      {"name":"Filtrar por máquina","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/preventive-plans/by-machine/{{machineId}}?page={{page}}&size={{size}}"}},
+      {"name":"Filtrar por activación","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/preventive-plans/by-status?active={{planActive}}&page={{page}}&size={{size}}"}},
+      {"name":"Buscar por nombre","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/preventive-plans/by-name?name={{planNameSearchTerm}}&page={{page}}&size={{size}}"}},
+      {"name":"Filtrar por próxima fecha","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/preventive-plans/by-next-due-date?from={{from}}&to={{to}}&page={{page}}&size={{size}}"}},
+      {"name":"Crear plan","request":{"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"machineId\": {{machineId}},\n  \"name\": \"Revisión periódica Postman\",\n  \"description\": \"Comprobación creada desde Postman.\",\n  \"intervalDays\": 30,\n  \"noticeDays\": 7,\n  \"nextDueDate\": \"2026-12-01\"\n}"},"url":"{{baseUrl}}/api/preventive-plans"}},
+      {"name":"Actualizar plan","request":{"method":"PUT","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"name\": \"Revisión periódica Postman actualizada\",\n  \"description\": \"Configuración actualizada desde Postman.\",\n  \"intervalDays\": 30,\n  \"noticeDays\": 7,\n  \"active\": true\n}"},"url":"{{baseUrl}}/api/preventive-plans/{{preventivePlanId}}"}}
+    ]},
+    {"name":"Preventivos","item":[
+      {"name":"Listar preventivos","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/preventives?page={{page}}&size={{size}}"}},
+      {"name":"Listar estados de preventivo","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/preventives/statuses"}},
+      {"name":"Obtener preventivo","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/preventives/{{preventiveId}}"}},
+      {"name":"Filtrar por plan","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/preventives/by-plan/{{preventivePlanId}}?page={{page}}&size={{size}}"}},
+      {"name":"Filtrar por estado","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/preventives/by-status?status={{preventiveStatus}}&page={{page}}&size={{size}}"}},
+      {"name":"Filtrar por inspector","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/preventives/by-inspector/{{inspectorId}}?page={{page}}&size={{size}}"}},
+      {"name":"Filtrar por fecha prevista","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/preventives/by-due-date?from={{from}}&to={{to}}&page={{page}}&size={{size}}"}},
+      {"name":"Asignar inspector","request":{"method":"PUT","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"inspectorId\": {{inspectorId}}\n}"},"url":"{{baseUrl}}/api/preventives/{{preventiveId}}/assignment"}},
+      {"name":"Iniciar preventivo","request":{"method":"PUT","header":[],"url":"{{baseUrl}}/api/preventives/{{preventiveId}}/start"}},
+      {"name":"Registrar trabajo realizado","request":{"method":"PUT","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"workPerformed\": \"Inspección realizada, componentes comprobados y equipo validado.\"\n}"},"url":"{{baseUrl}}/api/preventives/{{preventiveId}}/work-performed"}},
+      {"name":"Completar preventivo","request":{"method":"PUT","header":[],"url":"{{baseUrl}}/api/preventives/{{preventiveId}}/completion"}}
+    ]}
+  ]
+}
