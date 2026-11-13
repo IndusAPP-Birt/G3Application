@@ -1,8 +1,8 @@
 # G3 Application
 
-API REST para la administración de usuarios, maquinaria industrial, planes de mantenimiento y sus
-ejecuciones preventivas. La API emplea recursos JSON, validación de entrada, paginación homogénea
-y respuestas con un contrato común.
+API REST para la administración de usuarios, activos industriales, plantillas preventivas, su
+planificación por máquina y sus ejecuciones. La API emplea recursos JSON, validación de entrada,
+paginación homogénea y respuestas con un contrato común.
 
 ## Convenciones de la API
 
@@ -86,13 +86,12 @@ RETIRED
 
 ## Planes preventivos
 
-Un plan preventivo pertenece de forma permanente a una máquina y define una recurrencia de
-mantenimiento. Contiene nombre, descripción opcional, intervalo entre ejecuciones, margen de
-aviso, próxima fecha prevista, estado de activación y marcas temporales.
+Un plan preventivo es una plantilla independiente de las máquinas. Define el nombre y las
+acciones o instrucciones de mantenimiento que se describen en su contenido. Puede existir sin
+estar asignado a ningún activo y reutilizarse en varias máquinas.
 
-La máquina asociada no puede cambiarse tras crear el plan. La próxima fecha prevista forma parte
-de la planificación y se gestiona de forma independiente de la actualización administrativa del
-plan.
+Su estado de activación controla si la plantilla puede utilizarse para nuevas asignaciones. No
+incluye intervalos, avisos ni fechas de ejecución: esa configuración corresponde a la asignación.
 
 ### Endpoints
 
@@ -100,18 +99,45 @@ plan.
 |---|---|---|
 | `GET` | `/api/preventive-plans` | Obtiene planes preventivos paginados. |
 | `GET` | `/api/preventive-plans/{id}` | Obtiene un plan preventivo por identificador. |
-| `GET` | `/api/preventive-plans/by-machine/{machineId}` | Filtra planes por máquina. |
 | `GET` | `/api/preventive-plans/by-status` | Filtra planes por estado de activación. |
 | `GET` | `/api/preventive-plans/by-name` | Filtra por coincidencia parcial de nombre. |
-| `GET` | `/api/preventive-plans/by-next-due-date` | Filtra por un rango inclusivo de próxima fecha prevista. |
 | `POST` | `/api/preventive-plans` | Crea un plan preventivo activo. |
-| `PUT` | `/api/preventive-plans/{id}` | Actualiza la configuración y el estado de activación. |
+| `PUT` | `/api/preventive-plans/{id}` | Actualiza el contenido y el estado de activación. |
+
+## Asignaciones de planes preventivos
+
+Una asignación preventiva relaciona exactamente una plantilla y una máquina. Es la entidad que
+define cómo se aplica el plan a ese activo concreto:
+
+```text
+PreventivePlanAssignment
+├── plantilla preventiva
+├── máquina
+├── intervalDays
+├── noticeDays
+├── nextDueDate
+└── active
+```
+
+Una máquina puede tener varias asignaciones y una plantilla puede asignarse a varias máquinas.
+Solo puede existir una asignación por cada pareja máquina–plantilla. La plantilla y la máquina son
+inmutables una vez creada la asignación; el calendario y su activación sí se pueden actualizar.
+
+| Método | Ruta | Operación |
+|---|---|---|
+| `GET` | `/api/preventive-plan-assignments` | Obtiene asignaciones paginadas. |
+| `GET` | `/api/preventive-plan-assignments/{id}` | Obtiene una asignación por identificador. |
+| `GET` | `/api/preventive-plan-assignments/by-status` | Filtra asignaciones por activación. |
+| `GET` | `/api/preventive-plan-assignments/by-machine/{machineId}` | Filtra asignaciones por máquina. |
+| `GET` | `/api/preventive-plan-assignments/by-preventive-plan/{preventivePlanId}` | Filtra asignaciones por plantilla. |
+| `POST` | `/api/preventive-plan-assignments` | Asigna una plantilla a una máquina con su calendario inicial. |
+| `PUT` | `/api/preventive-plan-assignments/{id}` | Actualiza el calendario y la activación. |
 
 ## Ejecuciones preventivas
 
-Un preventivo representa la ejecución concreta de un plan para una fecha prevista. Conserva de
-forma inmutable el plan de origen y la fecha prevista, e incorpora el inspector asignado, el
-trabajo realizado y las marcas temporales de cada transición.
+Un preventivo representa una ejecución concreta generada desde una asignación. Conserva la
+asignación de origen, la fecha prevista y una instantánea inmutable del nombre y la descripción
+de la plantilla. Así se preserva el contexto histórico aunque la plantilla se modifique después.
 
 ```text
 PENDING → ASSIGNED → IN_PROGRESS → COMPLETED
@@ -127,8 +153,9 @@ PENDING → ASSIGNED → IN_PROGRESS → COMPLETED
 | Método | Ruta | Operación |
 |---|---|---|
 | `GET` | `/api/preventives` | Obtiene preventivos paginados. |
+| `GET` | `/api/preventives/statuses` | Obtiene el catálogo de estados de ejecución. |
 | `GET` | `/api/preventives/{id}` | Obtiene un preventivo por identificador. |
-| `GET` | `/api/preventives/by-plan/{preventivePlanId}` | Filtra preventivos por plan de origen. |
+| `GET` | `/api/preventives/by-plan/{preventivePlanId}` | Filtra preventivos por plantilla de origen. |
 | `GET` | `/api/preventives/by-status` | Filtra preventivos por estado. |
 | `GET` | `/api/preventives/by-inspector/{inspectorId}` | Filtra preventivos por inspector asignado. |
 | `GET` | `/api/preventives/by-due-date` | Filtra por un rango inclusivo de fecha prevista. |
@@ -139,22 +166,23 @@ PENDING → ASSIGNED → IN_PROGRESS → COMPLETED
 
 ### Generación automática
 
-Un proceso programado revisa los planes activos por lotes de hasta cien elementos. Para cada plan,
-genera un preventivo pendiente cuando su próxima fecha prevista entra en la ventana de aviso:
+Un proceso programado revisa las asignaciones activas por lotes de hasta cien elementos. Para cada
+asignación, genera un preventivo pendiente cuando su próxima fecha prevista entra en la ventana de
+aviso:
 
 ```text
 nextDueDate ≤ fecha actual + noticeDays
 ```
 
-Tras crear la ejecución, el plan avanza su próxima fecha prevista según `intervalDays`. La
-restricción formada por plan y fecha prevista impide duplicar una misma ejecución.
+Tras crear la ejecución, la asignación avanza su próxima fecha prevista según `intervalDays`. La
+restricción formada por asignación y fecha prevista impide duplicar una misma ejecución.
 
 La programación se configura mediante propiedades, que admiten sobrescritura por variables de
 entorno:
 
 | Propiedad | Variable de entorno | Valor predeterminado |
 |---|---|---|
-| `preventive.generation.cron` | `PREVENTIVE_GENERATION_CRON` | Cada cinco minutos. |
+| `preventive.generation.cron` | `PREVENTIVE_GENERATION_CRON` | Todos los días a las 06:00. |
 | `preventive.generation.zone` | `PREVENTIVE_GENERATION_ZONE` | `Europe/Madrid`. |
 
 ## Observabilidad
@@ -212,30 +240,43 @@ Las respuestas de error incluyen:
 | `415` | Tipo de contenido no compatible. |
 | `500` | Error interno no previsto. |
 
-## Flujo deseado de mantenimiento preventivo
+## Flujo de mantenimiento preventivo
 
 ```text
-Máquina
-  └── Plan preventivo (uno o varios por máquina)
-        ├── Configuración: intervalo, aviso, próxima fecha y activación
-        └── Generación automática de preventivos
-              └── Preventivo: ejecución concreta para una fecha prevista
-                    ├── Pendiente de asignación
-                    ├── Administrador asigna un inspector
-                    ├── Inspector inicia y registra el trabajo realizado
-                    └── Inspector completa la ejecución
+Máquina ──────────────────────────────── existe por sí sola
+
+Plantilla preventiva ─────────────────── existe por sí sola
+        │
+        │ se asigna a una máquina
+        ▼
+Asignación preventiva
+├── máquina + plantilla                  pareja única
+├── intervalo, aviso y próxima fecha     planificación específica del activo
+└── activa / inactiva                    permite o detiene nuevas generaciones
+        │
+        │ proceso programado
+        ▼
+Preventivo
+├── fecha prevista e instantánea del plan
+├── PENDING                              pendiente de asignar
+├── ASSIGNED                             administrador asigna un inspector
+├── IN_PROGRESS                          inspector inicia y registra el trabajo
+└── COMPLETED                            inspector completa con trabajo registrado
 ```
 
-1. Se registra una máquina como activo mantenible.
-2. Se asocian uno o varios planes preventivos a esa máquina. Cada plan representa una necesidad
-   de mantenimiento independiente y define su propia frecuencia, margen de aviso y calendario.
-3. Un proceso programado revisa los planes activos por lotes. Cuando `nextDueDate` es igual o
-   anterior a la fecha actual más `noticeDays`, genera un preventivo pendiente para esa fecha y
-   avanza la siguiente fecha del plan según su intervalo.
-4. El preventivo conserva de forma inmutable el plan de origen y la fecha prevista, creando una
-   trazabilidad estable entre la configuración y su ejecución.
-5. Un administrador asigna cada preventivo pendiente a un usuario con rol de inspector. La
-   ejecución pasa entonces por un ciclo operativo: pendiente, asignada, iniciada y completada.
-   El cierre debe registrar el trabajo realizado antes de marcarla como completada.
-6. Desactivar un plan impide generar nuevas ejecuciones, pero preserva tanto el plan como el
-   histórico de preventivos ya creados.
+1. Se registra una máquina como activo mantenible. Puede existir sin ningún mantenimiento
+   configurado.
+2. Se crean plantillas preventivas con las acciones que deben realizarse. Una plantilla tampoco
+   necesita estar asignada para existir.
+3. Un administrador crea una asignación para unir una plantilla y una máquina. En ella define el
+   intervalo, el margen de aviso, la próxima fecha y si debe generar nuevos mantenimientos.
+4. El proceso programado consulta asignaciones activas. Cuando
+   `nextDueDate ≤ fecha actual + noticeDays`, genera un preventivo pendiente y avanza la próxima
+   fecha de esa asignación según su intervalo.
+5. El preventivo conserva la asignación y una copia del contenido de la plantilla. Por tanto, un
+   cambio posterior de la plantilla no altera las instrucciones históricas de una ejecución ya
+   creada.
+6. Un administrador asigna el preventivo pendiente a un usuario con rol de inspector. El
+   inspector inicia la ejecución, registra o corrige el trabajo realizado y la completa.
+7. Desactivar una asignación impide nuevas generaciones, pero preserva la planificación y todos
+   los preventivos ya creados. Desactivar una plantilla impide emplearla en nuevas asignaciones.

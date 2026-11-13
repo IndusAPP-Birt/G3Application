@@ -54,6 +54,7 @@
     ]},
     {"name":"Preventivos","item":[
       {"name":"Listar preventivos","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/preventives?page={{page}}&size={{size}}"}},
+      {"name":"Listar estados de preventivo","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/preventives/statuses"}},
       {"name":"Obtener preventivo","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/preventives/{{preventiveId}}"}},
       {"name":"Filtrar por plan","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/preventives/by-plan/{{preventivePlanId}}?page={{page}}&size={{size}}"}},
       {"name":"Filtrar por estado","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/preventives/by-status?status={{preventiveStatus}}&page={{page}}&size={{size}}"}},

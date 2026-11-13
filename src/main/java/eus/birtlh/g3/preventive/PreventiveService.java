@@ -1,5 +1,6 @@
 package eus.birtlh.g3.preventive;
 
+import eus.birtlh.g3.common.dto.CatalogOptionResponse;
 import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.preventive.dto.AdminAssignInspectorToPreventiveRequest;
 import eus.birtlh.g3.preventive.dto.PreventiveResponse;
@@ -10,6 +11,7 @@ import eus.birtlh.g3.preventive.exceptions.PreventiveNotFoundException;
 import eus.birtlh.g3.preventive.exceptions.PreventiveWorkReportRequiredException;
 import eus.birtlh.g3.preventive.exceptions.UserIsNotInspectorException;
 import eus.birtlh.g3.preventive.mapper.PreventiveMapper;
+import eus.birtlh.g3.preventive.mapper.PreventiveStatusMapper;
 import eus.birtlh.g3.preventive.repository.PreventiveRepository;
 import eus.birtlh.g3.user.Role;
 import eus.birtlh.g3.user.User;
@@ -23,6 +25,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Servicio de aplicación que coordina los casos de uso de ejecuciones preventivas.
@@ -36,6 +40,17 @@ public class PreventiveService {
 
     private final PreventiveRepository preventiveRepository;
     private final UserRepository userRepository;
+
+    /**
+     * Obtiene todos los estados de ejecución disponibles como opciones de catálogo públicas.
+     *
+     * @return lista de estados disponibles con su código y descripción
+     */
+    public List<CatalogOptionResponse> getAllStatuses() {
+        return Arrays.stream(PreventiveStatus.values())
+                .map(PreventiveStatusMapper::toResponse)
+                .toList();
+    }
 
     /**
      * Obtiene una página de preventivos como DTOs de respuesta.

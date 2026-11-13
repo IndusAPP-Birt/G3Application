@@ -2,6 +2,7 @@ package eus.birtlh.g3.preventive.controller;
 
 import eus.birtlh.g3.common.PaginationConstants;
 import eus.birtlh.g3.common.dto.ApiSuccessResponse;
+import eus.birtlh.g3.common.dto.CatalogOptionResponse;
 import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.preventive.PreventiveService;
 import eus.birtlh.g3.preventive.PreventiveStatus;
@@ -18,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 /**
  * Controlador REST que expone las operaciones HTTP sobre ejecuciones preventivas.
@@ -31,6 +33,21 @@ import java.time.LocalDate;
 public class PreventiveController {
 
     private final PreventiveService preventiveService;
+
+    /**
+     * Obtiene los estados de ejecución disponibles para su selección en la API.
+     *
+     * @return respuesta HTTP 200 con las opciones de catálogo de estados y su marca temporal
+     */
+    @GetMapping("/statuses")
+    public ResponseEntity<ApiSuccessResponse<List<CatalogOptionResponse>>> getAllStatuses() {
+        return ResponseEntity.ok(
+                ApiSuccessResponse.success(
+                        preventiveService.getAllStatuses(),
+                        "Estados de preventivos obtenidos correctamente."
+                )
+        );
+    }
 
     /**
      * Obtiene una página de preventivos registrados.
