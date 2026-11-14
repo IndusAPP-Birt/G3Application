@@ -90,6 +90,23 @@ public class UserService {
     }
 
     /**
+     * Obtiene el usuario identificado por el JWT de la petición autenticada.
+     *
+     * @param email email normalizado incluido como sujeto del token JWT
+     * @return DTO público del usuario autenticado
+     * @throws UserNotFoundException si no existe un usuario para el sujeto autenticado
+     */
+    @Transactional(readOnly = true)
+    public UserResponse getAuthenticatedUser(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(
+                        "Usuario autenticado no encontrado."
+                ));
+
+        return UserMapper.toResponse(user);
+    }
+
+    /**
      * Obtiene una página de usuarios cuyo correo electrónico contiene el texto indicado.
      *
      * <p>Normaliza el término de búsqueda antes de consultar el repositorio y conserva el orden

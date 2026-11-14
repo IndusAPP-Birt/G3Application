@@ -34,6 +34,7 @@ Los tokens incluyen el email como sujeto y el rol del usuario en el claim `role`
 | Recurso | Administrador | Inspector | Técnico |
 |---|:---:|:---:|:---:|
 | Gestión de usuarios, plantillas y asignaciones | Sí | — | — |
+| Perfil del usuario autenticado | Sí | Sí | Sí |
 | Consulta de máquinas | Sí | Sí | Sí |
 | Alta y actualización de máquinas | Sí | — | — |
 | Consultas globales y asignación de preventivos | Sí | — | — |
@@ -76,6 +77,7 @@ ROLE_MAINTENANCE_TECHNICIAN
 | `GET` | `/api/users/roles` | Obtiene el catálogo de roles. |
 | `GET` | `/api/users` | Obtiene usuarios paginados. |
 | `GET` | `/api/users/{id}` | Obtiene un usuario por identificador. |
+| `GET` | `/api/users/me` | Obtiene el perfil del usuario autenticado. |
 | `GET` | `/api/users/by-email` | Filtra usuarios por coincidencia parcial de correo. |
 | `GET` | `/api/users/by-status` | Filtra usuarios por estado de acceso. |
 | `GET` | `/api/users/by-role` | Filtra usuarios por rol. |

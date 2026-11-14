@@ -29,6 +29,7 @@
       {"name":"Listar roles","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/users/roles"}},
       {"name":"Listar usuarios","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/users?page={{page}}&size={{size}}"}},
       {"name":"Obtener usuario","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/users/{{userId}}"}},
+      {"name":"Obtener perfil propio","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/users/me"}},
       {"name":"Buscar por correo","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/users/by-email?email={{emailSearchTerm}}&page={{page}}&size={{size}}"}},
       {"name":"Filtrar por estado","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/users/by-status?enabled={{enabled}}&page={{page}}&size={{size}}"}},
       {"name":"Filtrar por rol","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/users/by-role?role={{role}}&page={{page}}&size={{size}}"}},
