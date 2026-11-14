@@ -153,4 +153,15 @@ public class User {
     void disable() {
         this.enabled = false;
     }
+
+    /**
+     * Obtiene el hash de contraseña exclusivamente para construir el principal de Spring Security.
+     *
+     * <p>Su visibilidad de paquete evita que el hash forme parte de la API pública de la entidad.</p>
+     *
+     * @return hash BCrypt de la contraseña del usuario
+     */
+    String getPasswordHashForAuthentication() {
+        return passwordHash;
+    }
 }

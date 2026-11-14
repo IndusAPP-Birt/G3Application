@@ -6,12 +6,22 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
+
 /**
  * Repositorio de persistencia para la entidad {@link User}.
  *
  * <p>Hereda las operaciones CRUD proporcionadas por Spring Data JPA.</p>
  */
 public interface UserRepository extends JpaRepository<User, Long> {
+
+    /**
+     * Busca un usuario por su dirección de correo electrónico normalizada.
+     *
+     * @param email dirección de correo electrónico que identifica al usuario
+     * @return usuario encontrado o un {@link Optional} vacío si no existe
+     */
+    Optional<User> findByEmail(String email);
 
     /**
      * Busca usuarios cuyo correo electrónico contiene el texto indicado, sin distinguir
