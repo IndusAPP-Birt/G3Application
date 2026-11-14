@@ -13,12 +13,44 @@ paginación homogénea y respuestas con un contrato común.
   estables.
 - Los filtros se exponen mediante rutas específicas y no se combinan entre sí.
 
+## Autenticación y autorización
+
+La API utiliza JWT firmados con HS256 y no mantiene sesión en servidor. Para iniciar sesión se
+envían las credenciales al endpoint público de autenticación:
+
+| Método | Ruta | Operación |
+|---|---|---|
+| `POST` | `/api/auth/login` | Valida las credenciales y devuelve un token de acceso JWT. |
+
+Las operaciones protegidas requieren la cabecera:
+
+```http
+Authorization: Bearer <accessToken>
+```
+
+La clave de firma se configura exclusivamente mediante `JWT_SIGNING_KEY`, codificada en Base64.
+Los tokens incluyen el email como sujeto y el rol del usuario en el claim `role`.
+
+| Recurso | Administrador | Inspector | Técnico |
+|---|:---:|:---:|:---:|
+| Gestión de usuarios, plantillas y asignaciones | Sí | — | — |
+| Consulta de máquinas | Sí | Sí | Sí |
+| Alta y actualización de máquinas | Sí | — | — |
+| Consultas globales y asignación de preventivos | Sí | — | — |
+| Estados preventivos | Sí | Sí | — |
+| Inicio, registro de trabajo y cierre de preventivos | — | Sí* | — |
+
+`*` La capa de servicio debe comprobar además que el preventivo pertenece al inspector autenticado.
+Las rutas no declaradas se deniegan por defecto. `GET /actuator/health`, `POST /api/auth/login` y
+`GET /g3-console.html` permanecen públicos.
+
 ## Consola de pruebas
 
 La aplicación publica una consola web ligera en `/g3-console.html`. Permite consultar, filtrar,
 crear y actualizar los recursos disponibles desde el mismo origen que la API. Conserva la última
 respuesta de cada operación durante la sesión de la página e incluye la paginación en el área de
-resultados.
+resultados. La pestaña `Auth` obtiene el JWT y lo conserva en `sessionStorage` para adjuntarlo a
+las operaciones protegidas; `Permisos` muestra la matriz detallada aplicada por la API.
 
 Al desplegar la aplicación, la consola queda disponible en la misma URL pública del servicio; por
 ejemplo, `https://servicio.onrender.com/g3-console.html`.
@@ -194,16 +226,17 @@ entorno:
 ## Colecciones Postman
 
 Las colecciones de Postman incluyen todos los endpoints publicados y variables para sus
-identificadores, filtros y rangos de fechas:
+identificadores, filtros, rangos de fechas y token de acceso:
 
 | Archivo | Destino | Variable `baseUrl` |
 |---|---|---|
 | `postman/G3Application.postman_collection.json` | Desarrollo local | `http://localhost:8080` |
 | `postman/G3Application_Render.postman_collection.json` | Render | URL pública del servicio desplegado |
 
-Las operaciones de creación actualizan las variables de identificador necesarias para continuar
-con las actualizaciones asociadas. Antes de ejecutar una colección contra Render, se debe ajustar
-`baseUrl` a la URL efectiva del servicio.
+Cada colección comienza por `Autenticación > Iniciar sesión`: guarda automáticamente el JWT de la
+respuesta en la variable `accessToken`, utilizada como Bearer token por las operaciones protegidas.
+Antes de ejecutar una colección contra Render, se debe ajustar `baseUrl` a la URL efectiva del
+servicio y definir las credenciales de un usuario habilitado.
 
 ## Contratos de respuesta
 

@@ -7,12 +7,16 @@
   },
   "variable": [
     {"key": "baseUrl", "value": "http://localhost:8080"},
+    {"key": "accessToken", "value": ""},
+    {"key": "loginEmail", "value": ""},
+    {"key": "loginPassword", "value": ""},
     {"key": "page", "value": "0"},
     {"key": "size", "value": "20"},
     {"key": "userId", "value": "1"},
     {"key": "inspectorId", "value": "2"},
     {"key": "machineId", "value": "1"},
     {"key": "preventivePlanId", "value": "1"},
+    {"key": "preventivePlanAssignmentId", "value": "1"},
     {"key": "preventiveId", "value": "1"},
     {"key": "emailSearchTerm", "value": "inspector"},
     {"key": "enabled", "value": "true"},
@@ -29,11 +33,25 @@
     {"key": "newMachineAssetCode", "value": "MAQ-POSTMAN"},
     {"key": "newMachineSerialNumber", "value": "SN-POSTMAN"}
   ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{"key": "token", "value": "{{accessToken}}", "type": "string"}]
+  },
   "item": [
     {
       "name": "Observabilidad",
       "item": [
-        {"name": "Comprobar salud", "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/actuator/health"}}
+        {"name": "Comprobar salud", "request": {"auth": {"type": "noauth"}, "method": "GET", "header": [], "url": "{{baseUrl}}/actuator/health"}}
+      ]
+    },
+    {
+      "name": "Autenticación",
+      "item": [
+        {
+          "name": "Iniciar sesión",
+          "event": [{"listen": "test", "script": {"type": "text/javascript", "exec": ["const response = pm.response.json();", "pm.test(\"La respuesta incluye un token JWT\", () => pm.expect(response.data.accessToken).to.be.a(\"string\").and.not.empty);", "pm.collectionVariables.set(\"accessToken\", response.data.accessToken);"]}}],
+          "request": {"auth": {"type": "noauth"}, "method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"email\": \"{{loginEmail}}\",\n  \"password\": \"{{loginPassword}}\"\n}"}, "url": "{{baseUrl}}/api/auth/login"}
+        }
       ]
     },
     {
@@ -117,16 +135,14 @@
       "item": [
         {"name": "Listar planes", "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/preventive-plans?page={{page}}&size={{size}}"}},
         {"name": "Obtener plan", "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/preventive-plans/{{preventivePlanId}}"}},
-        {"name": "Filtrar por máquina", "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/preventive-plans/by-machine/{{machineId}}?page={{page}}&size={{size}}"}},
         {"name": "Filtrar por activación", "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/preventive-plans/by-status?active={{planActive}}&page={{page}}&size={{size}}"}},
         {"name": "Buscar por nombre", "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/preventive-plans/by-name?name={{planNameSearchTerm}}&page={{page}}&size={{size}}"}},
-        {"name": "Filtrar por próxima fecha", "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/preventive-plans/by-next-due-date?from={{from}}&to={{to}}&page={{page}}&size={{size}}"}},
         {
           "name": "Crear plan",
           "request": {
             "method": "POST",
             "header": [{"key": "Content-Type", "value": "application/json"}],
-            "body": {"mode": "raw", "raw": "{\n  \"machineId\": {{machineId}},\n  \"name\": \"Revisión periódica Postman\",\n  \"description\": \"Comprobación creada desde Postman.\",\n  \"intervalDays\": 30,\n  \"noticeDays\": 7,\n  \"nextDueDate\": \"2026-12-01\"\n}"},
+            "body": {"mode": "raw", "raw": "{\n  \"name\": \"Revisión periódica Postman\",\n  \"description\": \"Comprobación creada desde Postman.\"\n}"},
             "url": "{{baseUrl}}/api/preventive-plans"
           }
         },
@@ -135,10 +151,22 @@
           "request": {
             "method": "PUT",
             "header": [{"key": "Content-Type", "value": "application/json"}],
-            "body": {"mode": "raw", "raw": "{\n  \"name\": \"Revisión periódica Postman actualizada\",\n  \"description\": \"Configuración actualizada desde Postman.\",\n  \"intervalDays\": 30,\n  \"noticeDays\": 7,\n  \"active\": true\n}"},
+            "body": {"mode": "raw", "raw": "{\n  \"name\": \"Revisión periódica Postman actualizada\",\n  \"description\": \"Configuración actualizada desde Postman.\",\n  \"active\": true\n}"},
             "url": "{{baseUrl}}/api/preventive-plans/{{preventivePlanId}}"
           }
         }
+      ]
+    },
+    {
+      "name": "Asignaciones preventivas",
+      "item": [
+        {"name": "Listar asignaciones", "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/preventive-plan-assignments?page={{page}}&size={{size}}"}},
+        {"name": "Obtener asignación", "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/preventive-plan-assignments/{{preventivePlanAssignmentId}}"}},
+        {"name": "Filtrar por activación", "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/preventive-plan-assignments/by-status?active={{planActive}}&page={{page}}&size={{size}}"}},
+        {"name": "Filtrar por máquina", "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/preventive-plan-assignments/by-machine/{{machineId}}?page={{page}}&size={{size}}"}},
+        {"name": "Filtrar por plantilla", "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/preventive-plan-assignments/by-preventive-plan/{{preventivePlanId}}?page={{page}}&size={{size}}"}},
+        {"name": "Crear asignación", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"preventivePlanId\": {{preventivePlanId}},\n  \"machineId\": {{machineId}},\n  \"intervalDays\": 30,\n  \"noticeDays\": 7,\n  \"nextDueDate\": \"2026-12-01\"\n}"}, "url": "{{baseUrl}}/api/preventive-plan-assignments"}},
+        {"name": "Actualizar asignación", "request": {"method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"intervalDays\": 30,\n  \"noticeDays\": 7,\n  \"nextDueDate\": \"2026-12-01\",\n  \"active\": true\n}"}, "url": "{{baseUrl}}/api/preventive-plan-assignments/{{preventivePlanAssignmentId}}"}}
       ]
     },
     {
