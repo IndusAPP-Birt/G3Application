@@ -45,6 +45,17 @@ Los tokens incluyen el email como sujeto y el rol del usuario en el claim `role`
 Las rutas no declaradas se deniegan por defecto. `GET /actuator/health`, `POST /api/auth/login` y
 `GET /g3-console.html` permanecen públicos.
 
+### Credenciales de desarrollo
+
+Los usuarios cargados por `data.sql` comparten la contraseña `password`. Puedes utilizar estas
+cuentas para probar cada rol:
+
+| Rol | Correo | Contraseña |
+|---|---|---|
+| Administrador | `ane.garcia@example.com` | `password` |
+| Inspector | `kmarzana@ikaslea.birt.eus` | `password` |
+| Técnico de mantenimiento | `unai.fernandez@example.com` | `password` |
+
 ## Consola de pruebas
 
 La aplicación publica una consola web ligera en `/g3-console.html`. Permite consultar, filtrar,
@@ -87,6 +98,11 @@ ROLE_MAINTENANCE_TECHNICIAN
 
 La contraseña se actualiza mediante un recurso específico. La desactivación se gestiona mediante
 el campo `enabled`, sin borrado físico.
+
+### Evolución prevista
+
+- TODO: Añadir `PUT /api/users/me/password` para que cualquier usuario autenticado pueda cambiar
+  su propia contraseña tras validar la actual.
 
 ## Máquinas
 
@@ -197,6 +213,26 @@ PENDING → ASSIGNED → IN_PROGRESS → COMPLETED
 | `PUT` | `/api/preventives/{id}/start` | Inicia un preventivo asignado. |
 | `PUT` | `/api/preventives/{id}/work-performed` | Registra o corrige el trabajo realizado. |
 | `PUT` | `/api/preventives/{id}/completion` | Completa un preventivo con trabajo registrado. |
+
+### Evolución prevista
+
+- TODO: Añadir `GET /api/preventives/me` para que cada inspector consulte su propia bandeja de
+  trabajo, sin indicar su identificador.
+- TODO: Añadir `GET /api/preventives/by-assignment/{assignmentId}` para consultar el historial de
+  ejecuciones de una pareja concreta máquina–plantilla.
+
+### Política de reasignación de inspectores
+
+| Estado | Política |
+|---|---|
+| `PENDING` | El administrador realiza la asignación inicial y el preventivo pasa a `ASSIGNED`. |
+| `ASSIGNED` | El administrador puede sustituir al inspector; se actualiza la marca de asignación y se notifica al nuevo responsable. |
+| `IN_PROGRESS` | No se permite una reasignación directa. Cuando sea necesario un relevo, deberá registrarse una transferencia con inspector anterior, nuevo inspector, fecha y motivo; el preventivo conservará `IN_PROGRESS` y el trabajo ya registrado. |
+| `COMPLETED` | No se permite reasignar una ejecución cerrada. |
+
+La transferencia durante `IN_PROGRESS` permanece pendiente de implementar hasta disponer de un
+historial persistente de asignaciones. Sin ese historial, el campo único `workPerformed` no permite
+identificar qué inspector realizó cada parte del trabajo.
 
 ### Generación automática
 

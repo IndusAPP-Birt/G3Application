@@ -5,6 +5,7 @@ import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.preventive.dto.AdminAssignInspectorToPreventiveRequest;
 import eus.birtlh.g3.preventive.dto.PreventiveResponse;
 import eus.birtlh.g3.preventive.dto.RecordPreventiveWorkRequest;
+import eus.birtlh.g3.preventive.event.PreventiveAssignedEvent;
 import eus.birtlh.g3.preventive.exceptions.InvalidPreventiveDateRangeException;
 import eus.birtlh.g3.preventive.exceptions.InvalidPreventiveStatusTransitionException;
 import eus.birtlh.g3.preventive.exceptions.PreventiveNotFoundException;
@@ -18,6 +19,7 @@ import eus.birtlh.g3.user.User;
 import eus.birtlh.g3.user.exception.UserNotFoundException;
 import eus.birtlh.g3.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -40,6 +42,7 @@ public class PreventiveService {
 
     private final PreventiveRepository preventiveRepository;
     private final UserRepository userRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     /**
      * Obtiene todos los estados de ejecución disponibles como opciones de catálogo públicas.
@@ -251,7 +254,8 @@ public class PreventiveService {
      *
      * <p>Comprueba que el preventivo y el usuario existan, que este último tenga el rol de
      * inspector y que el preventivo esté pendiente. La entidad registra la asignación y cambia
-     * su estado a {@link PreventiveStatus#ASSIGNED}.</p>
+     * su estado a {@link PreventiveStatus#ASSIGNED}. Tras sincronizar el cambio, publica un
+     * {@link PreventiveAssignedEvent} para que otros módulos reaccionen a la asignación.</p>
      *
      * @param id identificador del preventivo al que se asignará el inspector
      * @param request identificador validado del inspector que recibirá la asignación
@@ -290,6 +294,10 @@ public class PreventiveService {
 
         preventive.assignInspector(inspector);
         preventiveRepository.flush();
+
+        applicationEventPublisher.publishEvent(
+                new PreventiveAssignedEvent(preventive.getId(), inspector.getId())
+        );
 
         return PreventiveMapper.toResponse(preventive);
     }
