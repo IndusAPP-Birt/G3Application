@@ -1,5 +1,6 @@
 package eus.birtlh.g3.preventive.dto.plan;
 
+import eus.birtlh.g3.preventive.PreventiveValidationConstraints;
 import jakarta.validation.constraints.*;
 
 /**
@@ -16,15 +17,15 @@ import jakarta.validation.constraints.*;
 public record UpdatePreventivePlanRequest(
         @NotBlank(message = "El nombre es obligatorio.")
         @Size(
-                min = 2,
-                max = 150,
-                message = "El nombre debe tener entre 2 y 150 caracteres."
+                min = PreventiveValidationConstraints.MIN_NAME_LENGTH,
+                max = PreventiveValidationConstraints.MAX_NAME_LENGTH,
+                message = "El nombre debe tener entre {min} y {max} caracteres."
         )
         String name,
 
         @Size(
-                max = 1_000,
-                message = "La descripción no puede superar los 1000 caracteres."
+                max = PreventiveValidationConstraints.MAX_DESCRIPTION_LENGTH,
+                message = "La descripción no puede superar los {max} caracteres."
         )
         String description,
 

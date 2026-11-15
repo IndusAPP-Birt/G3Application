@@ -4,6 +4,7 @@ import eus.birtlh.g3.common.PaginationConstants;
 import eus.birtlh.g3.common.dto.ApiSuccessResponse;
 import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.preventive.PreventivePlanService;
+import eus.birtlh.g3.preventive.PreventiveValidationConstraints;
 import eus.birtlh.g3.preventive.dto.plan.CreatePreventivePlanRequest;
 import eus.birtlh.g3.preventive.dto.plan.UpdatePreventivePlanRequest;
 import eus.birtlh.g3.preventive.dto.plan.PreventivePlanResponse;
@@ -152,9 +153,9 @@ public class PreventivePlanController {
             @RequestParam("name")
             @NotBlank(message = "El nombre es obligatorio")
             @Size(
-                    min = 2,
-                    max = 150,
-                    message = "El nombre debe tener entre 2 y 150 caracteres."
+                    min = PreventiveValidationConstraints.MIN_NAME_LENGTH,
+                    max = PreventiveValidationConstraints.MAX_NAME_LENGTH,
+                    message = "El nombre debe tener entre {min} y {max} caracteres."
             )
             String name,
 

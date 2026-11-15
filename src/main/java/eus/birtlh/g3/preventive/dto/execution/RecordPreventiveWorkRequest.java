@@ -1,5 +1,6 @@
 package eus.birtlh.g3.preventive.dto.execution;
 
+import eus.birtlh.g3.preventive.PreventiveValidationConstraints;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
@@ -12,8 +13,8 @@ import jakarta.validation.constraints.Size;
 public record RecordPreventiveWorkRequest(
         @NotBlank(message = "El trabajo realizado es obligatorio.")
         @Size(
-                max = 2_000,
-                message = "El trabajo realizado no puede superar los 2000 caracteres."
+                max = PreventiveValidationConstraints.MAX_WORK_PERFORMED_LENGTH,
+                message = "El trabajo realizado no puede superar los {max} caracteres."
         )
         String workPerformed
 ) {
