@@ -52,6 +52,15 @@ public interface PreventiveRepository extends JpaRepository<Preventive, Long> {
     Page<Preventive> findByAssignedInspectorId(Long inspectorId, Pageable pageable);
 
     /**
+     * Busca los preventivos asignados al inspector identificado por su correo electrónico.
+     *
+     * @param email correo electrónico del inspector con el que filtrar
+     * @param pageable configuración de página, tamaño y orden solicitados
+     * @return página de preventivos asignados al inspector; puede no contener resultados
+     */
+    Page<Preventive> findByAssignedInspectorEmail(String email, Pageable pageable);
+
+    /**
      * Busca los preventivos cuya fecha prevista está comprendida en un rango inclusivo.
      *
      * @param from fecha inicial del rango, incluida

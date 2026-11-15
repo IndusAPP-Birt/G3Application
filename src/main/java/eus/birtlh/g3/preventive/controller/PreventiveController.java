@@ -247,6 +247,58 @@ public class PreventiveController {
     }
 
     /**
+     * Obtiene una página de preventivos asignados al inspector autenticado.
+     *
+     * <p>El inspector se identifica a partir del sujeto del token JWT, sin admitir un
+     * identificador de inspector en la petición.</p>
+     *
+     * @param page índice de página basado en cero
+     * @param size número de preventivos por página
+     * @param jwt token del inspector autenticado
+     * @return respuesta HTTP 200 con la página de preventivos del inspector y su marca temporal
+     */
+    @GetMapping("/me")
+    public ResponseEntity<ApiSuccessResponse<PageResponse<PreventiveResponse>>> findPreventivesByAssignedInspector(
+            @RequestParam(
+                    name = "page",
+                    defaultValue = PaginationConstants.DEFAULT_PAGE_VALUE
+            )
+            @Min(
+                    value = PaginationConstants.MIN_PAGE,
+                    message = "La página debe ser {value} o mayor."
+            )
+            int page,
+
+            @RequestParam(
+                    name = "size",
+                    defaultValue = PaginationConstants.DEFAULT_PAGE_SIZE_VALUE
+            )
+            @Min(
+                    value = PaginationConstants.MIN_PAGE_SIZE,
+                    message = "El tamaño de página debe ser {value} o mayor."
+            )
+            @Max(
+                    value = PaginationConstants.MAX_PAGE_SIZE,
+                    message = "El tamaño de página no puede superar {value}."
+            )
+            int size,
+
+            @AuthenticationPrincipal
+            Jwt jwt
+    ) {
+        return ResponseEntity.ok(
+                ApiSuccessResponse.success(
+                        preventiveService.getPreventivesByAuthenticatedAssignedInspector(
+                                page,
+                                size,
+                                jwt.getSubject()
+                        ),
+                        "Preventivos obtenidos correctamente."
+                )
+        );
+    }
+
+    /**
      * Obtiene una página de preventivos cuya fecha prevista está comprendida en un rango
      * inclusivo.
      *

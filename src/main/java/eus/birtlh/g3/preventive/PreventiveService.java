@@ -251,6 +251,41 @@ public class PreventiveService {
     }
 
     /**
+     * Obtiene una página de preventivos asignados al inspector autenticado.
+     *
+     * <p>El correo electrónico procede del sujeto del token JWT, por lo que el cliente no puede
+     * consultar los preventivos asignados a otro inspector. Los resultados se ordenan de forma
+     * ascendente por identificador para mantener páginas estables.</p>
+     *
+     * @param page índice de página basado en cero
+     * @param size número de preventivos por página
+     * @param inspectorEmail correo electrónico del inspector autenticado
+     * @return página de preventivos asignados al inspector autenticado; puede estar vacía
+     */
+    @Transactional(readOnly = true)
+    public PageResponse<PreventiveResponse> getPreventivesByAuthenticatedAssignedInspector(
+            int page,
+            int size,
+            String inspectorEmail
+    ) {
+        Page<Preventive> preventives = preventiveRepository.findByAssignedInspectorEmail(
+                inspectorEmail,
+                PageRequest.of(page, size, Sort.by("id").ascending())
+        );
+
+        return new PageResponse<>(
+                preventives.getContent()
+                        .stream()
+                        .map(PreventiveMapper::toResponse)
+                        .toList(),
+                preventives.getNumber(),
+                preventives.getSize(),
+                preventives.getTotalElements(),
+                preventives.getTotalPages()
+        );
+    }
+
+    /**
      * Asigna un inspector a un preventivo pendiente.
      *
      * <p>Comprueba que el preventivo y el usuario existan, que este último tenga el rol de

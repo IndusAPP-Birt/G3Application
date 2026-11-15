@@ -63,6 +63,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/machines/**").hasAuthority("ROLE_ADMINISTRATOR")
                         .requestMatchers("/api/preventive-plans", "/api/preventive-plans/**").hasAuthority("ROLE_ADMINISTRATOR")
                         .requestMatchers("/api/preventive-plan-assignments", "/api/preventive-plan-assignments/**").hasAuthority("ROLE_ADMINISTRATOR")
+                        .requestMatchers("/api/preventives/me").hasAuthority("ROLE_INSPECTOR")
                         .requestMatchers(HttpMethod.GET, "/api/preventives/statuses").hasAnyAuthority("ROLE_ADMINISTRATOR", "ROLE_INSPECTOR")
                         .requestMatchers(HttpMethod.GET, "/api/preventives", "/api/preventives/**").hasAuthority("ROLE_ADMINISTRATOR")
                         .requestMatchers(HttpMethod.PUT, "/api/preventives/*/assignment").hasAuthority("ROLE_ADMINISTRATOR")
