@@ -19,6 +19,13 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Servicio de aplicación que coordina los casos de uso de asignaciones de plantillas preventivas
+ * a máquinas.
+ *
+ * <p>Gestiona el calendario y la activación de cada asignación, mientras que la plantilla y la
+ * máquina relacionadas permanecen inmutables después de su creación.</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class PreventivePlanAssignmentService {
@@ -27,6 +34,16 @@ public class PreventivePlanAssignmentService {
     private final PreventivePlanRepository preventivePlanRepository;
     private final MachineRepository machineRepository;
 
+    /**
+     * Obtiene una página de asignaciones preventivas como DTOs de respuesta.
+     *
+     * <p>Conserva el orden ascendente por identificador para que los resultados sean estables
+     * entre páginas.</p>
+     *
+     * @param page índice de página basado en cero
+     * @param size número de asignaciones por página
+     * @return página de asignaciones preventivas públicas; su contenido puede estar vacío
+     */
     @Transactional(readOnly = true)
     public PageResponse<PreventivePlanAssignmentResponse> getAllPreventivePlanAssignments(int page, int size) {
         Page<PreventivePlanAssignment> preventivePlanAssignments = preventivePlanAssignmentRepository.findAll(
@@ -45,6 +62,14 @@ public class PreventivePlanAssignmentService {
         );
     }
 
+    /**
+     * Obtiene una asignación preventiva por su identificador como DTO de respuesta.
+     *
+     * @param id identificador de la asignación preventiva solicitada
+     * @return DTO público de la asignación encontrada
+     * @throws PreventivePlanAssignmentNotFoundException si no existe una asignación con el
+     *                                                    identificador indicado
+     */
     @Transactional(readOnly = true)
     public PreventivePlanAssignmentResponse getPreventivePlanAssignmentById(Long id) {
         PreventivePlanAssignment preventivePlanAssignment = preventivePlanAssignmentRepository.findById(id)

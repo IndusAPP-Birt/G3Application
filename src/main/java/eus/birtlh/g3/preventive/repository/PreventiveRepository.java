@@ -15,8 +15,22 @@ import java.time.LocalDate;
  */
 public interface PreventiveRepository extends JpaRepository<Preventive, Long> {
 
+    /**
+     * Busca los preventivos generados desde asignaciones de una plantilla preventiva.
+     *
+     * @param preventivePlanId identificador de la plantilla con la que filtrar
+     * @param pageable configuración de página, tamaño y orden solicitados
+     * @return página de preventivos de la plantilla; puede no contener resultados
+     */
     Page<Preventive> findByPreventivePlanAssignmentPreventivePlanId(Long preventivePlanId, Pageable pageable);
 
+    /**
+     * Busca los preventivos generados desde asignaciones configuradas para una máquina.
+     *
+     * @param planId identificador de la máquina con la que filtrar
+     * @param pageable configuración de página, tamaño y orden solicitados
+     * @return página de preventivos de la máquina; puede no contener resultados
+     */
     Page<Preventive> findByPreventivePlanAssignmentMachineId(Long planId, Pageable pageable);
 
     /**
