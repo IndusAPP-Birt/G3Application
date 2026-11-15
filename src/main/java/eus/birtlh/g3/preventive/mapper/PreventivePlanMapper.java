@@ -1,7 +1,7 @@
 package eus.birtlh.g3.preventive.mapper;
 
 import eus.birtlh.g3.preventive.PreventivePlan;
-import eus.birtlh.g3.preventive.dto.PreventivePlanResponse;
+import eus.birtlh.g3.preventive.dto.plan.PreventivePlanResponse;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 

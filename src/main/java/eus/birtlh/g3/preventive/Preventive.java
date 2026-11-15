@@ -1,6 +1,6 @@
 package eus.birtlh.g3.preventive;
 
-import eus.birtlh.g3.preventive.exceptions.PreventiveWorkReportRequiredException;
+import eus.birtlh.g3.preventive.exceptions.execution.PreventiveWorkReportRequiredException;
 import eus.birtlh.g3.user.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;

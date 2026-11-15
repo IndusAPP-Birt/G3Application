@@ -1,4 +1,4 @@
-package eus.birtlh.g3.preventive.exceptions;
+package eus.birtlh.g3.preventive.exceptions.execution;
 
 /**
  * Indica que el rango de fechas solicitado para consultar recursos preventivos no es válido.

@@ -1,4 +1,4 @@
-package eus.birtlh.g3.preventive.dto;
+package eus.birtlh.g3.preventive.dto.execution;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Positive;
  *
  * @param inspectorId identificador del usuario inspector que recibirá la asignación
  */
-public record AdminAssignInspectorToPreventiveRequest(
+public record AssignInspectorToPreventiveRequest(
         @NotNull(message = "El inspector es obligatorio.")
         @Positive(message = "El identificador debe ser mayor que cero.")
         Long inspectorId

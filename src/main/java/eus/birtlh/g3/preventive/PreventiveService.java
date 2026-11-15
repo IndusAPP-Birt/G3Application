@@ -2,15 +2,15 @@ package eus.birtlh.g3.preventive;
 
 import eus.birtlh.g3.common.dto.CatalogOptionResponse;
 import eus.birtlh.g3.common.dto.PageResponse;
-import eus.birtlh.g3.preventive.dto.AdminAssignInspectorToPreventiveRequest;
-import eus.birtlh.g3.preventive.dto.PreventiveResponse;
-import eus.birtlh.g3.preventive.dto.RecordPreventiveWorkRequest;
+import eus.birtlh.g3.preventive.dto.execution.AssignInspectorToPreventiveRequest;
+import eus.birtlh.g3.preventive.dto.execution.PreventiveResponse;
+import eus.birtlh.g3.preventive.dto.execution.RecordPreventiveWorkRequest;
 import eus.birtlh.g3.preventive.event.PreventiveAssignedEvent;
-import eus.birtlh.g3.preventive.exceptions.InvalidPreventiveDateRangeException;
-import eus.birtlh.g3.preventive.exceptions.InvalidPreventiveStatusTransitionException;
-import eus.birtlh.g3.preventive.exceptions.PreventiveNotFoundException;
-import eus.birtlh.g3.preventive.exceptions.PreventiveWorkReportRequiredException;
-import eus.birtlh.g3.preventive.exceptions.UserIsNotInspectorException;
+import eus.birtlh.g3.preventive.exceptions.execution.InvalidPreventiveDateRangeException;
+import eus.birtlh.g3.preventive.exceptions.execution.InvalidPreventiveStatusTransitionException;
+import eus.birtlh.g3.preventive.exceptions.execution.PreventiveNotFoundException;
+import eus.birtlh.g3.preventive.exceptions.execution.PreventiveWorkReportRequiredException;
+import eus.birtlh.g3.preventive.exceptions.execution.UserIsNotInspectorException;
 import eus.birtlh.g3.preventive.mapper.PreventiveMapper;
 import eus.birtlh.g3.preventive.mapper.PreventiveStatusMapper;
 import eus.birtlh.g3.preventive.repository.PreventiveRepository;
@@ -268,7 +268,7 @@ public class PreventiveService {
     @Transactional
     public PreventiveResponse assignInspectorToPreventive(
             long id,
-            AdminAssignInspectorToPreventiveRequest request
+            AssignInspectorToPreventiveRequest request
     ) {
         Preventive preventive = preventiveRepository.findById(id)
                 .orElseThrow(() -> new PreventiveNotFoundException(

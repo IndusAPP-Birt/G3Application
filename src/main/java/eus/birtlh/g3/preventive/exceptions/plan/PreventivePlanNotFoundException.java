@@ -1,4 +1,4 @@
-package eus.birtlh.g3.preventive.exceptions;
+package eus.birtlh.g3.preventive.exceptions.plan;
 
 /**
  * Indica que no existe el plan preventivo solicitado.

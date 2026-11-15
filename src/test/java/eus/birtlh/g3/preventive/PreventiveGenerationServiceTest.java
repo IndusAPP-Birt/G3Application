@@ -3,10 +3,10 @@ package eus.birtlh.g3.preventive;
 import eus.birtlh.g3.machine.MachineService;
 import eus.birtlh.g3.machine.dto.AdminCreateMachineRequest;
 import eus.birtlh.g3.machine.dto.MachineResponse;
-import eus.birtlh.g3.preventive.dto.AdminCreatePreventivePlanRequest;
-import eus.birtlh.g3.preventive.dto.AdminCreatePreventivePlanAssignmentRequest;
-import eus.birtlh.g3.preventive.dto.PreventivePlanAssignmentResponse;
-import eus.birtlh.g3.preventive.dto.PreventivePlanResponse;
+import eus.birtlh.g3.preventive.dto.plan.CreatePreventivePlanRequest;
+import eus.birtlh.g3.preventive.dto.assignment.CreatePreventivePlanAssignmentRequest;
+import eus.birtlh.g3.preventive.dto.assignment.PreventivePlanAssignmentResponse;
+import eus.birtlh.g3.preventive.dto.plan.PreventivePlanResponse;
 import eus.birtlh.g3.preventive.repository.PreventivePlanAssignmentRepository;
 import eus.birtlh.g3.preventive.repository.PreventiveRepository;
 import org.junit.jupiter.api.Test;
@@ -60,7 +60,7 @@ class PreventiveGenerationServiceTest {
         );
 
         PreventivePlanResponse plan = preventivePlanService.createPreventivePlan(
-                new AdminCreatePreventivePlanRequest(
+                new CreatePreventivePlanRequest(
                         "Plan de prueba de generación",
                         "Plan utilizado por la prueba de generación automática."
                 )
@@ -68,7 +68,7 @@ class PreventiveGenerationServiceTest {
 
         PreventivePlanAssignmentResponse assignment =
                 preventivePlanAssignmentService.createPreventivePlanAssignment(
-                        new AdminCreatePreventivePlanAssignmentRequest(
+                        new CreatePreventivePlanAssignmentRequest(
                                 plan.id(),
                                 machine.id(),
                                 30,

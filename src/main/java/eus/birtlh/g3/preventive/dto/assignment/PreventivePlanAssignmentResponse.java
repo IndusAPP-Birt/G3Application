@@ -1,6 +1,7 @@
-package eus.birtlh.g3.preventive.dto;
+package eus.birtlh.g3.preventive.dto.assignment;
 
 import eus.birtlh.g3.machine.dto.MachineResponse;
+import eus.birtlh.g3.preventive.dto.plan.PreventivePlanResponse;
 
 import java.time.Instant;
 import java.time.LocalDate;

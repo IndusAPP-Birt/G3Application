@@ -1,4 +1,4 @@
-package eus.birtlh.g3.preventive.dto;
+package eus.birtlh.g3.preventive.dto.plan;
 
 import java.time.Instant;
 

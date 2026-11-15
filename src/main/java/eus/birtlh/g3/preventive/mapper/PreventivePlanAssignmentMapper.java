@@ -2,7 +2,7 @@ package eus.birtlh.g3.preventive.mapper;
 
 import eus.birtlh.g3.machine.mapper.MachineMapper;
 import eus.birtlh.g3.preventive.PreventivePlanAssignment;
-import eus.birtlh.g3.preventive.dto.PreventivePlanAssignmentResponse;
+import eus.birtlh.g3.preventive.dto.assignment.PreventivePlanAssignmentResponse;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 

@@ -4,11 +4,11 @@ import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.machine.Machine;
 import eus.birtlh.g3.machine.exception.MachineNotFoundException;
 import eus.birtlh.g3.machine.repository.MachineRepository;
-import eus.birtlh.g3.preventive.dto.AdminCreatePreventivePlanAssignmentRequest;
-import eus.birtlh.g3.preventive.dto.AdminUpdatePreventivePlanAssignmentRequest;
-import eus.birtlh.g3.preventive.dto.PreventivePlanAssignmentResponse;
-import eus.birtlh.g3.preventive.exceptions.PreventivePlanAssignmentNotFoundException;
-import eus.birtlh.g3.preventive.exceptions.PreventivePlanNotFoundException;
+import eus.birtlh.g3.preventive.dto.assignment.CreatePreventivePlanAssignmentRequest;
+import eus.birtlh.g3.preventive.dto.assignment.UpdatePreventivePlanAssignmentRequest;
+import eus.birtlh.g3.preventive.dto.assignment.PreventivePlanAssignmentResponse;
+import eus.birtlh.g3.preventive.exceptions.assignment.PreventivePlanAssignmentNotFoundException;
+import eus.birtlh.g3.preventive.exceptions.plan.PreventivePlanNotFoundException;
 import eus.birtlh.g3.preventive.mapper.PreventivePlanAssignmentMapper;
 import eus.birtlh.g3.preventive.repository.PreventivePlanAssignmentRepository;
 import eus.birtlh.g3.preventive.repository.PreventivePlanRepository;
@@ -169,7 +169,7 @@ public class PreventivePlanAssignmentService {
      * @throws MachineNotFoundException si no existe la máquina indicada en la solicitud
      */
     @Transactional
-    public PreventivePlanAssignmentResponse createPreventivePlanAssignment(AdminCreatePreventivePlanAssignmentRequest request) {
+    public PreventivePlanAssignmentResponse createPreventivePlanAssignment(CreatePreventivePlanAssignmentRequest request) {
         PreventivePlan preventivePlan = preventivePlanRepository.findById(request.preventivePlanId())
                 .orElseThrow(() -> new PreventivePlanNotFoundException(
                         "Plan preventivo con id " + request.preventivePlanId() + " no encontrado."
@@ -208,7 +208,7 @@ public class PreventivePlanAssignmentService {
     @Transactional
     public PreventivePlanAssignmentResponse updatePreventivePlanAssignment(
             Long id,
-            AdminUpdatePreventivePlanAssignmentRequest request
+            UpdatePreventivePlanAssignmentRequest request
     ) {
         PreventivePlanAssignment preventivePlanAssignment = preventivePlanAssignmentRepository.findById(id)
                 .orElseThrow(() -> new PreventivePlanAssignmentNotFoundException(

@@ -1,4 +1,4 @@
-package eus.birtlh.g3.preventive.exceptions;
+package eus.birtlh.g3.preventive.exceptions.execution;
 
 /**
  * Indica que una operación no puede ejecutarse desde el estado actual de un preventivo.

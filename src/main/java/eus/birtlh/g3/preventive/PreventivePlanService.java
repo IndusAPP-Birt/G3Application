@@ -1,10 +1,10 @@
 package eus.birtlh.g3.preventive;
 
 import eus.birtlh.g3.common.dto.PageResponse;
-import eus.birtlh.g3.preventive.dto.AdminCreatePreventivePlanRequest;
-import eus.birtlh.g3.preventive.dto.AdminUpdatePreventivePlanRequest;
-import eus.birtlh.g3.preventive.dto.PreventivePlanResponse;
-import eus.birtlh.g3.preventive.exceptions.PreventivePlanNotFoundException;
+import eus.birtlh.g3.preventive.dto.plan.CreatePreventivePlanRequest;
+import eus.birtlh.g3.preventive.dto.plan.UpdatePreventivePlanRequest;
+import eus.birtlh.g3.preventive.dto.plan.PreventivePlanResponse;
+import eus.birtlh.g3.preventive.exceptions.plan.PreventivePlanNotFoundException;
 import eus.birtlh.g3.preventive.mapper.PreventivePlanMapper;
 import eus.birtlh.g3.preventive.repository.PreventivePlanRepository;
 import lombok.RequiredArgsConstructor;
@@ -150,7 +150,7 @@ public class PreventivePlanService {
      * @return DTO público de la plantilla creada
      */
     @Transactional
-    public PreventivePlanResponse createPreventivePlan(AdminCreatePreventivePlanRequest request) {
+    public PreventivePlanResponse createPreventivePlan(CreatePreventivePlanRequest request) {
         PreventivePlan preventivePlan = preventivePlanRepository.save(
                 new PreventivePlan(
                         request.name(),
@@ -173,7 +173,7 @@ public class PreventivePlanService {
      *                                         indicado
      */
     @Transactional
-    public PreventivePlanResponse updatePreventivePlan(Long id, AdminUpdatePreventivePlanRequest request) {
+    public PreventivePlanResponse updatePreventivePlan(Long id, UpdatePreventivePlanRequest request) {
         PreventivePlan preventivePlan = preventivePlanRepository.findById(id)
                 .orElseThrow(() -> new PreventivePlanNotFoundException(
                         "Plan preventivo con " + id + " no encontrado."

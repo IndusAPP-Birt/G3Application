@@ -1,4 +1,4 @@
-package eus.birtlh.g3.preventive.dto;
+package eus.birtlh.g3.preventive.dto.execution;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

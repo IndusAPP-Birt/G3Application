@@ -6,9 +6,9 @@ import eus.birtlh.g3.common.dto.CatalogOptionResponse;
 import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.preventive.PreventiveService;
 import eus.birtlh.g3.preventive.PreventiveStatus;
-import eus.birtlh.g3.preventive.dto.AdminAssignInspectorToPreventiveRequest;
-import eus.birtlh.g3.preventive.dto.PreventiveResponse;
-import eus.birtlh.g3.preventive.dto.RecordPreventiveWorkRequest;
+import eus.birtlh.g3.preventive.dto.execution.AssignInspectorToPreventiveRequest;
+import eus.birtlh.g3.preventive.dto.execution.PreventiveResponse;
+import eus.birtlh.g3.preventive.dto.execution.RecordPreventiveWorkRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -312,7 +312,7 @@ public class PreventiveController {
             Long id,
 
             @Valid
-            @RequestBody AdminAssignInspectorToPreventiveRequest request
+            @RequestBody AssignInspectorToPreventiveRequest request
     ) {
         return ResponseEntity.ok(
                 ApiSuccessResponse.success(

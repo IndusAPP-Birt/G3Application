@@ -1,4 +1,4 @@
-package eus.birtlh.g3.preventive.exceptions;
+package eus.birtlh.g3.preventive.exceptions.assignment;
 
 /**
  * Indica que no existe una asignación de plantilla preventiva a máquina con el identificador

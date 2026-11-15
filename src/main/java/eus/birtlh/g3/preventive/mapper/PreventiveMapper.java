@@ -1,7 +1,7 @@
 package eus.birtlh.g3.preventive.mapper;
 
 import eus.birtlh.g3.preventive.Preventive;
-import eus.birtlh.g3.preventive.dto.PreventiveResponse;
+import eus.birtlh.g3.preventive.dto.execution.PreventiveResponse;
 import eus.birtlh.g3.user.mapper.UserMapper;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

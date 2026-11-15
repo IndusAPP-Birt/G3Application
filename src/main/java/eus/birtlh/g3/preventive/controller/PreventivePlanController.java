@@ -4,9 +4,9 @@ import eus.birtlh.g3.common.PaginationConstants;
 import eus.birtlh.g3.common.dto.ApiSuccessResponse;
 import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.preventive.PreventivePlanService;
-import eus.birtlh.g3.preventive.dto.AdminCreatePreventivePlanRequest;
-import eus.birtlh.g3.preventive.dto.AdminUpdatePreventivePlanRequest;
-import eus.birtlh.g3.preventive.dto.PreventivePlanResponse;
+import eus.birtlh.g3.preventive.dto.plan.CreatePreventivePlanRequest;
+import eus.birtlh.g3.preventive.dto.plan.UpdatePreventivePlanRequest;
+import eus.birtlh.g3.preventive.dto.plan.PreventivePlanResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -200,7 +200,7 @@ public class PreventivePlanController {
     @PostMapping
     public ResponseEntity<ApiSuccessResponse<PreventivePlanResponse>> createPreventivePlan(
             @Valid
-            @RequestBody AdminCreatePreventivePlanRequest request
+            @RequestBody CreatePreventivePlanRequest request
     ) {
         PreventivePlanResponse preventivePlan = preventivePlanService.createPreventivePlan(request);
 
@@ -231,7 +231,7 @@ public class PreventivePlanController {
             Long id,
 
             @Valid
-            @RequestBody AdminUpdatePreventivePlanRequest request
+            @RequestBody UpdatePreventivePlanRequest request
     ) {
         return ResponseEntity.ok(
                 ApiSuccessResponse.success(

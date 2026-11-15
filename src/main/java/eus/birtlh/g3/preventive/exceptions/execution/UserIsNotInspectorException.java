@@ -1,4 +1,4 @@
-package eus.birtlh.g3.preventive.exceptions;
+package eus.birtlh.g3.preventive.exceptions.execution;
 
 /**
  * Indica que el usuario seleccionado para asignar un preventivo no tiene el rol de inspector.

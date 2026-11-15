@@ -1,4 +1,4 @@
-package eus.birtlh.g3.preventive.dto;
+package eus.birtlh.g3.preventive.dto.assignment;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -17,7 +17,7 @@ import java.time.LocalDate;
  * @param nextDueDate próxima fecha prevista de generación
  * @param active estado de activación que el administrador asigna a la planificación
  */
-public record AdminUpdatePreventivePlanAssignmentRequest(
+public record UpdatePreventivePlanAssignmentRequest(
         @Positive(message = "El intervalo debe ser mayor que cero.")
         int intervalDays,
 

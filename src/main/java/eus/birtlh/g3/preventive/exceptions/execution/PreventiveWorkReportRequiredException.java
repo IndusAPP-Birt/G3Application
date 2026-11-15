@@ -1,4 +1,4 @@
-package eus.birtlh.g3.preventive.exceptions;
+package eus.birtlh.g3.preventive.exceptions.execution;
 
 /**
  * Indica que se intenta completar un preventivo sin haber registrado el trabajo realizado.

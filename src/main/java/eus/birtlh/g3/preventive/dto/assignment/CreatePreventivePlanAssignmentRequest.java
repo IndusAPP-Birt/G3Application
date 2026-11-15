@@ -1,4 +1,4 @@
-package eus.birtlh.g3.preventive.dto;
+package eus.birtlh.g3.preventive.dto.assignment;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -18,7 +18,7 @@ import java.time.LocalDate;
  * @param noticeDays días de antelación para generar el mantenimiento preventivo
  * @param nextDueDate próxima fecha prevista de generación
  */
-public record AdminCreatePreventivePlanAssignmentRequest(
+public record CreatePreventivePlanAssignmentRequest(
         @NotNull(message = "El plan preventivo es obligatorio.")
         @Positive(message = "El identificador debe ser mayor que cero.")
         Long preventivePlanId,

@@ -1,6 +1,7 @@
-package eus.birtlh.g3.preventive.dto;
+package eus.birtlh.g3.preventive.dto.execution;
 
 import eus.birtlh.g3.preventive.PreventiveStatus;
+import eus.birtlh.g3.preventive.dto.assignment.PreventivePlanAssignmentResponse;
 import eus.birtlh.g3.user.dto.UserResponse;
 
 import java.time.Instant;

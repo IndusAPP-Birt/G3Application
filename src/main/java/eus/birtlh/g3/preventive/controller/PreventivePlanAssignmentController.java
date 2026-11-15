@@ -4,9 +4,9 @@ import eus.birtlh.g3.common.PaginationConstants;
 import eus.birtlh.g3.common.dto.ApiSuccessResponse;
 import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.preventive.PreventivePlanAssignmentService;
-import eus.birtlh.g3.preventive.dto.AdminCreatePreventivePlanAssignmentRequest;
-import eus.birtlh.g3.preventive.dto.AdminUpdatePreventivePlanAssignmentRequest;
-import eus.birtlh.g3.preventive.dto.PreventivePlanAssignmentResponse;
+import eus.birtlh.g3.preventive.dto.assignment.CreatePreventivePlanAssignmentRequest;
+import eus.birtlh.g3.preventive.dto.assignment.UpdatePreventivePlanAssignmentRequest;
+import eus.birtlh.g3.preventive.dto.assignment.PreventivePlanAssignmentResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -234,7 +234,7 @@ public class PreventivePlanAssignmentController {
     @PostMapping
     public ResponseEntity<ApiSuccessResponse<PreventivePlanAssignmentResponse>> createPreventivePlanAssignment(
             @Valid
-            @RequestBody AdminCreatePreventivePlanAssignmentRequest request
+            @RequestBody CreatePreventivePlanAssignmentRequest request
     ) {
         PreventivePlanAssignmentResponse preventivePlanAssignment = preventivePlanAssignmentService.createPreventivePlanAssignment(request);
 
@@ -265,7 +265,7 @@ public class PreventivePlanAssignmentController {
             Long id,
 
             @Valid
-            @RequestBody AdminUpdatePreventivePlanAssignmentRequest request
+            @RequestBody UpdatePreventivePlanAssignmentRequest request
     ) {
         PreventivePlanAssignmentResponse preventivePlanAssignment = preventivePlanAssignmentService.updatePreventivePlanAssignment(id, request);
 
