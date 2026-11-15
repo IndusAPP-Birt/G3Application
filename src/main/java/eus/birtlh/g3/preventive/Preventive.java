@@ -40,10 +40,10 @@ public class Preventive {
     @JoinColumn(name = "preventive_plan_assignment_id", nullable = false, updatable = false)
     private PreventivePlanAssignment preventivePlanAssignment;
 
-    @Column(name = "plan_name", nullable = false, length = 150, updatable = false)
+    @Column(name = "plan_name", nullable = false, length = PreventiveValidationConstraints.MAX_NAME_LENGTH, updatable = false)
     private String planName;
 
-    @Column(name = "plan_description", length = 1_000, updatable = false)
+    @Column(name = "plan_description", length = PreventiveValidationConstraints.MAX_DESCRIPTION_LENGTH, updatable = false)
     private String planDescription;
 
     @Column(name = "due_date", nullable = false, updatable = false)
@@ -57,7 +57,7 @@ public class Preventive {
     @Column(nullable = false)
     private PreventiveStatus status = PreventiveStatus.PENDING;
 
-    @Column(name = "work_performed", length = 2_000)
+    @Column(name = "work_performed", length = PreventiveValidationConstraints.MAX_WORK_PERFORMED_LENGTH, nullable = false)
     private String workPerformed;
 
     @Column(name = "assigned_at")

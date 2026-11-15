@@ -27,10 +27,10 @@ public class PreventivePlan {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 150)
+    @Column(nullable = false, length = PreventiveValidationConstraints.MAX_NAME_LENGTH)
     private String name;
 
-    @Column(length = 1_000)
+    @Column(length = PreventiveValidationConstraints.MAX_DESCRIPTION_LENGTH)
     private String description;
 
     @Column(nullable = false)
