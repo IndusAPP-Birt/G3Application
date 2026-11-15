@@ -2,9 +2,9 @@ package eus.birtlh.g3.machine;
 
 import eus.birtlh.g3.common.dto.CatalogOptionResponse;
 import eus.birtlh.g3.common.dto.PageResponse;
-import eus.birtlh.g3.machine.dto.AdminCreateMachineRequest;
-import eus.birtlh.g3.machine.dto.AdminUpdateAssetCodeRequest;
-import eus.birtlh.g3.machine.dto.AdminUpdateMachineRequest;
+import eus.birtlh.g3.machine.dto.CreateMachineRequest;
+import eus.birtlh.g3.machine.dto.UpdateAssetCodeRequest;
+import eus.birtlh.g3.machine.dto.UpdateMachineRequest;
 import eus.birtlh.g3.machine.dto.MachineResponse;
 import eus.birtlh.g3.machine.exception.AssetCodeAlreadyInUseException;
 import eus.birtlh.g3.machine.exception.MachineNotFoundException;
@@ -197,7 +197,7 @@ public class MachineService {
      * @throws SerialNumberAlreadyInUseException si el número de serie indicado ya está asignado
      */
     @Transactional
-    public MachineResponse createMachine(AdminCreateMachineRequest request) {
+    public MachineResponse createMachine(CreateMachineRequest request) {
         if (machineRepository.existsByAssetCode(request.assetCode())) {
             throw new AssetCodeAlreadyInUseException(
                     "El código patrimonial " + request.assetCode() + " ya existe."
@@ -245,7 +245,7 @@ public class MachineService {
      * @throws SerialNumberAlreadyInUseException si el número de serie pertenece a otra máquina
      */
     @Transactional
-    public MachineResponse updateMachine(Long id, AdminUpdateMachineRequest request) {
+    public MachineResponse updateMachine(Long id, UpdateMachineRequest request) {
         Machine machine = machineRepository.findById(id)
                 .orElseThrow(() -> new MachineNotFoundException(
                         "Máquina con " + id + " no encontrada."
@@ -288,7 +288,7 @@ public class MachineService {
     @Transactional
     public MachineResponse updateMachineAssetCode(
             Long id,
-            AdminUpdateAssetCodeRequest request
+            UpdateAssetCodeRequest request
     ) {
         Machine machine = machineRepository.findById(id)
                 .orElseThrow(() -> new MachineNotFoundException(

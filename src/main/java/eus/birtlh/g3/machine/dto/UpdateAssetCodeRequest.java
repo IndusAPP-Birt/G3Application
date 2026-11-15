@@ -14,7 +14,7 @@ import java.util.Locale;
  *
  * @param assetCode nuevo código patrimonial, obligatorio y de entre 2 y 50 caracteres
  */
-public record AdminUpdateAssetCodeRequest(
+public record UpdateAssetCodeRequest(
         @NotBlank(message = "El código patrimonial es obligatorio.")
         @Size(
                 min = MachineValidationConstraints.MIN_ASSET_CODE_LENGTH,
@@ -23,7 +23,7 @@ public record AdminUpdateAssetCodeRequest(
         )
         String assetCode
 ) {
-    public AdminUpdateAssetCodeRequest {
+    public UpdateAssetCodeRequest {
         if (assetCode != null) {
             assetCode = assetCode.strip().toUpperCase(Locale.ROOT);
         }

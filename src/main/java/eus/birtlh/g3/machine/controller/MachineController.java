@@ -7,9 +7,9 @@ import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.machine.MachineService;
 import eus.birtlh.g3.machine.MachineStatus;
 import eus.birtlh.g3.machine.MachineValidationConstraints;
-import eus.birtlh.g3.machine.dto.AdminCreateMachineRequest;
-import eus.birtlh.g3.machine.dto.AdminUpdateAssetCodeRequest;
-import eus.birtlh.g3.machine.dto.AdminUpdateMachineRequest;
+import eus.birtlh.g3.machine.dto.CreateMachineRequest;
+import eus.birtlh.g3.machine.dto.UpdateAssetCodeRequest;
+import eus.birtlh.g3.machine.dto.UpdateMachineRequest;
 import eus.birtlh.g3.machine.dto.MachineResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
@@ -268,7 +268,7 @@ public class MachineController {
     @PostMapping
     public ResponseEntity<ApiSuccessResponse<MachineResponse>> createMachine(
             @Valid
-            @RequestBody AdminCreateMachineRequest request
+            @RequestBody CreateMachineRequest request
     ) {
         MachineResponse machine = machineService.createMachine(request);
 
@@ -303,7 +303,7 @@ public class MachineController {
             Long id,
 
             @Valid
-            @RequestBody AdminUpdateMachineRequest request
+            @RequestBody UpdateMachineRequest request
     ) {
         return ResponseEntity.ok(
                 ApiSuccessResponse.success(
@@ -327,7 +327,7 @@ public class MachineController {
             Long id,
 
             @Valid
-            @RequestBody AdminUpdateAssetCodeRequest request
+            @RequestBody UpdateAssetCodeRequest request
     ) {
         return ResponseEntity.ok(
                 ApiSuccessResponse.success(

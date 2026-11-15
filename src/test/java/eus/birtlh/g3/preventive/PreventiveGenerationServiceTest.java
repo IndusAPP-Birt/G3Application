@@ -1,7 +1,7 @@
 package eus.birtlh.g3.preventive;
 
 import eus.birtlh.g3.machine.MachineService;
-import eus.birtlh.g3.machine.dto.AdminCreateMachineRequest;
+import eus.birtlh.g3.machine.dto.CreateMachineRequest;
 import eus.birtlh.g3.machine.dto.MachineResponse;
 import eus.birtlh.g3.preventive.dto.plan.CreatePreventivePlanRequest;
 import eus.birtlh.g3.preventive.dto.assignment.CreatePreventivePlanAssignmentRequest;
@@ -48,7 +48,7 @@ class PreventiveGenerationServiceTest {
     @Test
     void generatesPendingPreventiveAndAdvancesAssignmentDueDate() {
         MachineResponse machine = machineService.createMachine(
-                new AdminCreateMachineRequest(
+                new CreateMachineRequest(
                         "GEN-TEST-001",
                         "Máquina de prueba de generación",
                         "Fabricante de prueba",
