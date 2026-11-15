@@ -72,6 +72,7 @@
       {"name":"Filtrar por plan","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/preventives/by-plan/{{preventivePlanId}}?page={{page}}&size={{size}}"}},
       {"name":"Filtrar por estado","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/preventives/by-status?status={{preventiveStatus}}&page={{page}}&size={{size}}"}},
       {"name":"Filtrar por inspector","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/preventives/by-inspector/{{inspectorId}}?page={{page}}&size={{size}}"}},
+      {"name":"Consultar mi bandeja","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/preventives/me?page={{page}}&size={{size}}"}},
       {"name":"Filtrar por fecha prevista","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/preventives/by-due-date?from={{from}}&to={{to}}&page={{page}}&size={{size}}"}},
       {"name":"Asignar inspector","request":{"method":"PUT","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"inspectorId\": {{inspectorId}}\n}"},"url":"{{baseUrl}}/api/preventives/{{preventiveId}}/assignment"}},
       {"name":"Iniciar preventivo","request":{"method":"PUT","header":[],"url":"{{baseUrl}}/api/preventives/{{preventiveId}}/start"}},

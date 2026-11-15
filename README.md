@@ -38,10 +38,11 @@ Los tokens incluyen el email como sujeto y el rol del usuario en el claim `role`
 | Consulta de máquinas | Sí | Sí | Sí |
 | Alta y actualización de máquinas | Sí | — | — |
 | Consultas globales y asignación de preventivos | Sí | — | — |
+| Bandeja propia de preventivos | — | Sí | — |
 | Estados preventivos | Sí | Sí | — |
 | Inicio, registro de trabajo y cierre de preventivos | — | Sí* | — |
 
-`*` La capa de servicio debe comprobar además que el preventivo pertenece al inspector autenticado.
+`*` La capa de servicio comprueba además que el preventivo pertenece al inspector autenticado.
 Las rutas no declaradas se deniegan por defecto. `GET /actuator/health`, `POST /api/auth/login` y
 `GET /g3-console.html` permanecen públicos.
 
@@ -194,6 +195,8 @@ PENDING → ASSIGNED → IN_PROGRESS → COMPLETED
 ```
 
 - Solo se asigna un usuario con rol `ROLE_INSPECTOR` a un preventivo pendiente.
+- Cada inspector consulta su propia bandeja sin indicar su identificador.
+- Solo el inspector asignado puede iniciar, registrar trabajo o completar el preventivo.
 - Solo se inicia un preventivo asignado.
 - El trabajo realizado se puede registrar o corregir mientras la ejecución está en progreso.
 - Solo se completa un preventivo en progreso que tenga trabajo registrado.
@@ -208,6 +211,7 @@ PENDING → ASSIGNED → IN_PROGRESS → COMPLETED
 | `GET` | `/api/preventives/by-plan/{preventivePlanId}` | Filtra preventivos por plantilla de origen. |
 | `GET` | `/api/preventives/by-status` | Filtra preventivos por estado. |
 | `GET` | `/api/preventives/by-inspector/{inspectorId}` | Filtra preventivos por inspector asignado. |
+| `GET` | `/api/preventives/me` | Obtiene los preventivos asignados al inspector autenticado. |
 | `GET` | `/api/preventives/by-due-date` | Filtra por un rango inclusivo de fecha prevista. |
 | `PUT` | `/api/preventives/{id}/assignment` | Asigna un inspector a un preventivo pendiente. |
 | `PUT` | `/api/preventives/{id}/start` | Inicia un preventivo asignado. |
@@ -216,8 +220,6 @@ PENDING → ASSIGNED → IN_PROGRESS → COMPLETED
 
 ### Evolución prevista
 
-- TODO: Añadir `GET /api/preventives/me` para que cada inspector consulte su propia bandeja de
-  trabajo, sin indicar su identificador.
 - TODO: Añadir `GET /api/preventives/by-assignment/{assignmentId}` para consultar el historial de
   ejecuciones de una pareja concreta máquina–plantilla.
 
@@ -304,6 +306,7 @@ Las respuestas de error incluyen:
 | Estado | Caso |
 |---|---|
 | `400` | Validación de solicitudes, parámetros ausentes o incompatibles, formato inválido, rango de fechas no válido, ausencia de trabajo registrado o asignación de un usuario sin rol de inspector. |
+| `403` | El inspector autenticado intenta operar un preventivo que no tiene asignado. |
 | `404` | Recurso solicitado no encontrado. |
 | `405` | Método HTTP no admitido; se conserva la cabecera `Allow`. |
 | `406` | Representación no disponible para la cabecera `Accept` solicitada. |
