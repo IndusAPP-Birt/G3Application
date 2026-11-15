@@ -12,7 +12,7 @@ import jakarta.validation.constraints.Size;
  *
  * @param password nueva contraseña en texto plano que el servicio debe convertir en hash
  */
-public record AdminResetUserPasswordRequest(
+public record ResetUserPasswordRequest(
         @NotBlank(message = "La contraseña es obligatoria.")
         @Size(
                 min = UserValidationConstraints.MIN_PASSWORD_LENGTH,

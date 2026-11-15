@@ -22,7 +22,7 @@ import java.util.Locale;
  * @param password contraseña en texto plano que el servicio debe convertir en hash
  * @param role rol que el administrador asigna al usuario
  */
-public record AdminCreateUserRequest(
+public record CreateUserRequest(
         @NotBlank(message = "El nombre es obligatorio.")
         @Size(
                 min = UserValidationConstraints.MIN_NAME_LENGTH,
@@ -56,7 +56,7 @@ public record AdminCreateUserRequest(
         @NotNull(message = "El rol es obligatorio.")
         Role role
 ) {
-    public AdminCreateUserRequest {
+    public CreateUserRequest {
         if (name != null) {
             name = name.strip();
         }

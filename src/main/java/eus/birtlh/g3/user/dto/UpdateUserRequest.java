@@ -21,7 +21,7 @@ import java.util.Locale;
  * @param role rol que el administrador asigna al usuario
  * @param enabled estado de acceso que el administrador asigna al usuario
  */
-public record AdminUpdateUserRequest(
+public record UpdateUserRequest(
         @NotBlank(message = "El nombre es obligatorio.")
         @Size(
                 min = UserValidationConstraints.MIN_NAME_LENGTH,
@@ -50,7 +50,7 @@ public record AdminUpdateUserRequest(
         @NotNull(message = "El estado es obligatorio.")
         Boolean enabled
 ) {
-    public AdminUpdateUserRequest {
+    public UpdateUserRequest {
         if (name != null) {
             name = name.strip();
         }

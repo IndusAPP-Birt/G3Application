@@ -2,9 +2,9 @@ package eus.birtlh.g3.user;
 
 import eus.birtlh.g3.common.dto.CatalogOptionResponse;
 import eus.birtlh.g3.common.dto.PageResponse;
-import eus.birtlh.g3.user.dto.AdminCreateUserRequest;
-import eus.birtlh.g3.user.dto.AdminResetUserPasswordRequest;
-import eus.birtlh.g3.user.dto.AdminUpdateUserRequest;
+import eus.birtlh.g3.user.dto.CreateUserRequest;
+import eus.birtlh.g3.user.dto.ResetUserPasswordRequest;
+import eus.birtlh.g3.user.dto.UpdateUserRequest;
 import eus.birtlh.g3.user.dto.UserResponse;
 import eus.birtlh.g3.user.exception.EmailAlreadyInUseException;
 import eus.birtlh.g3.user.exception.UserNotFoundException;
@@ -219,7 +219,7 @@ public class UserService {
      * @throws EmailAlreadyInUseException si ya existe un usuario con el correo electrónico indicado
      */
     @Transactional
-    public UserResponse createUser(AdminCreateUserRequest request) {
+    public UserResponse createUser(CreateUserRequest request) {
         if (userRepository.existsByEmail(request.email())) {
             throw new EmailAlreadyInUseException(
                     "El email " + request.email() + " ya existe."
@@ -254,7 +254,7 @@ public class UserService {
      * @throws EmailAlreadyInUseException si el correo electrónico pertenece a otro usuario
      */
     @Transactional
-    public UserResponse updateUser(Long id, AdminUpdateUserRequest request) {
+    public UserResponse updateUser(Long id, UpdateUserRequest request) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(
                         "Usuario con " + id + " no encontrado."
@@ -296,7 +296,7 @@ public class UserService {
     @Transactional
     public UserResponse resetUserPassword(
             Long id,
-            AdminResetUserPasswordRequest request
+            ResetUserPasswordRequest request
     ) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(

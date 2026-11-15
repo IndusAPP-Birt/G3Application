@@ -6,9 +6,9 @@ import eus.birtlh.g3.common.dto.CatalogOptionResponse;
 import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.user.Role;
 import eus.birtlh.g3.user.UserValidationConstraints;
-import eus.birtlh.g3.user.dto.AdminCreateUserRequest;
-import eus.birtlh.g3.user.dto.AdminResetUserPasswordRequest;
-import eus.birtlh.g3.user.dto.AdminUpdateUserRequest;
+import eus.birtlh.g3.user.dto.CreateUserRequest;
+import eus.birtlh.g3.user.dto.ResetUserPasswordRequest;
+import eus.birtlh.g3.user.dto.UpdateUserRequest;
 import eus.birtlh.g3.user.dto.UserResponse;
 import eus.birtlh.g3.user.UserService;
 import jakarta.validation.Valid;
@@ -278,7 +278,7 @@ public class UserController {
     @PostMapping
     public ResponseEntity<ApiSuccessResponse<UserResponse>> createUser(
             @Valid
-            @RequestBody AdminCreateUserRequest request
+            @RequestBody CreateUserRequest request
     ) {
         UserResponse user = userService.createUser(request);
 
@@ -309,7 +309,7 @@ public class UserController {
             Long id,
 
             @Valid
-            @RequestBody AdminUpdateUserRequest request
+            @RequestBody UpdateUserRequest request
     ) {
         return ResponseEntity.ok(
                 ApiSuccessResponse.success(
@@ -333,7 +333,7 @@ public class UserController {
             Long id,
 
             @Valid
-            @RequestBody AdminResetUserPasswordRequest request
+            @RequestBody ResetUserPasswordRequest request
     ) {
         return ResponseEntity.ok(
                 ApiSuccessResponse.success(
