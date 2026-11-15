@@ -1,5 +1,6 @@
 package eus.birtlh.g3.machine.dto;
 
+import eus.birtlh.g3.machine.MachineValidationConstraints;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
@@ -26,45 +27,45 @@ import java.util.Locale;
 public record AdminCreateMachineRequest(
         @NotBlank(message = "El código patrimonial es obligatorio.")
         @Size(
-                min = 2,
-                max = 50,
-                message = "El código patrimonial debe tener entre 2 y 50 caracteres."
+                min = MachineValidationConstraints.MIN_ASSET_CODE_LENGTH,
+                max = MachineValidationConstraints.MAX_ASSET_CODE_LENGTH,
+                message = "El código patrimonial debe tener entre {min} y {max} caracteres."
         )
         String assetCode,
 
         @NotBlank(message = "El nombre es obligatorio.")
         @Size(
-                min = 2,
-                max = 100,
-                message = "El nombre debe tener entre 2 y 100 caracteres."
+                min = MachineValidationConstraints.MIN_NAME_LENGTH,
+                max = MachineValidationConstraints.MAX_NAME_LENGTH,
+                message = "El nombre debe tener entre {min} y {max} caracteres."
         )
         String name,
 
         @Size(
-                min = 2,
-                max = 100,
-                message = "El fabricante, si se indica, debe tener entre 2 y 100 caracteres."
+                min = MachineValidationConstraints.MIN_MANUFACTURER_LENGTH,
+                max = MachineValidationConstraints.MAX_MANUFACTURER_LENGTH,
+                message = "El fabricante, si se indica, debe tener entre {min} y {max} caracteres."
         )
         String manufacturer,
 
         @Size(
-                min = 2,
-                max = 100,
-                message = "El modelo, si se indica, debe tener entre 2 y 100 caracteres."
+                min = MachineValidationConstraints.MIN_MODEL_LENGTH,
+                max = MachineValidationConstraints.MAX_MODEL_LENGTH,
+                message = "El modelo, si se indica, debe tener entre {min} y {max} caracteres."
         )
         String model,
 
         @Size(
-                min = 2,
-                max = 100,
-                message = "El número de serie, si se indica, debe tener entre 2 y 100 caracteres."
+                min = MachineValidationConstraints.MIN_SERIAL_NUMBER_LENGTH,
+                max = MachineValidationConstraints.MAX_SERIAL_NUMBER_LENGTH,
+                message = "El número de serie, si se indica, debe tener entre {min} y {max} caracteres."
         )
         String serialNumber,
 
         @Size(
-                min = 2,
-                max = 150,
-                message = "La ubicación, si se indica, debe tener entre 2 y 150 caracteres."
+                min = MachineValidationConstraints.MIN_LOCATION_LENGTH,
+                max = MachineValidationConstraints.MAX_LOCATION_LENGTH,
+                message = "La ubicación, si se indica, debe tener entre {min} y {max} caracteres."
         )
         String location,
 

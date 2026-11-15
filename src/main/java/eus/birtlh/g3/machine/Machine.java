@@ -41,22 +41,22 @@ public class Machine {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "asset_code", nullable = false, length = 50)
+    @Column(name = "asset_code", nullable = false, length = MachineValidationConstraints.MAX_ASSET_CODE_LENGTH)
     private String assetCode;
 
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false, length = MachineValidationConstraints.MAX_NAME_LENGTH)
     private String name;
 
-    @Column(length = 100)
+    @Column(length = MachineValidationConstraints.MAX_MANUFACTURER_LENGTH)
     private String manufacturer;
 
-    @Column(length = 100)
+    @Column(length = MachineValidationConstraints.MAX_MODEL_LENGTH)
     private String model;
 
-    @Column(name = "serial_number", length = 100)
+    @Column(name = "serial_number", length = MachineValidationConstraints.MAX_SERIAL_NUMBER_LENGTH)
     private String serialNumber;
 
-    @Column(length = 150)
+    @Column(length = MachineValidationConstraints.MAX_LOCATION_LENGTH)
     private String location;
 
     @Column(name = "commissioned_at", nullable = false, updatable = false)

@@ -6,6 +6,7 @@ import eus.birtlh.g3.common.dto.CatalogOptionResponse;
 import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.machine.MachineService;
 import eus.birtlh.g3.machine.MachineStatus;
+import eus.birtlh.g3.machine.MachineValidationConstraints;
 import eus.birtlh.g3.machine.dto.AdminCreateMachineRequest;
 import eus.birtlh.g3.machine.dto.AdminUpdateAssetCodeRequest;
 import eus.birtlh.g3.machine.dto.AdminUpdateMachineRequest;
@@ -121,9 +122,9 @@ public class MachineController {
             @RequestParam("assetCode")
             @NotBlank(message = "El código patrimonial es obligatorio.")
             @Size(
-                    min = 2,
-                    max = 50,
-                    message = "El código patrimonial debe tener entre 2 y 50 caracteres."
+                    min = MachineValidationConstraints.MIN_ASSET_CODE_LENGTH,
+                    max = MachineValidationConstraints.MAX_ASSET_CODE_LENGTH,
+                    message = "El código patrimonial debe tener entre {min} y {max} caracteres."
             )
             String assetCode,
 
@@ -175,9 +176,9 @@ public class MachineController {
             @RequestParam("serialNumber")
             @NotBlank(message = "El número de serie es obligatorio.")
             @Size(
-                    min = 2,
-                    max = 100,
-                    message = "El número de serie, debe tener entre 2 y 100 caracteres."
+                    min = MachineValidationConstraints.MIN_SERIAL_NUMBER_LENGTH,
+                    max = MachineValidationConstraints.MAX_SERIAL_NUMBER_LENGTH,
+                    message = "El número de serie debe tener entre {min} y {max} caracteres."
             )
             String serialNumber,
 

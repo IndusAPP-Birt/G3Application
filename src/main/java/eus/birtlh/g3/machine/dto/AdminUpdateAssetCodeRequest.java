@@ -1,5 +1,6 @@
 package eus.birtlh.g3.machine.dto;
 
+import eus.birtlh.g3.machine.MachineValidationConstraints;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
@@ -16,9 +17,9 @@ import java.util.Locale;
 public record AdminUpdateAssetCodeRequest(
         @NotBlank(message = "El código patrimonial es obligatorio.")
         @Size(
-                min = 2,
-                max = 50,
-                message = "El código patrimonial debe tener entre 2 y 50 caracteres."
+                min = MachineValidationConstraints.MIN_ASSET_CODE_LENGTH,
+                max = MachineValidationConstraints.MAX_ASSET_CODE_LENGTH,
+                message = "El código patrimonial debe tener entre {min} y {max} caracteres."
         )
         String assetCode
 ) {
