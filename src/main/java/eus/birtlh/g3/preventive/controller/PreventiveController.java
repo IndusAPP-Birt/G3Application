@@ -16,6 +16,8 @@ import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -326,17 +328,21 @@ public class PreventiveController {
      * Inicia un preventivo que ya tiene un inspector asignado.
      *
      * @param id identificador positivo del preventivo que se desea iniciar
+     * @param jwt token del inspector autenticado que solicita el inicio
      * @return respuesta HTTP 200 con el preventivo iniciado y su marca temporal
      */
     @PutMapping("/{id}/start")
     public ResponseEntity<ApiSuccessResponse<PreventiveResponse>> startPreventive(
             @PathVariable
             @Positive(message = "El identificador debe ser mayor que cero.")
-            Long id
+            Long id,
+
+            @AuthenticationPrincipal
+            Jwt jwt
     ) {
         return ResponseEntity.ok(
                 ApiSuccessResponse.success(
-                        preventiveService.startPreventive(id),
+                        preventiveService.startPreventive(id, jwt.getSubject()),
                         "Preventivo iniciado correctamente."
                 )
         );
@@ -347,6 +353,7 @@ public class PreventiveController {
      *
      * @param id identificador positivo del preventivo en el que se registra el trabajo
      * @param request informe de trabajo validado que se desea registrar
+     * @param jwt token del inspector autenticado que registra el trabajo
      * @return respuesta HTTP 200 con el preventivo actualizado y su marca temporal
      */
     @PutMapping("/{id}/work-performed")
@@ -356,11 +363,14 @@ public class PreventiveController {
             Long id,
 
             @Valid
-            @RequestBody RecordPreventiveWorkRequest request
+            @RequestBody RecordPreventiveWorkRequest request,
+
+            @AuthenticationPrincipal
+            Jwt jwt
     ) {
         return ResponseEntity.ok(
                 ApiSuccessResponse.success(
-                        preventiveService.recordWorkPerformed(id,  request),
+                        preventiveService.recordWorkPerformed(id,  request, jwt.getSubject()),
                         "Trabajo registrado correctamente."
                 )
         );
@@ -370,17 +380,21 @@ public class PreventiveController {
      * Completa un preventivo en curso que tiene trabajo registrado.
      *
      * @param id identificador positivo del preventivo que se desea completar
+     * @param jwt token del inspector autenticado que solicita la finalización
      * @return respuesta HTTP 200 con el preventivo completado y su marca temporal
      */
     @PutMapping("/{id}/completion")
     public ResponseEntity<ApiSuccessResponse<PreventiveResponse>> completePreventive(
             @PathVariable
             @Positive(message = "El identificador debe ser mayor que cero.")
-            Long id
+            Long id,
+
+            @AuthenticationPrincipal
+            Jwt jwt
     ) {
         return ResponseEntity.ok(
                 ApiSuccessResponse.success(
-                        preventiveService.completePreventive(id),
+                        preventiveService.completePreventive(id, jwt.getSubject()),
                         "Preventivo completado correctamente."
                 )
         );

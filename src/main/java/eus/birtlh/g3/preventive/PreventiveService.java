@@ -6,6 +6,7 @@ import eus.birtlh.g3.preventive.dto.execution.AssignInspectorToPreventiveRequest
 import eus.birtlh.g3.preventive.dto.execution.PreventiveResponse;
 import eus.birtlh.g3.preventive.dto.execution.RecordPreventiveWorkRequest;
 import eus.birtlh.g3.preventive.event.PreventiveAssignedEvent;
+import eus.birtlh.g3.preventive.exceptions.assignment.InspectorNotAssignedToPreventiveException;
 import eus.birtlh.g3.preventive.exceptions.execution.InvalidPreventiveDateRangeException;
 import eus.birtlh.g3.preventive.exceptions.execution.InvalidPreventiveStatusTransitionException;
 import eus.birtlh.g3.preventive.exceptions.execution.PreventiveNotFoundException;
@@ -309,16 +310,25 @@ public class PreventiveService {
      * el momento de inicio y cambia el estado a {@link PreventiveStatus#IN_PROGRESS}.</p>
      *
      * @param id identificador del preventivo que se desea iniciar
+     * @param authenticatedInspectorEmail correo electrónico del inspector autenticado
      * @return DTO público del preventivo iniciado
      * @throws PreventiveNotFoundException si no existe un preventivo con el identificador indicado
+     * @throws UserNotFoundException si no existe el inspector identificado por el token
+     * @throws InspectorNotAssignedToPreventiveException si el preventivo no está asignado al
+     *                                                    inspector autenticado
      * @throws InvalidPreventiveStatusTransitionException si el preventivo no está asignado
      */
     @Transactional
-    public PreventiveResponse startPreventive(long id) {
+    public PreventiveResponse startPreventive(
+            long id,
+            String authenticatedInspectorEmail
+            ) {
         Preventive preventive = preventiveRepository.findById(id)
                 .orElseThrow(() -> new PreventiveNotFoundException(
                         "Preventivo con " + id + " no encontrado."
                 ));
+
+        validateInspectorAssignment(preventive, authenticatedInspectorEmail);
 
         if (preventive.getStatus() != PreventiveStatus.ASSIGNED) {
             throw new InvalidPreventiveStatusTransitionException(
@@ -340,19 +350,26 @@ public class PreventiveService {
      *
      * @param id identificador del preventivo en el que se registra el trabajo
      * @param request informe de trabajo validado y normalizado
+     * @param authenticatedInspectorEmail correo electrónico del inspector autenticado
      * @return DTO público del preventivo con el trabajo realizado actualizado
      * @throws PreventiveNotFoundException si no existe un preventivo con el identificador indicado
+     * @throws UserNotFoundException si no existe el inspector identificado por el token
+     * @throws InspectorNotAssignedToPreventiveException si el preventivo no está asignado al
+     *                                                    inspector autenticado
      * @throws InvalidPreventiveStatusTransitionException si el preventivo no está en progreso
      */
     @Transactional
     public PreventiveResponse recordWorkPerformed(
             long id,
-            RecordPreventiveWorkRequest request
+            RecordPreventiveWorkRequest request,
+            String authenticatedInspectorEmail
     ) {
         Preventive preventive = preventiveRepository.findById(id)
                 .orElseThrow(() -> new PreventiveNotFoundException(
                         "Preventivo con " + id + " no encontrado."
                 ));
+
+        validateInspectorAssignment(preventive, authenticatedInspectorEmail);
 
         if (preventive.getStatus() != PreventiveStatus.IN_PROGRESS) {
             throw new InvalidPreventiveStatusTransitionException(
@@ -374,17 +391,26 @@ public class PreventiveService {
      * estado a {@link PreventiveStatus#COMPLETED}.</p>
      *
      * @param id identificador del preventivo que se desea completar
+     * @param authenticatedInspectorEmail correo electrónico del inspector autenticado
      * @return DTO público del preventivo completado
      * @throws PreventiveNotFoundException si no existe un preventivo con el identificador indicado
+     * @throws UserNotFoundException si no existe el inspector identificado por el token
+     * @throws InspectorNotAssignedToPreventiveException si el preventivo no está asignado al
+     *                                                    inspector autenticado
      * @throws InvalidPreventiveStatusTransitionException si el preventivo no está en progreso
      * @throws PreventiveWorkReportRequiredException si no se ha registrado trabajo realizado
      */
     @Transactional
-    public PreventiveResponse completePreventive(long id) {
+    public PreventiveResponse completePreventive(
+            long id,
+            String authenticatedInspectorEmail
+    ) {
         Preventive preventive = preventiveRepository.findById(id)
                 .orElseThrow(() -> new PreventiveNotFoundException(
                         "Preventivo con " + id + " no encontrado."
                 ));
+
+        validateInspectorAssignment(preventive, authenticatedInspectorEmail);
 
         if (preventive.getStatus() != PreventiveStatus.IN_PROGRESS) {
             throw new InvalidPreventiveStatusTransitionException(
@@ -396,5 +422,33 @@ public class PreventiveService {
         preventiveRepository.flush();
 
         return PreventiveMapper.toResponse(preventive);
+    }
+
+    /**
+     * Comprueba que el inspector autenticado sea el responsable asignado al preventivo.
+     *
+     * @param preventive preventivo sobre el que se solicita una operación de ejecución
+     * @param authenticatedInspectorEmail correo electrónico del inspector autenticado
+     * @throws UserNotFoundException si no existe el inspector identificado por el token
+     * @throws InspectorNotAssignedToPreventiveException si el preventivo no está asignado al
+     *                                                    inspector autenticado
+     */
+    private void validateInspectorAssignment(
+            Preventive preventive,
+            String authenticatedInspectorEmail
+    ) {
+        User authenticatedInspector = userRepository.findByEmail(authenticatedInspectorEmail)
+                .orElseThrow(() -> new UserNotFoundException(
+                        "Inspector autenticado no encontrado."
+                ));
+
+        if (
+                preventive.getAssignedInspector() == null
+                || !preventive.getAssignedInspector().getId().equals(authenticatedInspector.getId())
+        ) {
+            throw new InspectorNotAssignedToPreventiveException(
+                    "El preventivo no está asignado al inspector autenticado."
+            );
+        }
     }
 }

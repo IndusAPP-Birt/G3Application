@@ -4,6 +4,7 @@ import eus.birtlh.g3.common.dto.ApiErrorResponse;
 import eus.birtlh.g3.machine.exception.AssetCodeAlreadyInUseException;
 import eus.birtlh.g3.machine.exception.MachineNotFoundException;
 import eus.birtlh.g3.machine.exception.SerialNumberAlreadyInUseException;
+import eus.birtlh.g3.preventive.exceptions.assignment.InspectorNotAssignedToPreventiveException;
 import eus.birtlh.g3.preventive.exceptions.assignment.PreventivePlanAssignmentNotFoundException;
 import eus.birtlh.g3.preventive.exceptions.execution.*;
 import eus.birtlh.g3.preventive.exceptions.plan.PreventivePlanNotFoundException;
@@ -134,6 +135,21 @@ public class GlobalExceptionHandler {
             UserIsNotInspectorException ex
     ) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiErrorResponse.error(ex.getMessage()));
+    }
+
+    /**
+     * Devuelve una respuesta HTTP 403 cuando un inspector intenta operar un preventivo que no
+     * tiene asignado.
+     *
+     * @param ex excepción que identifica la falta de asignación del inspector autenticado
+     * @return respuesta de error con estado HTTP 403
+     */
+    @ExceptionHandler(InspectorNotAssignedToPreventiveException.class)
+    public ResponseEntity<ApiErrorResponse> handleInspectorNotAssignedToPreventiveException(
+            InspectorNotAssignedToPreventiveException ex
+    ) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(ApiErrorResponse.error(ex.getMessage()));
     }
 
