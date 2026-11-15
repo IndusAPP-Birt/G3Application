@@ -57,7 +57,7 @@ public class Preventive {
     @Column(nullable = false)
     private PreventiveStatus status = PreventiveStatus.PENDING;
 
-    @Column(name = "work_performed", length = PreventiveValidationConstraints.MAX_WORK_PERFORMED_LENGTH, nullable = false)
+    @Column(name = "work_performed", length = PreventiveValidationConstraints.MAX_WORK_PERFORMED_LENGTH)
     private String workPerformed;
 
     @Column(name = "assigned_at")
