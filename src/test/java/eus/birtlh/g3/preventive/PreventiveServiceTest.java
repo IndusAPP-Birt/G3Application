@@ -256,6 +256,7 @@ public class PreventiveServiceTest {
     @DisplayName("Un inspector no asignado no puede registrar trabajo en el preventivo")
     @Test
     void rechazaRegistroDeTrabajoCuandoElInspectorNoEstaAsignadoAlPreventivo() {
+
         // Creamos la máquina
         MachineResponse machine = machineService.createMachine(
                 new CreateMachineRequest(
@@ -360,5 +361,223 @@ public class PreventiveServiceTest {
         assertThat(unchangedPreventive.getWorkPerformed())
                 .as("El trabajo realizado se mantiene vacío")
                 .isNull();
+    }
+
+    /**
+     * Comprueba que un inspector no asignado no puede completar un preventivo en curso, aunque
+     * el inspector asignado haya registrado trabajo. Tras rechazar la operación, el preventivo
+     * conserva su estado, el trabajo registrado y no establece fecha de finalización.
+     */
+    @DisplayName("Un inspector no asignado no puede completar el preventivo")
+    @Test
+    void rechazaFinalizacionCuandoElInspectorNoEstaAsignadoAlPreventivo() {
+
+        // Creamos la máquina
+        MachineResponse machine = machineService.createMachine(
+                new CreateMachineRequest(
+                        "TEST-REJECT-COMPLETION-001",
+                        "Máquina de prueba",
+                        "Fabricante de prueba",
+                        "Modelo de prueba",
+                        "SN-TEST-REJECT-COMPLETION-001",
+                        "Laboratorio",
+                        TODAY
+                )
+        );
+
+        // Creamos el plan preventivo
+        PreventivePlanResponse plan = preventivePlanService.createPreventivePlan(
+                new CreatePreventivePlanRequest(
+                        "Plan de prueba de rechazo de finalización",
+                        "Instrucciones para probar que un inspector ajeno no puede completar el preventivo."
+                )
+        );
+
+        // Creamos la asignación
+        preventivePlanAssignmentService.createPreventivePlanAssignment(
+                new CreatePreventivePlanAssignmentRequest(
+                        plan.id(),
+                        machine.id(),
+                        30,
+                        7,
+                        DUE_DATE
+                )
+        );
+
+        // Generamos el preventivo pendiente a partir de la asignación configurada
+        preventiveGenerationService.generatePendingPreventives(TODAY);
+
+        // Recuperamos el preventivo generado según el plan
+        Preventive preventive = preventiveRepository
+                .findByPreventivePlanAssignmentPreventivePlanId(
+                        plan.id(),
+                        PageRequest.of(0, 1)
+                )
+                .getContent()
+                .getFirst();
+
+        // Creamos al inspector que recibirá la asignación
+        UserResponse inspector = userService.createUser(
+                new CreateUserRequest(
+                        "Inspector",
+                        "Asignado",
+                        "inspector.assigned@test.local",
+                        "Password123!",
+                        Role.ROLE_INSPECTOR
+                )
+        );
+
+        // Asignamos el preventivo al inspector
+        PreventiveResponse assigned = preventiveService.assignInspectorToPreventive(
+                preventive.getId(),
+                new AssignInspectorToPreventiveRequest(inspector.id())
+        );
+
+        // El inspector asignado inicia el preventivo
+        PreventiveResponse started = preventiveService.startPreventive(
+                assigned.id(),
+                inspector.email()
+        );
+
+        // El inspector asignado registra el trabajo realizado
+        String workPerformed = "Revisión y ajuste realizados por el inspector asignado";
+        preventiveService.recordWorkPerformed(
+                started.id(),
+                new RecordPreventiveWorkRequest(workPerformed),
+                inspector.email()
+        );
+
+        // Creamos a otro inspector sin asignación sobre el preventivo
+        UserResponse otherInspector = userService.createUser(
+                new CreateUserRequest(
+                        "Inspector",
+                        "Ajeno",
+                        "inspector.other@test.local",
+                        "Password123!",
+                        Role.ROLE_INSPECTOR
+                )
+        );
+
+        // Comprobamos que el inspector ajeno no puede completar el preventivo
+        assertThatThrownBy(() -> preventiveService.completePreventive(
+                started.id(),
+                otherInspector.email()
+        ))
+                .isInstanceOf(InspectorNotAssignedToPreventiveException.class)
+                .hasMessage("El preventivo no está asignado al inspector autenticado.");
+
+        Preventive unchangedPreventive = preventiveRepository.findById(started.id())
+                .orElseThrow();
+
+        // Comprobamos que el intento rechazado no modifica el preventivo
+        assertThat(unchangedPreventive.getStatus())
+                .as("El preventivo se mantiene como IN_PROGRESS")
+                .isEqualTo(PreventiveStatus.IN_PROGRESS);
+        assertThat(unchangedPreventive.getWorkPerformed())
+                .as("El trabajo realizado se conserva")
+                .isEqualTo(workPerformed);
+        assertThat(unchangedPreventive.getCompletedAt())
+                .as("'completedAt' se mantiene vacía")
+                .isNull();
+    }
+
+    /**
+     * Comprueba que el inspector asignado puede completar un preventivo en curso cuando ha
+     * registrado el trabajo realizado. El cierre cambia su estado a
+     * {@link PreventiveStatus#COMPLETED} y registra la fecha de finalización.
+     */
+    @DisplayName("El inspector asignado puede completar un preventivo con trabajo registrado")
+    @Test
+    void completaPreventivoEnProgresoConTrabajoRegistradoCuandoLoSolicitaElInspectorAsignado() {
+
+        // Creamos la máquina
+        MachineResponse machine = machineService.createMachine(
+                new CreateMachineRequest(
+                        "TEST-COMPLETION-001",
+                        "Máquina de prueba",
+                        "Fabricante de prueba",
+                        "Modelo de prueba",
+                        "SN-TEST-COMPLETION-001",
+                        "Laboratorio",
+                        TODAY
+                )
+        );
+
+        // Creamos el plan preventivo
+        PreventivePlanResponse plan = preventivePlanService.createPreventivePlan(
+                new CreatePreventivePlanRequest(
+                        "Plan de prueba de finalización",
+                        "Instrucciones para probar la finalización de un preventivo."
+                )
+        );
+
+        // Creamos la asignación
+        preventivePlanAssignmentService.createPreventivePlanAssignment(
+                new CreatePreventivePlanAssignmentRequest(
+                        plan.id(),
+                        machine.id(),
+                        30,
+                        7,
+                        DUE_DATE
+                )
+        );
+
+        // Generamos el preventivo pendiente a partir de la asignación configurada
+        preventiveGenerationService.generatePendingPreventives(TODAY);
+
+        // Recuperamos el preventivo generado según el plan
+        Preventive preventive = preventiveRepository
+                .findByPreventivePlanAssignmentPreventivePlanId(
+                        plan.id(),
+                        PageRequest.of(0, 1)
+                )
+                .getContent()
+                .getFirst();
+
+        // Creamos al inspector que recibirá la asignación
+        UserResponse inspector = userService.createUser(
+                new CreateUserRequest(
+                        "Inspector",
+                        "Finalización",
+                        "inspector.completion@test.local",
+                        "Password123!",
+                        Role.ROLE_INSPECTOR
+                )
+        );
+
+        // Asignamos e iniciamos el preventivo con el inspector asignado
+        PreventiveResponse assigned = preventiveService.assignInspectorToPreventive(
+                preventive.getId(),
+                new AssignInspectorToPreventiveRequest(inspector.id())
+        );
+        PreventiveResponse started = preventiveService.startPreventive(
+                assigned.id(),
+                inspector.email()
+        );
+
+        // El inspector registra el trabajo realizado antes de completar el preventivo
+        String workPerformed = "Revisión finalizada y equipo validado";
+        preventiveService.recordWorkPerformed(
+                started.id(),
+                new RecordPreventiveWorkRequest(workPerformed),
+                inspector.email()
+        );
+
+        // El inspector asignado completa el preventivo
+        PreventiveResponse completed = preventiveService.completePreventive(
+                started.id(),
+                inspector.email()
+        );
+
+        // Comprobamos que el cierre actualiza el estado y conserva el trabajo registrado
+        assertThat(completed.status())
+                .as("El preventivo debe pasar a COMPLETED")
+                .isEqualTo(PreventiveStatus.COMPLETED);
+        assertThat(completed.workPerformed())
+                .as("El trabajo realizado se conserva al completar el preventivo")
+                .isEqualTo(workPerformed);
+        assertThat(completed.completedAt())
+                .as("'completedAt' registra la fecha de finalización")
+                .isNotNull();
     }
 }
