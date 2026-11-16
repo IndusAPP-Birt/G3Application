@@ -2,12 +2,15 @@ package eus.birtlh.g3.preventive;
 
 import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.machine.Machine;
+import eus.birtlh.g3.machine.MachineStatus;
+import eus.birtlh.g3.machine.exception.MachineNotActiveException;
 import eus.birtlh.g3.machine.exception.MachineNotFoundException;
 import eus.birtlh.g3.machine.repository.MachineRepository;
 import eus.birtlh.g3.preventive.dto.assignment.CreatePreventivePlanAssignmentRequest;
 import eus.birtlh.g3.preventive.dto.assignment.UpdatePreventivePlanAssignmentRequest;
 import eus.birtlh.g3.preventive.dto.assignment.PreventivePlanAssignmentResponse;
 import eus.birtlh.g3.preventive.exceptions.assignment.PreventivePlanAssignmentNotFoundException;
+import eus.birtlh.g3.preventive.exceptions.plan.PreventivePlanInactiveException;
 import eus.birtlh.g3.preventive.exceptions.plan.PreventivePlanNotFoundException;
 import eus.birtlh.g3.preventive.mapper.PreventivePlanAssignmentMapper;
 import eus.birtlh.g3.preventive.repository.PreventivePlanAssignmentRepository;
@@ -185,13 +188,15 @@ public class PreventivePlanAssignmentService {
     /**
      * Asigna una plantilla preventiva a una máquina con su planificación inicial.
      *
-     * <p>Comprueba que existan tanto la plantilla como la máquina antes de crear una asignación
-     * activa. Las dos relaciones quedan inmutables después de la creación.</p>
+     * <p>Comprueba que existan tanto la plantilla como la máquina y que ambas estén activas antes
+     * de crear la asignación. Las dos relaciones quedan inmutables después de la creación.</p>
      *
      * @param request datos validados de la asignación y de su calendario inicial
      * @return DTO público de la asignación creada
      * @throws PreventivePlanNotFoundException si no existe la plantilla indicada en la solicitud
+     * @throws PreventivePlanInactiveException si la plantilla indicada está inactiva
      * @throws MachineNotFoundException si no existe la máquina indicada en la solicitud
+     * @throws MachineNotActiveException si la máquina indicada no está activa
      */
     @Transactional
     public PreventivePlanAssignmentResponse createPreventivePlanAssignment(CreatePreventivePlanAssignmentRequest request) {
@@ -200,10 +205,22 @@ public class PreventivePlanAssignmentService {
                         "Plan preventivo con id " + request.preventivePlanId() + " no encontrado."
                 ));
 
+        if (!preventivePlan.isActive()) {
+            throw new PreventivePlanInactiveException(
+                    "El plan preventivo seleccionado no está activo."
+            );
+        }
+
         Machine machine = machineRepository.findById(request.machineId())
                 .orElseThrow(() -> new MachineNotFoundException(
                         "Máquina con id " + request.machineId() + " no encontrada."
                 ));
+
+        if (machine.getStatus() != MachineStatus.ACTIVE) {
+            throw new MachineNotActiveException(
+                    "La máquina seleccionada no está activa."
+            );
+        }
 
         PreventivePlanAssignment preventivePlanAssignment = preventivePlanAssignmentRepository.save(
                 new PreventivePlanAssignment(

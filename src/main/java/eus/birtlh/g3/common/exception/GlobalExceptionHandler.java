@@ -2,11 +2,13 @@ package eus.birtlh.g3.common.exception;
 
 import eus.birtlh.g3.common.dto.ApiErrorResponse;
 import eus.birtlh.g3.machine.exception.AssetCodeAlreadyInUseException;
+import eus.birtlh.g3.machine.exception.MachineNotActiveException;
 import eus.birtlh.g3.machine.exception.MachineNotFoundException;
 import eus.birtlh.g3.machine.exception.SerialNumberAlreadyInUseException;
 import eus.birtlh.g3.preventive.exceptions.assignment.InspectorNotAssignedToPreventiveException;
 import eus.birtlh.g3.preventive.exceptions.assignment.PreventivePlanAssignmentNotFoundException;
 import eus.birtlh.g3.preventive.exceptions.execution.*;
+import eus.birtlh.g3.preventive.exceptions.plan.PreventivePlanInactiveException;
 import eus.birtlh.g3.preventive.exceptions.plan.PreventivePlanNotFoundException;
 import eus.birtlh.g3.user.exception.EmailAlreadyInUseException;
 import eus.birtlh.g3.user.exception.UserNotFoundException;
@@ -178,6 +180,36 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidPreventiveStatusTransitionException.class)
     public ResponseEntity<ApiErrorResponse> handleInvalidPreventiveStatusTransitionException(
             InvalidPreventiveStatusTransitionException ex
+    ) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiErrorResponse.error(ex.getMessage()));
+    }
+
+    /**
+     * Devuelve una respuesta HTTP 409 cuando se intenta crear una asignación con una plantilla
+     * preventiva inactiva.
+     *
+     * @param ex excepción que identifica la plantilla no disponible para la asignación
+     * @return respuesta de error con estado HTTP 409
+     */
+    @ExceptionHandler(PreventivePlanInactiveException.class)
+    public ResponseEntity<ApiErrorResponse> handlePreventivePlanInactiveException(
+            PreventivePlanInactiveException ex
+    ) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiErrorResponse.error(ex.getMessage()));
+    }
+
+    /**
+     * Devuelve una respuesta HTTP 409 cuando se intenta crear una asignación con una máquina que
+     * no está activa.
+     *
+     * @param ex excepción que identifica la máquina no disponible para la asignación
+     * @return respuesta de error con estado HTTP 409
+     */
+    @ExceptionHandler(MachineNotActiveException.class)
+    public ResponseEntity<ApiErrorResponse> handleMachineNotActiveException(
+            MachineNotActiveException ex
     ) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(ApiErrorResponse.error(ex.getMessage()));
