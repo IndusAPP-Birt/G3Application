@@ -6,6 +6,7 @@ import eus.birtlh.g3.machine.exception.MachineNotActiveException;
 import eus.birtlh.g3.machine.exception.MachineNotFoundException;
 import eus.birtlh.g3.machine.exception.SerialNumberAlreadyInUseException;
 import eus.birtlh.g3.preventive.exceptions.assignment.InspectorNotAssignedToPreventiveException;
+import eus.birtlh.g3.preventive.exceptions.assignment.PreventivePlanAssignmentAlreadyExistsException;
 import eus.birtlh.g3.preventive.exceptions.assignment.PreventivePlanAssignmentNotFoundException;
 import eus.birtlh.g3.preventive.exceptions.execution.*;
 import eus.birtlh.g3.preventive.exceptions.plan.PreventivePlanInactiveException;
@@ -210,6 +211,21 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MachineNotActiveException.class)
     public ResponseEntity<ApiErrorResponse> handleMachineNotActiveException(
             MachineNotActiveException ex
+    ) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiErrorResponse.error(ex.getMessage()));
+    }
+
+    /**
+     * Devuelve una respuesta HTTP 409 cuando ya existe una asignación para la misma pareja de
+     * plantilla preventiva y máquina.
+     *
+     * @param ex excepción que identifica la asignación duplicada
+     * @return respuesta de error con estado HTTP 409
+     */
+    @ExceptionHandler(PreventivePlanAssignmentAlreadyExistsException.class)
+    public ResponseEntity<ApiErrorResponse> handlePreventivePlanAssignmentAlreadyExistsException(
+            PreventivePlanAssignmentAlreadyExistsException ex
     ) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(ApiErrorResponse.error(ex.getMessage()));

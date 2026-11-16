@@ -9,6 +9,7 @@ import eus.birtlh.g3.machine.repository.MachineRepository;
 import eus.birtlh.g3.preventive.dto.assignment.CreatePreventivePlanAssignmentRequest;
 import eus.birtlh.g3.preventive.dto.assignment.UpdatePreventivePlanAssignmentRequest;
 import eus.birtlh.g3.preventive.dto.assignment.PreventivePlanAssignmentResponse;
+import eus.birtlh.g3.preventive.exceptions.assignment.PreventivePlanAssignmentAlreadyExistsException;
 import eus.birtlh.g3.preventive.exceptions.assignment.PreventivePlanAssignmentNotFoundException;
 import eus.birtlh.g3.preventive.exceptions.plan.PreventivePlanInactiveException;
 import eus.birtlh.g3.preventive.exceptions.plan.PreventivePlanNotFoundException;
@@ -197,6 +198,8 @@ public class PreventivePlanAssignmentService {
      * @throws PreventivePlanInactiveException si la plantilla indicada está inactiva
      * @throws MachineNotFoundException si no existe la máquina indicada en la solicitud
      * @throws MachineNotActiveException si la máquina indicada no está activa
+     * @throws PreventivePlanAssignmentAlreadyExistsException si ya existe una asignación para la
+     *                                                         plantilla y la máquina indicadas
      */
     @Transactional
     public PreventivePlanAssignmentResponse createPreventivePlanAssignment(CreatePreventivePlanAssignmentRequest request) {
@@ -219,6 +222,14 @@ public class PreventivePlanAssignmentService {
         if (machine.getStatus() != MachineStatus.ACTIVE) {
             throw new MachineNotActiveException(
                     "La máquina seleccionada no está activa."
+            );
+        }
+
+        if (preventivePlanAssignmentRepository.existsByPreventivePlanIdAndMachineId(
+                preventivePlan.getId(), machine.getId()
+        )) {
+            throw new PreventivePlanAssignmentAlreadyExistsException(
+                    "Ya existe una asignación para el plan preventivo y la máquina seleccionados."
             );
         }
 

@@ -40,4 +40,14 @@ public interface PreventivePlanAssignmentRepository extends JpaRepository<Preven
      * @return página de asignaciones de la plantilla; puede no contener resultados
      */
     Page<PreventivePlanAssignment> findByPreventivePlanId(Long preventivePlanId, Pageable pageable);
+
+    /**
+     * Comprueba si ya existe una asignación para la pareja formada por una plantilla y una
+     * máquina.
+     *
+     * @param preventivePlanId identificador de la plantilla preventiva
+     * @param machineId identificador de la máquina
+     * @return {@code true} si la pareja ya tiene una asignación; {@code false} en caso contrario
+     */
+    boolean existsByPreventivePlanIdAndMachineId(Long preventivePlanId, Long machineId);
 }
