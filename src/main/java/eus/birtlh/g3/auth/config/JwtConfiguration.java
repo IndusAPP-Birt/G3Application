@@ -19,13 +19,15 @@ import java.util.Base64;
 /**
  * Configura los componentes criptográficos necesarios para crear y validar tokens JWT con HS256.
  *
- * <p>Se confía en que la clave recibida mediante {@code JWT_SIGNING_KEY} fue generada previamente
- * con 32 bytes aleatorios y está codificada en Base64. Por esta decisión no se añade una validación
- * propia de longitud ni formato antes de convertirla en una clave HMAC.</p>
+ * <p>La clave recibida mediante {@code JWT_SIGNING_KEY} se decodifica desde Base64 y debe contener
+ * al menos 256 bits, requisito mínimo del algoritmo HS256.</p>
  */
 @Configuration
 @EnableConfigurationProperties(JwtProperties.class)
 public class JwtConfiguration {
+
+    /** Longitud mínima, en bytes, de una clave simétrica para HS256. */
+    private static final int HS256_MINIMUM_KEY_LENGTH_BYTES = 32;
 
     /**
      * Convierte la clave de firma configurada en una clave HMAC utilizable por JWT.
@@ -33,10 +35,18 @@ public class JwtConfiguration {
      * @param properties propiedades externas de JWT
      * @return clave simétrica de firma y validación
      * @throws IllegalArgumentException si la clave configurada no contiene Base64 válido
+     * @throws IllegalStateException si la clave decodificada no alcanza los 256 bits requeridos
+     *                               por HS256
      */
     @Bean
     public SecretKey jwtSigningKey(JwtProperties properties) {
         byte[] keyBytes = Base64.getDecoder().decode(properties.signingKey());
+
+        if (keyBytes.length < HS256_MINIMUM_KEY_LENGTH_BYTES) {
+            throw new IllegalStateException(
+                    "JWT_SIGNING_KEY debe contener al menos 256 bits para usar HS256."
+            );
+        }
 
         return new SecretKeySpec(keyBytes, "HmacSHA256");
     }
