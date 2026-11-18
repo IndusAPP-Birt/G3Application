@@ -1,46 +1,10 @@
-# Auditoría de la aplicación
+# Cambios pendientes
 
-Fecha: 2026-11-15  
-Alcance: estructura, dominio, persistencia, seguridad, validación, transacciones, generación
-programada, notificaciones, pruebas, documentación y consola.
+Este documento recoge exclusivamente los cambios técnicos que permanecen pendientes y el motivo por el que todavía no se han abordado.
 
-La rama `develop` estaba limpia durante la auditoría. La batería `./mvnw test -q` se ejecutó
-correctamente proporcionando una clave JWT Base64 válida mediante variable de entorno temporal.
-No se conservan artefactos de compilación o pruebas.
-
-## Hallazgos y mejoras
-
-| Prioridad | Hallazgo | Impacto | Acción propuesta |
-|---|---|---|---|
-| ~~P1~~ | ~~Un inspector puede iniciar, registrar trabajo o completar cualquier preventivo si conoce su identificador. La autorización HTTP comprueba el rol, pero [PreventiveService](../src/main/java/eus/birtlh/g3/preventive/PreventiveService.java) no contrasta al usuario autenticado con `assignedInspector`.~~ | ~~Un inspector podría operar un preventivo asignado a otro inspector.~~ | ~~Recibir la identidad autenticada en los casos de uso de ejecución y comprobar que coincide con el inspector asignado.~~ |
-| ~~P1~~ | ~~Un inspector no puede consultar su propia carga: los `GET /api/preventives/**` pertenecen actualmente al administrador.~~ | ~~El inspector no dispone de una bandeja propia para localizar sus asignaciones.~~ | ~~Implementar el TODO `GET /api/preventives/me` y restringirlo al inspector autenticado.~~ |
-| P1 | La configuración actual usa H2 en memoria, `create-drop` y `data.sql` también al desplegar. | Un reinicio del servicio elimina cambios y repuebla datos de demostración. Si Render debe conservar actividad real, no hay persistencia operativa. | Separar perfiles de desarrollo y despliegue; usar una base persistente para el segundo y reservar los datos semilla para desarrollo. |
-| ~~P2~~ | ~~[JwtConfiguration](../src/main/java/eus/birtlh/g3/auth/config/JwtConfiguration.java) decodifica la clave Base64, pero no valida que tenga al menos 256 bits para HS256.~~ | ~~Una clave válida pero demasiado corta debilitaría la firma JWT.~~ | ~~Validar su longitud al arrancar y abortar con un mensaje de configuración claro cuando sea insuficiente.~~ |
-| ~~P2~~ | ~~Crear de nuevo la misma pareja plantilla-máquina depende de la restricción única de base de datos. La excepción resultante se traduce en HTTP 500.~~ | ~~Un duplicado o reintento normal de cliente no recibe un conflicto de negocio comprensible.~~ | ~~Comprobar la pareja antes de crear y devolver HTTP 409 mediante una excepción específica. La restricción única debe mantenerse como garantía final.~~ |
-| ~~P2~~ | ~~Se puede crear una asignación preventiva sin exigir que la plantilla esté activa ni que la máquina se encuentre en estado `ACTIVE`.~~ | ~~Permite planificar mantenimiento sobre recursos no disponibles e introduce una incoherencia entre los estados publicados y las reglas de creación.~~ | ~~Antes de crear la asignación, comprobar que la plantilla está activa y que la máquina está activa; rechazar cada caso con una excepción específica traducida a HTTP 409.~~ |
-| P2 | Deshabilitar un usuario, cambiarle el rol o restablecer su contraseña no invalida un JWT emitido previamente. | El token conserva sus permisos anteriores hasta su caducidad, actualmente 15 minutos. | Decidir si esa ventana es aceptable. Si no lo es, incorporar una política de revocación o versionado de tokens. |
-| P2 | Las pruebas dependen de que `JWT_SIGNING_KEY` esté configurada externamente. Con una clave temporal válida la batería completa pasa, pero sin ella no es reproducible de forma autónoma. | Localmente y en CI hay que preparar una variable de entorno antes de ejecutar los tests. | Añadir una configuración exclusiva de pruebas con una clave Base64 ficticia y válida; la clave real debe continuar siendo obligatoria fuera de las pruebas. |
-| ~~P2~~ | ~~La cobertura no protegía las reglas principales de negocio ni la matriz de permisos.~~ | ~~Cambios futuros podían romper transiciones, planificación, autenticación, notificaciones o autorización sin que la batería lo detectase. ~~| ~~Incorporar pruebas de integración para el ciclo de ejecución, la creación y planificación de asignaciones, la generación automática y la instantánea histórica; pruebas de servicio para usuarios, máquinas y autenticación; pruebas unitarias del listener de notificaciones; y una matriz `MockMvc` para las rutas críticas. Ejecutarlas con un perfil `test` autónomo, H2 limpio y una clave JWT ficticia.~~ |
-| P3 | La generación planificada no coordina varias instancias ni define de forma explícita cómo recuperar periodos prolongados sin ejecución. | No afecta mientras exista una instancia. Al escalar, dos procesos podrían competir por la misma generación. | Mantener el diseño actual con una instancia; definir bloqueo distribuido y política de recuperación solo si se despliega con más de una. |
-| P3 | Los mapeos paginados de preventivos navegan relaciones anidadas durante la conversión a DTO. La medición de `GET /api/preventives?page=0&size=20` devolvió 18 resultados y ejecutó 42 consultas SQL: una principal y 41 cargas perezosas adicionales. | El patrón N+1 está confirmado y su coste crecerá con el tamaño de cada página. | Aplicar un `@EntityGraph` para cargar la asignación, su plantilla, su máquina y el inspector junto al preventivo. Después, repetir la medición para verificar la reducción de consultas. |
-| ~~P4~~ | ~~[g3-console.html](../src/main/resources/static/g3-console.html) conserva una configuración antigua de planes con rutas ya inexistentes, aunque se sobrescribe posteriormente y no llega a ejecutarse.~~  | ~~Deuda de mantenimiento y posible confusión al modificar la consola.~~  | ~~Eliminar el bloque obsoleto en una tarea específica de mantenimiento de la consola.~~  |
-| ~~P4~~ | ~~Parte de [PreventivePlanAssignmentService](../src/main/java/eus/birtlh/g3/preventive/PreventivePlanAssignmentService.java) y dos métodos de [PreventiveRepository](../src/main/java/eus/birtlh/g3/preventive/repository/PreventiveRepository.java) no tienen Javadocs, a diferencia del resto del módulo.~~ | ~~Solo afecta a la consistencia documental.~~ | ~~Completar la documentación en un commit exclusivo de `docs`.~~ |
-
-## Aspectos verificados sin incidencia
-
-- Separación de dominio coherente entre `PreventivePlan`, `PreventivePlanAssignment` y
-  `Preventive`.
-- Restricción única correcta para la pareja plantilla-máquina y para la fecha prevista dentro de
-  cada asignación.
-- Validaciones y normalización de entradas centralizadas mediante clases de constraints.
-- Notificación de asignación publicada después de confirmar la transacción; un error SMTP no
-  revierte el preventivo ya asignado.
-- Errores HTTP, paginación y respuestas de API tienen contratos homogéneos.
-- La seguridad deniega por defecto las rutas que no están declaradas.
-- La consola, el README y las colecciones Postman recogen los endpoints implementados; los
-  endpoints futuros se distinguen como TODO en el README.
-
-## Límites de alcance
-
-La gestión de incidencias correctivas, el estado `BLOCKED` y los informes no se evalúan como
-carencias: todavía no forman parte de los recursos implementados en esta versión.
+| Prioridad | Cambio pendiente | Motivo de aplazamiento |
+|---|---|---|
+| P1 | Sustituir la configuración actual de H2 en memoria, `create-drop` y `data.sql` en despliegue por una base de datos persistente. | Es una mejora importante. La parte de producción que se mostrará se migrará a Neon. Antes hay que decidir cómo se poblarán las bases de datos, preparar la estrategia de datos iniciales y realizar pruebas contra la nueva base de datos. |
+| P2 | Decidir si deben revocarse de forma inmediata los JWT emitidos al deshabilitar un usuario, cambiar su rol o restablecer su contraseña. | Se acepta temporalmente la ventana actual de 15 minutos por simplicidad. El cierre de sesión corresponde al frontend, que elimina el token almacenado. Más adelante se valorará con el frontend si es posible forzar la eliminación del token cuando se deshabilite un usuario; esta medida no sustituye una revocación gestionada por el servidor. |
+| P3 | Coordinar la generación preventiva si se despliega más de una instancia y definir la recuperación de periodos sin ejecución. | La aplicación no necesita todavía varias instancias ni una política de recuperación definida, pero es una mejora útil que se abordará al consolidar el despliegue o antes de escalarlo. |
+| P3 | Eliminar el patrón N+1 confirmado en los listados paginados de preventivos. | El volumen actual de datos es reducido, por lo que no supone un problema operativo inmediato. Aun así, es una buena práctica pendiente: se abordará mediante una mejora específica de JPA y una nueva medición posterior. |
