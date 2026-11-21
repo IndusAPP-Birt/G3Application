@@ -20,7 +20,7 @@ Una máquina y una plantilla preventiva existen de forma independiente. `Prevent
 
 | Recurso | Contenido |
 |---|---|
-| [Lógica de negocio](docs/logica-de-negocio.docx) | Entidades, relaciones, reglas verificadas, excepciones, pruebas y flujo completo de mantenimiento preventivo. |
+| [Lógica de negocio](docs/logica-de-negocio_0.1.docx) | Entidades, relaciones, reglas verificadas, excepciones, pruebas y flujo completo de mantenimiento preventivo. |
 | [Esquema de base de datos](docs/esquema-base-datos.docx) | Tablas persistentes, claves, restricciones y relaciones del modelo de datos. |
 | [Auditoría técnica](docs/auditoria-aplicacion.md) | Hallazgos técnicos, prioridades y acciones de mejora. |
 | [Colección Postman local](postman/G3Application.postman_collection.json) | Consultas contra el servicio local. |
@@ -137,7 +137,7 @@ Vincula una plantilla con una máquina y establece su calendario específico de 
 
 ### Mantenimientos preventivos
 
-Representa las ejecuciones generadas desde una asignación preventiva y su ciclo de trabajo.
+Representa las ejecuciones generadas desde una asignación preventiva y su ciclo de trabajo. Al asignar un inspector a un preventivo, la aplicación le envía una notificación por correo y comunica la asignación al chat central configurado de Telegram.
 
 | Método | Ruta | Operación |
 |---|---|---|
@@ -180,6 +180,8 @@ Cada colección comienza con `Autenticación > Iniciar sesión`, que guarda el J
 | `spring.mail.port` | `MAIL_PORT` | Puerto SMTP. |
 | `spring.mail.username` | `MAIL_USERNAME` | Cuenta remitente. |
 | `spring.mail.password` | `MAIL_PASSWORD` | Credencial o contraseña de aplicación SMTP. |
+| `telegram.bot-token` | `TELEGRAM_BOT_TOKEN` | Token del bot que envía las notificaciones centrales. |
+| `telegram.chat-id` | `TELEGRAM_CHAT_ID` | Identificador del chat central destinatario de las notificaciones. |
 | `preventive.generation.cron` | `PREVENTIVE_GENERATION_CRON` | Programación de la generación preventiva. |
 | `preventive.generation.zone` | `PREVENTIVE_GENERATION_ZONE` | Zona horaria de la programación; predeterminada `Europe/Madrid`. |
 
@@ -229,4 +231,4 @@ Las respuestas de error incluyen:
 
 ## Lógica de negocio
 
-La descripción completa de entidades, relaciones, reglas verificadas, excepciones, pruebas y flujo de mantenimiento preventivo está disponible en [Lógica de negocio](docs/logica-de-negocio.docx).
+La descripción completa de entidades, relaciones, reglas verificadas, excepciones, pruebas y flujo de mantenimiento preventivo está disponible en [Lógica de negocio](docs/logica-de-negocio_0.1.docx).
