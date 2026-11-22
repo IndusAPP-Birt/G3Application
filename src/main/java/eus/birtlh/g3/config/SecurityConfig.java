@@ -65,6 +65,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/preventive-plan-assignments", "/api/preventive-plan-assignments/**").hasAuthority("ROLE_ADMINISTRATOR")
                         .requestMatchers("/api/preventives/me").hasAuthority("ROLE_INSPECTOR")
                         .requestMatchers(HttpMethod.GET, "/api/preventives/statuses").hasAnyAuthority("ROLE_ADMINISTRATOR", "ROLE_INSPECTOR")
+                        .requestMatchers(HttpMethod.GET, "/api/preventives/*/incidents").hasAnyAuthority("ROLE_ADMINISTRATOR", "ROLE_INSPECTOR")
                         .requestMatchers(HttpMethod.GET, "/api/preventives", "/api/preventives/**").hasAuthority("ROLE_ADMINISTRATOR")
                         .requestMatchers(HttpMethod.PUT, "/api/preventives/*/assignment").hasAuthority("ROLE_ADMINISTRATOR")
                         .requestMatchers(HttpMethod.PUT, "/api/preventives/*/start", "/api/preventives/*/work-performed", "/api/preventives/*/completion").hasAuthority("ROLE_INSPECTOR")

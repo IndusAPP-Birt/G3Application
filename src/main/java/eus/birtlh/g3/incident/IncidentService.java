@@ -8,6 +8,8 @@ import eus.birtlh.g3.incident.mapper.IncidentMapper;
 import eus.birtlh.g3.incident.mapper.IncidentSeverityMapper;
 import eus.birtlh.g3.incident.mapper.IncidentStatusMapper;
 import eus.birtlh.g3.incident.repository.IncidentRepository;
+import eus.birtlh.g3.preventive.exceptions.execution.PreventiveNotFoundException;
+import eus.birtlh.g3.preventive.repository.PreventiveRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,6 +31,7 @@ import java.util.List;
 public class IncidentService {
 
     private final IncidentRepository incidentRepository;
+    private final PreventiveRepository preventiveRepository;
 
     /**
      * Obtiene todos los niveles de gravedad disponibles como opciones de catálogo públicas.
@@ -96,5 +99,47 @@ public class IncidentService {
                 ));
 
         return IncidentMapper.toResponse(incident);
+    }
+
+    /**
+     * Obtiene una página de incidencias asociadas a un preventivo.
+     *
+     * <p>La autorización de la consulta corresponde a la configuración de seguridad. Tanto la
+     * administración como los inspectores autorizados pueden consultar las incidencias de
+     * cualquier preventivo. Antes de realizar la consulta, se valida que el preventivo exista.</p>
+     *
+     * @param page índice de página basado en cero
+     * @param size número de incidencias por página
+     * @param preventiveId identificador del preventivo solicitado
+     * @return página de incidencias públicas del preventivo; su contenido puede estar vacío
+     * @throws PreventiveNotFoundException si no existe el preventivo indicado
+     */
+    @Transactional(readOnly = true)
+    public PageResponse<IncidentResponse> getAllIncidentsByPreventiveId(
+            int page,
+            int size,
+            Long preventiveId
+    ) {
+        if (!preventiveRepository.existsById(preventiveId)) {
+            throw new PreventiveNotFoundException(
+                    "Preventivo con id " + preventiveId + " no encontrado."
+            );
+        }
+
+        Page<Incident> incidents = incidentRepository.findAllByPreventiveId(
+                preventiveId,
+                PageRequest.of(page, size, Sort.by("id").ascending())
+        );
+
+        return new PageResponse<>(
+                incidents.getContent()
+                        .stream()
+                        .map(IncidentMapper::toResponse)
+                        .toList(),
+                incidents.getNumber(),
+                incidents.getSize(),
+                incidents.getTotalElements(),
+                incidents.getTotalPages()
+        );
     }
 }
