@@ -160,7 +160,59 @@ public class IncidentController {
     ) {
         return ResponseEntity.ok(
                 ApiSuccessResponse.success(
-                        incidentService.getByAssignedTechnicianEmail(
+                        incidentService.getIncidentsByAssignedTechnicianEmail(
+                                page,
+                                size,
+                                jwt.getSubject()
+                        ),
+                        "Incidencias obtenidas correctamente."
+                )
+        );
+    }
+
+    /**
+     * Obtiene una página de incidencias comunicadas por el inspector autenticado.
+     *
+     * <p>El correo del inspector se obtiene del sujeto del JWT, por lo que la petición no admite
+     * un identificador de inspector modificable por el cliente.</p>
+     *
+     * @param page índice de página basado en cero
+     * @param size número de incidencias por página
+     * @param jwt token JWT del inspector autenticado
+     * @return respuesta HTTP 200 con la página de incidencias y su marca temporal
+     */
+    @GetMapping("/reported-by-me")
+    public ResponseEntity<ApiSuccessResponse<PageResponse<IncidentResponse>>> findIncidentsByReportedByInspectorEmail(
+            @RequestParam(
+                    name = "page",
+                    defaultValue = PaginationConstants.DEFAULT_PAGE_VALUE
+            )
+            @Min(
+                    value = PaginationConstants.MIN_PAGE,
+                    message = "La página debe ser {value} o mayor."
+            )
+            int page,
+
+            @RequestParam(
+                    name = "size",
+                    defaultValue = PaginationConstants.DEFAULT_PAGE_SIZE_VALUE
+            )
+            @Min(
+                    value = PaginationConstants.MIN_PAGE_SIZE,
+                    message = "El tamaño de página debe ser {value} o mayor."
+            )
+            @Max(
+                    value = PaginationConstants.MAX_PAGE_SIZE,
+                    message = "El tamaño de página no puede superar {value}."
+            )
+            int size,
+
+            @AuthenticationPrincipal
+            Jwt jwt
+    ) {
+        return ResponseEntity.ok(
+                ApiSuccessResponse.success(
+                        incidentService.getIncidentsByReportedByInspectorEmail(
                                 page,
                                 size,
                                 jwt.getSubject()

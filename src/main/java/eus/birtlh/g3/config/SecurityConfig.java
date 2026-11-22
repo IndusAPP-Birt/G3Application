@@ -72,6 +72,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/incidents/severities", "/api/incidents/statuses").hasAnyAuthority("ROLE_ADMINISTRATOR", "ROLE_INSPECTOR", "ROLE_MAINTENANCE_TECHNICIAN")
                         .requestMatchers(HttpMethod.GET, "/api/incidents").hasAuthority("ROLE_ADMINISTRATOR")
                         .requestMatchers(HttpMethod.GET, "/api/incidents/me").hasAuthority("ROLE_MAINTENANCE_TECHNICIAN")
+                        .requestMatchers(HttpMethod.GET, "/api/incidents/reported-by-me").hasAuthority("ROLE_INSPECTOR")
                         .requestMatchers(HttpMethod.GET, "/api/incidents/*").hasAuthority("ROLE_ADMINISTRATOR")
                         .anyRequest().denyAll()
                 )

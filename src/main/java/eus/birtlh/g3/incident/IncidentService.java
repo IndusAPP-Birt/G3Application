@@ -155,13 +155,47 @@ public class IncidentService {
      * @return página de incidencias asignadas al técnico; su contenido puede estar vacío
      */
     @Transactional(readOnly = true)
-    public PageResponse<IncidentResponse> getByAssignedTechnicianEmail(
+    public PageResponse<IncidentResponse> getIncidentsByAssignedTechnicianEmail(
             int page,
             int size,
             String technicianEmail
     ) {
         Page<Incident> incidents = incidentRepository.findByAssignedTechnicianEmail(
                 technicianEmail,
+                PageRequest.of(page, size, Sort.by("id").ascending())
+        );
+
+        return new PageResponse<>(
+                incidents.getContent()
+                        .stream()
+                        .map(IncidentMapper::toResponse)
+                        .toList(),
+                incidents.getNumber(),
+                incidents.getSize(),
+                incidents.getTotalElements(),
+                incidents.getTotalPages()
+        );
+    }
+
+    /**
+     * Obtiene una página de incidencias comunicadas por un inspector.
+     *
+     * <p>El correo recibido identifica al inspector autenticado y limita el resultado a las
+     * incidencias que ha comunicado, incluidas las resueltas pendientes de validación y cierre.</p>
+     *
+     * @param page índice de página basado en cero
+     * @param size número de incidencias por página
+     * @param inspectorEmail correo electrónico del inspector que comunicó las incidencias
+     * @return página de incidencias comunicadas por el inspector; su contenido puede estar vacío
+     */
+    @Transactional(readOnly = true)
+    public PageResponse<IncidentResponse> getIncidentsByReportedByInspectorEmail(
+            int page,
+            int size,
+            String inspectorEmail
+    ) {
+        Page<Incident> incidents = incidentRepository.findByReportedByInspectorEmail(
+                inspectorEmail,
                 PageRequest.of(page, size, Sort.by("id").ascending())
         );
 
