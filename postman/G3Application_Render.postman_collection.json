@@ -10,7 +10,7 @@
     {"key":"accessToken","value":""}, {"key":"loginEmail","value":""}, {"key":"loginPassword","value":""},
     {"key":"page","value":"0"}, {"key":"size","value":"20"},
     {"key":"userId","value":"1"}, {"key":"inspectorId","value":"2"},
-    {"key":"machineId","value":"1"}, {"key":"preventivePlanId","value":"1"}, {"key":"preventivePlanAssignmentId","value":"1"}, {"key":"preventiveId","value":"1"},
+    {"key":"machineId","value":"1"}, {"key":"preventivePlanId","value":"1"}, {"key":"preventivePlanAssignmentId","value":"1"}, {"key":"preventiveId","value":"1"}, {"key":"incidentId","value":"1"},
     {"key":"emailSearchTerm","value":"inspector"}, {"key":"enabled","value":"true"}, {"key":"role","value":"ROLE_INSPECTOR"},
     {"key":"assetCodeSearchTerm","value":"MAQ"}, {"key":"serialNumberSearchTerm","value":"SN"}, {"key":"machineStatus","value":"ACTIVE"},
     {"key":"planActive","value":"true"}, {"key":"planNameSearchTerm","value":"Revisión"}, {"key":"preventiveStatus","value":"PENDING"},
@@ -81,7 +81,9 @@
     ]},
     {"name":"Incidencias","item":[
       {"name":"Listar estados de incidencia","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/incidents/statuses"}},
-      {"name":"Listar niveles de gravedad","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/incidents/severities"}}
+      {"name":"Listar niveles de gravedad","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/incidents/severities"}},
+      {"name":"Listar incidencias","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/incidents?page={{page}}&size={{size}}"}},
+      {"name":"Obtener incidencia","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/incidents/{{incidentId}}"}}
     ]}
   ]
 }

@@ -63,6 +63,7 @@ El token contiene el correo electrónico como sujeto y el rol en el claim `role`
 | Bandeja propia de preventivos | — | Sí | — |
 | Estados preventivos | Sí | Sí | — |
 | Catálogos de estados y niveles de gravedad de incidencias | Sí | Sí | Sí |
+| Listado y consulta individual de incidencias | Sí | — | — |
 | Inicio, registro de trabajo y cierre de preventivos | — | Sí* | — |
 
 `*` La capa de servicio comprueba además que el preventivo pertenece al inspector autenticado.
@@ -160,12 +161,14 @@ Representa las ejecuciones generadas desde una asignación preventiva y su ciclo
 
 ### Incidencias
 
-Representa los problemas detectados durante la ejecución de un preventivo. Actualmente se publican los catálogos necesarios para seleccionar e interpretar su estado y nivel de gravedad.
+Representa los problemas detectados durante la ejecución de un preventivo. Actualmente permite consultar sus catálogos, su listado paginado y el detalle de cada incidencia. El listado y el detalle están reservados a administración.
 
 | Método | Ruta | Operación |
 |---|---|---|
 | `GET` | `/api/incidents/statuses` | Obtiene el catálogo de estados de incidencias. |
 | `GET` | `/api/incidents/severities` | Obtiene el catálogo de niveles de gravedad de incidencias. |
+| `GET` | `/api/incidents` | Obtiene incidencias paginadas. |
+| `GET` | `/api/incidents/{id}` | Obtiene una incidencia por identificador. |
 
 ## Consola de pruebas
 

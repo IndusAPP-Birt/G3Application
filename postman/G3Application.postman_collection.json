@@ -18,6 +18,7 @@
     {"key": "preventivePlanId", "value": "1"},
     {"key": "preventivePlanAssignmentId", "value": "1"},
     {"key": "preventiveId", "value": "1"},
+    {"key": "incidentId", "value": "1"},
     {"key": "emailSearchTerm", "value": "inspector"},
     {"key": "enabled", "value": "true"},
     {"key": "role", "value": "ROLE_INSPECTOR"},
@@ -207,7 +208,9 @@
       "name": "Incidencias",
       "item": [
         {"name": "Listar estados de incidencia", "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/incidents/statuses"}},
-        {"name": "Listar niveles de gravedad", "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/incidents/severities"}}
+        {"name": "Listar niveles de gravedad", "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/incidents/severities"}},
+        {"name": "Listar incidencias", "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/incidents?page={{page}}&size={{size}}"}},
+        {"name": "Obtener incidencia", "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/incidents/{{incidentId}}"}}
       ]
     }
   ]

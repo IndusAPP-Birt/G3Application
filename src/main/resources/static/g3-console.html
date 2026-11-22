@@ -78,6 +78,8 @@
             <tr><td>GET</td><td><code>/api/preventives/statuses</code></td><td class="allowed">Sí</td><td class="allowed">Sí</td><td class="denied">—</td></tr>
             <tr><td>GET</td><td><code>/api/incidents/statuses</code></td><td class="allowed">Sí</td><td class="allowed">Sí</td><td class="allowed">Sí</td></tr>
             <tr><td>GET</td><td><code>/api/incidents/severities</code></td><td class="allowed">Sí</td><td class="allowed">Sí</td><td class="allowed">Sí</td></tr>
+            <tr><td>GET</td><td><code>/api/incidents</code></td><td class="allowed">Sí</td><td class="denied">—</td><td class="denied">—</td></tr>
+            <tr><td>GET</td><td><code>/api/incidents/{id}</code></td><td class="allowed">Sí</td><td class="denied">—</td><td class="denied">—</td></tr>
             <tr><td>GET</td><td><code>/api/preventives</code></td><td class="allowed">Sí</td><td class="denied">—</td><td class="denied">—</td></tr>
             <tr><td>GET</td><td><code>/api/preventives/{id}</code></td><td class="allowed">Sí</td><td class="denied">—</td><td class="denied">—</td></tr>
             <tr><td>GET</td><td><code>/api/preventives/by-plan/{preventivePlanId}</code></td><td class="allowed">Sí</td><td class="denied">—</td><td class="denied">—</td></tr>
@@ -128,7 +130,9 @@ entities.assignments={label:'PreventivePlanAssignment',icon:'A',description:'Pla
 ]};
 entities.incidents={label:'Incident',icon:'I',description:'Incidencias detectadas durante la ejecución de preventivos.',actions:[
 {label:'Estados',method:'GET',path:'/api/incidents/statuses',description:'Catálogo de estados del ciclo de trabajo de incidencias.',fields:[]},
-{label:'Gravedad',method:'GET',path:'/api/incidents/severities',description:'Catálogo de niveles de gravedad de incidencias.',fields:[]}
+{label:'Gravedad',method:'GET',path:'/api/incidents/severities',description:'Catálogo de niveles de gravedad de incidencias.',fields:[]},
+{label:'Listado',method:'GET',path:'/api/incidents',description:'Página de incidencias registradas.',fields:pagination},
+{label:'Por ID',method:'GET',path:'/api/incidents/{id}',description:'Consulta una incidencia por identificador.',fields:[textField('id','Identificador','1',true,'number')]}
 ]};
 entities.preventives.description='Ejecuciones generadas desde una asignación preventiva y su ciclo de trabajo.';
 entities.workflow={label:'Flujo',icon:'→',description:'Modelo de mantenimiento preventivo y ciclo de trabajo.',actions:[]};
@@ -198,10 +202,11 @@ rules:[
 },
 incidents:{
 title:'Incidencias',
-purpose:'Expone los catálogos necesarios para clasificar las incidencias detectadas durante la ejecución de un preventivo.',
+purpose:'Permite consultar los catálogos y las incidencias detectadas durante la ejecución de un preventivo.',
 rules:[
 'Una incidencia se clasifica por su estado y nivel de gravedad.',
 'Los catálogos están disponibles para administradores, inspectores y técnicos de mantenimiento.',
+'El listado global y la consulta individual están reservados a administración.',
 'Las operaciones de apertura, asignación y resolución se incorporarán progresivamente.'
 ]
 }
