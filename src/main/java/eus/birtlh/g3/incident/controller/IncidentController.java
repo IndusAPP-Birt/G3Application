@@ -6,15 +6,12 @@ import eus.birtlh.g3.common.dto.CatalogOptionResponse;
 import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.incident.IncidentService;
 import eus.birtlh.g3.incident.dto.IncidentResponse;
-import eus.birtlh.g3.user.dto.UserResponse;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -95,6 +92,26 @@ public class IncidentController {
                 ApiSuccessResponse.success(
                         incidentService.getAllIncidents(page, size),
                         "Incidencias obtenidas correctamente."
+                )
+        );
+    }
+
+    /**
+     * Obtiene una incidencia por su identificador.
+     *
+     * @param id identificador positivo de la incidencia solicitada
+     * @return respuesta HTTP 200 con la incidencia y su marca temporal
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiSuccessResponse<IncidentResponse>> findIncidentById(
+            @PathVariable
+            @Positive(message = "El identificador debe ser mayor que cero.")
+            Long id
+    ) {
+        return ResponseEntity.ok(
+                ApiSuccessResponse.success(
+                        incidentService.getIncidentById(id),
+                        "Incidencia obtenida correctamente."
                 )
         );
     }

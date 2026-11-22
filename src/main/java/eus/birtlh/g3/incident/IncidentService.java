@@ -3,11 +3,11 @@ package eus.birtlh.g3.incident;
 import eus.birtlh.g3.common.dto.CatalogOptionResponse;
 import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.incident.dto.IncidentResponse;
+import eus.birtlh.g3.incident.exception.IncidentNotFoundException;
 import eus.birtlh.g3.incident.mapper.IncidentMapper;
 import eus.birtlh.g3.incident.mapper.IncidentSeverityMapper;
 import eus.birtlh.g3.incident.mapper.IncidentStatusMapper;
 import eus.birtlh.g3.incident.repository.IncidentRepository;
-import eus.birtlh.g3.user.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -79,5 +79,22 @@ public class IncidentService {
                 incidents.getTotalElements(),
                 incidents.getTotalPages()
         );
+    }
+
+    /**
+     * Obtiene una incidencia por su identificador como DTO de respuesta.
+     *
+     * @param id identificador de la incidencia solicitada
+     * @return DTO público de la incidencia encontrada
+     * @throws IncidentNotFoundException si no existe una incidencia con el identificador indicado
+     */
+    @Transactional(readOnly = true)
+    public IncidentResponse getIncidentById(Long id) {
+        Incident incident = incidentRepository.findById(id)
+                .orElseThrow(() -> new IncidentNotFoundException(
+                        "Incidencia con id " + id + " no encontrada."
+                ));
+
+        return IncidentMapper.toResponse(incident);
     }
 }

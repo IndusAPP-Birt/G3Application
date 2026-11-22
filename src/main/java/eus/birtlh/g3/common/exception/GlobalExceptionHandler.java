@@ -1,6 +1,7 @@
 package eus.birtlh.g3.common.exception;
 
 import eus.birtlh.g3.common.dto.ApiErrorResponse;
+import eus.birtlh.g3.incident.exception.IncidentNotFoundException;
 import eus.birtlh.g3.machine.exception.AssetCodeAlreadyInUseException;
 import eus.birtlh.g3.machine.exception.MachineNotActiveException;
 import eus.birtlh.g3.machine.exception.MachineNotFoundException;
@@ -106,6 +107,20 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(PreventiveNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handlePreventiveNotFoundException(
             PreventiveNotFoundException ex
+    ) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiErrorResponse.error(ex.getMessage()));
+    }
+
+    /**
+     * Devuelve una respuesta HTTP 404 cuando no existe la incidencia solicitada.
+     *
+     * @param ex excepción que identifica la incidencia no encontrada
+     * @return respuesta de error con estado HTTP 404
+     */
+    @ExceptionHandler(IncidentNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleIncidentNotFoundException(
+            IncidentNotFoundException ex
     ) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ApiErrorResponse.error(ex.getMessage()));
