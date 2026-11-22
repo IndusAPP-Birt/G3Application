@@ -202,3 +202,266 @@ JOIN preventive_plans AS plan ON plan.id = assignment.preventive_plan_id
 JOIN machines AS machine ON machine.id = assignment.machine_id
 WHERE machine.id BETWEEN 1 AND 12
   AND assignment.active = TRUE;
+
+INSERT INTO incidents (
+    preventive_id,
+    description,
+    severity,
+    status,
+    reported_by_inspector_id,
+    assigned_technician_id,
+    assigned_at,
+    started_at,
+    resolved_at,
+    closed_at,
+    created_at,
+    updated_at
+)
+SELECT
+    preventive.id,
+    'Desgaste crítico en el acoplamiento elástico del eje de transmisión.',
+    'HIGH',
+    'IN_PROGRESS',
+    preventive.assigned_inspector_id,
+    technician.id,
+    DATEADD('DAY', -3, CURRENT_TIMESTAMP),
+    DATEADD('DAY', -2, CURRENT_TIMESTAMP),
+    NULL,
+    NULL,
+    DATEADD('DAY', -4, CURRENT_TIMESTAMP),
+    DATEADD('DAY', -2, CURRENT_TIMESTAMP)
+FROM preventives AS preventive
+JOIN preventive_plan_assignments AS assignment ON assignment.id = preventive.preventive_plan_assignment_id
+JOIN machines AS machine ON machine.id = assignment.machine_id
+JOIN users AS technician ON technician.email = 'unai.fernandez@example.com'
+WHERE machine.asset_code = 'MAQ-0002'
+  AND preventive.plan_name = 'Inspección de transmisión';
+
+INSERT INTO incidents (
+    preventive_id,
+    description,
+    severity,
+    status,
+    reported_by_inspector_id,
+    assigned_technician_id,
+    assigned_at,
+    started_at,
+    resolved_at,
+    closed_at,
+    created_at,
+    updated_at
+)
+SELECT
+    preventive.id,
+    'Desgaste superficial en la protección de la correa principal.',
+    'LOW',
+    'OPEN',
+    preventive.assigned_inspector_id,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    DATEADD('DAY', -1, CURRENT_TIMESTAMP),
+    DATEADD('DAY', -1, CURRENT_TIMESTAMP)
+FROM preventives AS preventive
+JOIN preventive_plan_assignments AS assignment ON assignment.id = preventive.preventive_plan_assignment_id
+JOIN machines AS machine ON machine.id = assignment.machine_id
+WHERE machine.asset_code = 'MAQ-0002'
+  AND preventive.plan_name = 'Inspección de transmisión';
+
+INSERT INTO incidents (
+    preventive_id,
+    description,
+    severity,
+    status,
+    reported_by_inspector_id,
+    assigned_technician_id,
+    assigned_at,
+    started_at,
+    resolved_at,
+    closed_at,
+    created_at,
+    updated_at
+)
+SELECT
+    preventive.id,
+    'Nivel de lubricante inferior al recomendado en el grupo de arrastre.',
+    'MEDIUM',
+    'ASSIGNED',
+    preventive.assigned_inspector_id,
+    technician.id,
+    DATEADD('DAY', -2, CURRENT_TIMESTAMP),
+    NULL,
+    NULL,
+    NULL,
+    DATEADD('DAY', -3, CURRENT_TIMESTAMP),
+    DATEADD('DAY', -2, CURRENT_TIMESTAMP)
+FROM preventives AS preventive
+JOIN preventive_plan_assignments AS assignment ON assignment.id = preventive.preventive_plan_assignment_id
+JOIN machines AS machine ON machine.id = assignment.machine_id
+JOIN users AS technician ON technician.email = 'maialen.sanz@example.com'
+WHERE machine.asset_code = 'MAQ-0006'
+  AND preventive.plan_name = 'Lubricación programada';
+
+INSERT INTO incidents (
+    preventive_id,
+    description,
+    severity,
+    status,
+    reported_by_inspector_id,
+    assigned_technician_id,
+    assigned_at,
+    started_at,
+    resolved_at,
+    closed_at,
+    created_at,
+    updated_at
+)
+SELECT
+    preventive.id,
+    'Desviación de calibración fuera de tolerancia en el eje de posicionamiento.',
+    'CRITICAL',
+    'RESOLVED',
+    preventive.assigned_inspector_id,
+    technician.id,
+    DATEADD('DAY', -8, CURRENT_TIMESTAMP),
+    DATEADD('DAY', -7, CURRENT_TIMESTAMP),
+    DATEADD('DAY', -1, CURRENT_TIMESTAMP),
+    NULL,
+    DATEADD('DAY', -9, CURRENT_TIMESTAMP),
+    DATEADD('DAY', -1, CURRENT_TIMESTAMP)
+FROM preventives AS preventive
+JOIN preventive_plan_assignments AS assignment ON assignment.id = preventive.preventive_plan_assignment_id
+JOIN machines AS machine ON machine.id = assignment.machine_id
+JOIN users AS technician ON technician.email = 'gorka.molina@example.com'
+WHERE machine.asset_code = 'MAQ-0006'
+  AND preventive.plan_name = 'Calibración de precisión';
+
+INSERT INTO incidents (
+    preventive_id,
+    description,
+    severity,
+    status,
+    reported_by_inspector_id,
+    assigned_technician_id,
+    assigned_at,
+    started_at,
+    resolved_at,
+    closed_at,
+    created_at,
+    updated_at
+)
+SELECT
+    preventive.id,
+    'Conexión floja detectada en el bornero del cuadro eléctrico.',
+    'MEDIUM',
+    'CLOSED',
+    preventive.assigned_inspector_id,
+    technician.id,
+    DATEADD('DAY', -20, CURRENT_TIMESTAMP),
+    DATEADD('DAY', -19, CURRENT_TIMESTAMP),
+    DATEADD('DAY', -16, CURRENT_TIMESTAMP),
+    DATEADD('DAY', -15, CURRENT_TIMESTAMP),
+    DATEADD('DAY', -21, CURRENT_TIMESTAMP),
+    DATEADD('DAY', -15, CURRENT_TIMESTAMP)
+FROM preventives AS preventive
+JOIN preventive_plan_assignments AS assignment ON assignment.id = preventive.preventive_plan_assignment_id
+JOIN machines AS machine ON machine.id = assignment.machine_id
+JOIN users AS technician ON technician.email = 'miren.serrano@example.com'
+WHERE machine.asset_code = 'MAQ-0003'
+  AND preventive.plan_name = 'Revisión eléctrica';
+
+INSERT INTO incidents (
+    preventive_id,
+    description,
+    severity,
+    status,
+    reported_by_inspector_id,
+    assigned_technician_id,
+    assigned_at,
+    started_at,
+    resolved_at,
+    closed_at,
+    created_at,
+    updated_at
+)
+SELECT
+    preventive.id,
+    'Holgura anómala en el acoplamiento del motor principal.',
+    'LOW',
+    'CLOSED',
+    preventive.assigned_inspector_id,
+    technician.id,
+    DATEADD('DAY', -14, CURRENT_TIMESTAMP),
+    DATEADD('DAY', -13, CURRENT_TIMESTAMP),
+    DATEADD('DAY', -11, CURRENT_TIMESTAMP),
+    DATEADD('DAY', -10, CURRENT_TIMESTAMP),
+    DATEADD('DAY', -15, CURRENT_TIMESTAMP),
+    DATEADD('DAY', -10, CURRENT_TIMESTAMP)
+FROM preventives AS preventive
+JOIN preventive_plan_assignments AS assignment ON assignment.id = preventive.preventive_plan_assignment_id
+JOIN machines AS machine ON machine.id = assignment.machine_id
+JOIN users AS technician ON technician.email = 'eneko.gil@example.com'
+WHERE machine.asset_code = 'MAQ-0007'
+  AND preventive.plan_name = 'Inspección de transmisión';
+
+INSERT INTO incident_actions (incident_id, work_performed, performed_by_technician_id, created_at)
+SELECT
+    incident.id,
+    'Se sustituye el elemento elástico deteriorado del acoplamiento.',
+    technician.id,
+    DATEADD('DAY', -1, CURRENT_TIMESTAMP)
+FROM incidents AS incident
+JOIN users AS technician ON technician.email = 'unai.fernandez@example.com'
+WHERE incident.description = 'Desgaste crítico en el acoplamiento elástico del eje de transmisión.';
+
+INSERT INTO incident_actions (incident_id, work_performed, performed_by_technician_id, created_at)
+SELECT
+    incident.id,
+    'Se reajusta el parámetro de referencia del eje de posicionamiento.',
+    technician.id,
+    DATEADD('DAY', -5, CURRENT_TIMESTAMP)
+FROM incidents AS incident
+JOIN users AS technician ON technician.email = 'gorka.molina@example.com'
+WHERE incident.description = 'Desviación de calibración fuera de tolerancia en el eje de posicionamiento.';
+
+INSERT INTO incident_actions (incident_id, work_performed, performed_by_technician_id, created_at)
+SELECT
+    incident.id,
+    'Se realiza una prueba de repetibilidad y el resultado queda dentro de tolerancia.',
+    technician.id,
+    DATEADD('DAY', -2, CURRENT_TIMESTAMP)
+FROM incidents AS incident
+JOIN users AS technician ON technician.email = 'gorka.molina@example.com'
+WHERE incident.description = 'Desviación de calibración fuera de tolerancia en el eje de posicionamiento.';
+
+INSERT INTO incident_actions (incident_id, work_performed, performed_by_technician_id, created_at)
+SELECT
+    incident.id,
+    'Se reaprietan las conexiones del bornero y se comprueba el par de apriete.',
+    technician.id,
+    DATEADD('DAY', -17, CURRENT_TIMESTAMP)
+FROM incidents AS incident
+JOIN users AS technician ON technician.email = 'miren.serrano@example.com'
+WHERE incident.description = 'Conexión floja detectada en el bornero del cuadro eléctrico.';
+
+INSERT INTO incident_actions (incident_id, work_performed, performed_by_technician_id, created_at)
+SELECT
+    incident.id,
+    'Se verifica el aislamiento eléctrico y el funcionamiento de las protecciones.',
+    technician.id,
+    DATEADD('DAY', -16, CURRENT_TIMESTAMP)
+FROM incidents AS incident
+JOIN users AS technician ON technician.email = 'miren.serrano@example.com'
+WHERE incident.description = 'Conexión floja detectada en el bornero del cuadro eléctrico.';
+
+INSERT INTO incident_actions (incident_id, work_performed, performed_by_technician_id, created_at)
+SELECT
+    incident.id,
+    'Se alinea el acoplamiento y se verifica la ausencia de vibraciones anómalas.',
+    technician.id,
+    DATEADD('DAY', -12, CURRENT_TIMESTAMP)
+FROM incidents AS incident
+JOIN users AS technician ON technician.email = 'eneko.gil@example.com'
+WHERE incident.description = 'Holgura anómala en el acoplamiento del motor principal.';

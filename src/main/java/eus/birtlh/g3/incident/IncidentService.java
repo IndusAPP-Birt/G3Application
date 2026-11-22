@@ -1,10 +1,19 @@
 package eus.birtlh.g3.incident;
 
 import eus.birtlh.g3.common.dto.CatalogOptionResponse;
+import eus.birtlh.g3.common.dto.PageResponse;
+import eus.birtlh.g3.incident.dto.IncidentResponse;
+import eus.birtlh.g3.incident.mapper.IncidentMapper;
 import eus.birtlh.g3.incident.mapper.IncidentSeverityMapper;
 import eus.birtlh.g3.incident.mapper.IncidentStatusMapper;
+import eus.birtlh.g3.incident.repository.IncidentRepository;
+import eus.birtlh.g3.user.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
@@ -18,6 +27,8 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class IncidentService {
+
+    private final IncidentRepository incidentRepository;
 
     /**
      * Obtiene todos los niveles de gravedad disponibles como opciones de catálogo públicas.
@@ -39,5 +50,34 @@ public class IncidentService {
         return Arrays.stream(IncidentStatus.values())
                 .map(IncidentStatusMapper::toResponse)
                 .toList();
+    }
+
+    /**
+     * Obtiene una página de incidencias como DTOs de respuesta.
+     *
+     * <p>Conserva el orden ascendente por identificador para ofrecer resultados estables entre
+     * páginas. La transacción mantiene disponibles el preventivo y los usuarios relacionados
+     * durante la conversión mediante {@link IncidentMapper}.</p>
+     *
+     * @param page índice de página basado en cero
+     * @param size número de incidencias por página
+     * @return página de incidencias públicas; su contenido puede estar vacío
+     */
+    @Transactional(readOnly = true)
+    public PageResponse<IncidentResponse> getAllIncidents(int page, int size) {
+        Page<Incident> incidents = incidentRepository.findAll(
+                PageRequest.of(page, size, Sort.by("id").ascending())
+        );
+
+        return new PageResponse<>(
+                incidents.getContent()
+                        .stream()
+                        .map(IncidentMapper::toResponse)
+                        .toList(),
+                incidents.getNumber(),
+                incidents.getSize(),
+                incidents.getTotalElements(),
+                incidents.getTotalPages()
+        );
     }
 }
