@@ -4,7 +4,7 @@ API REST para la gestión de usuarios, activos industriales, plantillas preventi
 
 ## Visión general
 
-La aplicación se organiza alrededor de cinco recursos principales:
+La aplicación se organiza alrededor de seis recursos principales:
 
 ```text
 User
@@ -12,16 +12,19 @@ Machine
 PreventivePlan
 PreventivePlanAssignment
 Preventive
+Incident
 ```
 
 Una máquina y una plantilla preventiva existen de forma independiente. `PreventivePlanAssignment` las vincula y configura el calendario de mantenimiento. Desde una asignación activa, el proceso programado genera ejecuciones `Preventive` que un inspector asignado puede iniciar, documentar y completar.
+
+`Incident` representa una incidencia detectada durante la ejecución de un preventivo. Define su gravedad y ciclo de trabajo; sus acciones y operaciones de gestión se incorporarán progresivamente a la API.
 
 ## Documentación
 
 | Recurso | Contenido |
 |---|---|
 | [Lógica de negocio](docs/logica-de-negocio_0.1.docx) | Entidades, relaciones, reglas verificadas, excepciones, pruebas y flujo completo de mantenimiento preventivo. |
-| [Esquema de base de datos](docs/esquema-base-datos.docx) | Tablas persistentes, claves, restricciones y relaciones del modelo de datos. |
+| [Esquema de base de datos](docs/esquema-base-datos.svg) | Tablas persistentes, claves, restricciones y relaciones del modelo de datos. |
 | [Auditoría técnica](docs/auditoria-aplicacion.md) | Hallazgos técnicos, prioridades y acciones de mejora. |
 | [Colección Postman local](postman/G3Application.postman_collection.json) | Consultas contra el servicio local. |
 | [Colección Postman Render](postman/G3Application_Render.postman_collection.json) | Consultas contra el servicio desplegado. |
@@ -59,6 +62,7 @@ El token contiene el correo electrónico como sujeto y el rol en el claim `role`
 | Consultas globales y asignación de preventivos | Sí | — | — |
 | Bandeja propia de preventivos | — | Sí | — |
 | Estados preventivos | Sí | Sí | — |
+| Catálogos de estados y niveles de gravedad de incidencias | Sí | Sí | Sí |
 | Inicio, registro de trabajo y cierre de preventivos | — | Sí* | — |
 
 `*` La capa de servicio comprueba además que el preventivo pertenece al inspector autenticado.
@@ -153,6 +157,15 @@ Representa las ejecuciones generadas desde una asignación preventiva y su ciclo
 | `PUT` | `/api/preventives/{id}/start` | Inicia un preventivo asignado. |
 | `PUT` | `/api/preventives/{id}/work-performed` | Registra o corrige el trabajo realizado. |
 | `PUT` | `/api/preventives/{id}/completion` | Completa un preventivo con trabajo registrado. |
+
+### Incidencias
+
+Representa los problemas detectados durante la ejecución de un preventivo. Actualmente se publican los catálogos necesarios para seleccionar e interpretar su estado y nivel de gravedad.
+
+| Método | Ruta | Operación |
+|---|---|---|
+| `GET` | `/api/incidents/statuses` | Obtiene el catálogo de estados de incidencias. |
+| `GET` | `/api/incidents/severities` | Obtiene el catálogo de niveles de gravedad de incidencias. |
 
 ## Consola de pruebas
 

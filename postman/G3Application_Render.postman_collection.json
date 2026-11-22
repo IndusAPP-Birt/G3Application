@@ -78,6 +78,10 @@
       {"name":"Iniciar preventivo","request":{"method":"PUT","header":[],"url":"{{baseUrl}}/api/preventives/{{preventiveId}}/start"}},
       {"name":"Registrar trabajo realizado","request":{"method":"PUT","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"workPerformed\": \"Inspección realizada, componentes comprobados y equipo validado.\"\n}"},"url":"{{baseUrl}}/api/preventives/{{preventiveId}}/work-performed"}},
       {"name":"Completar preventivo","request":{"method":"PUT","header":[],"url":"{{baseUrl}}/api/preventives/{{preventiveId}}/completion"}}
+    ]},
+    {"name":"Incidencias","item":[
+      {"name":"Listar estados de incidencia","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/incidents/statuses"}},
+      {"name":"Listar niveles de gravedad","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/incidents/severities"}}
     ]}
   ]
 }

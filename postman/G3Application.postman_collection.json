@@ -202,6 +202,13 @@
         },
         {"name": "Completar preventivo", "request": {"method": "PUT", "header": [], "url": "{{baseUrl}}/api/preventives/{{preventiveId}}/completion"}}
       ]
+    },
+    {
+      "name": "Incidencias",
+      "item": [
+        {"name": "Listar estados de incidencia", "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/incidents/statuses"}},
+        {"name": "Listar niveles de gravedad", "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/incidents/severities"}}
+      ]
     }
   ]
 }

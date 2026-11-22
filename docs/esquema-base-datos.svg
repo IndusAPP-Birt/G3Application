@@ -1,0 +1,142 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="910" viewBox="0 0 2200 1250">
+  <style>
+    .title { font: 700 22px Arial, sans-serif; fill: #172033; }
+    .field { font: 18px "Courier New", monospace; fill: #172033; }
+    .note { font: 17px Arial, sans-serif; fill: #3a4659; }
+    .box { fill: #ffffff; stroke: #26364d; stroke-width: 2.5; }
+    .head { fill: #eaf0f8; stroke: #26364d; stroke-width: 2.5; }
+    .line { fill: none; stroke: #40546f; stroke-width: 2.5; }
+    .card { font: 700 17px Arial, sans-serif; fill: #40546f; }
+  </style>
+  <rect width="2200" height="1250" fill="#ffffff"/>
+  <text x="60" y="36" class="note">Leyenda: PK = clave primaria · FK = clave foránea · UQ = única · NN = no nulo</text>
+
+  <!-- Relaciones situadas detrás de las entidades -->
+  <path d="M420 200 H610 V300 H700" class="line"/>
+  <text x="493" y="191" class="card">1</text><text x="666" y="290" class="card">*</text>
+  <path d="M420 565 H610 V370 H700" class="line"/>
+  <text x="493" y="556" class="card">1</text><text x="666" y="360" class="card">*</text>
+  <path d="M1110 470 H1170" class="line"/>
+  <text x="1127" y="459" class="card">1</text><text x="1150" y="459" class="card">*</text>
+  <path d="M1375 620 V720" class="line"/>
+  <text x="1385" y="670" class="card">1</text><text x="1385" y="710" class="card">*</text>
+  <path d="M1580 1000 H1650 V918 H1730" class="line"/>
+  <text x="1592" y="990" class="card">1</text><text x="1710" y="908" class="card">*</text>
+
+  <path d="M1580 304 H1730" class="line"/>
+  <text x="1665" y="294" class="card">0..1</text><text x="1592" y="294" class="card">*</text>
+  <path d="M1580 844 H1660 V390 H1730" class="line"/>
+  <text x="1645" y="380" class="card">1</text><text x="1592" y="834" class="card">*</text>
+  <path d="M1580 870 H1685 V455 H1730" class="line"/>
+  <text x="1668" y="445" class="card">0..1</text><text x="1592" y="860" class="card">*</text>
+  <path d="M2140 944 H2170 V520 H2140" class="line"/>
+  <text x="2148" y="510" class="card">1</text><text x="2148" y="934" class="card">*</text>
+
+  <!-- MACHINES -->
+  <rect x="60" y="70" width="360" height="350" rx="4" class="box"/>
+  <rect x="60" y="70" width="360" height="42" rx="4" class="head"/>
+  <text x="240" y="98" text-anchor="middle" class="title">MACHINES</text>
+  <text x="82" y="142" class="field">PK  id</text>
+  <text x="82" y="168" class="field">UQ  asset_code                 NN</text>
+  <text x="82" y="194" class="field">    name                       NN</text>
+  <text x="82" y="220" class="field">    manufacturer</text>
+  <text x="82" y="246" class="field">UQ  serial_number</text>
+  <text x="82" y="272" class="field">    model</text>
+  <text x="82" y="298" class="field">    location</text>
+  <text x="82" y="324" class="field">    commissioned_at            NN</text>
+  <text x="82" y="350" class="field">    status                     NN</text>
+  <text x="82" y="376" class="field">    created_at                 NN</text>
+  <text x="82" y="402" class="field">    updated_at                 NN</text>
+
+  <!-- PREVENTIVE_PLANS -->
+  <rect x="60" y="440" width="360" height="250" rx="4" class="box"/>
+  <rect x="60" y="440" width="360" height="42" rx="4" class="head"/>
+  <text x="240" y="468" text-anchor="middle" class="title">PREVENTIVE_PLANS</text>
+  <text x="82" y="512" class="field">PK  id</text>
+  <text x="82" y="538" class="field">    name                       NN</text>
+  <text x="82" y="564" class="field">    description</text>
+  <text x="82" y="590" class="field">    active                     NN</text>
+  <text x="82" y="616" class="field">    created_at                 NN</text>
+  <text x="82" y="642" class="field">    updated_at                 NN</text>
+
+  <!-- PREVENTIVE_PLAN_ASSIGNMENTS -->
+  <rect x="700" y="210" width="410" height="320" rx="4" class="box"/>
+  <rect x="700" y="210" width="410" height="42" rx="4" class="head"/>
+  <text x="905" y="238" text-anchor="middle" class="title">PREVENTIVE_PLAN_ASSIGNMENTS</text>
+  <text x="722" y="282" class="field">PK  id</text>
+  <text x="722" y="308" class="field">FK  preventive_plan_id         NN</text>
+  <text x="722" y="334" class="field">FK  machine_id                  NN</text>
+  <text x="722" y="360" class="field">    interval_days               NN</text>
+  <text x="722" y="386" class="field">    notice_days                 NN</text>
+  <text x="722" y="412" class="field">    next_due_date               NN</text>
+  <text x="722" y="438" class="field">    active                      NN</text>
+  <text x="722" y="464" class="field">    created_at                  NN</text>
+  <text x="722" y="490" class="field">    updated_at                  NN</text>
+  <text x="722" y="516" class="field">UQ  (preventive_plan_id, machine_id)</text>
+
+  <!-- PREVENTIVES -->
+  <rect x="1170" y="180" width="410" height="440" rx="4" class="box"/>
+  <rect x="1170" y="180" width="410" height="42" rx="4" class="head"/>
+  <text x="1375" y="208" text-anchor="middle" class="title">PREVENTIVES</text>
+  <text x="1192" y="252" class="field">PK  id</text>
+  <text x="1192" y="278" class="field">FK  preventive_plan_assignment_id NN</text>
+  <text x="1192" y="304" class="field">FK  assigned_inspector_id</text>
+  <text x="1192" y="330" class="field">    plan_name                  NN</text>
+  <text x="1192" y="356" class="field">    plan_description</text>
+  <text x="1192" y="382" class="field">    due_date                   NN</text>
+  <text x="1192" y="408" class="field">    status                     NN</text>
+  <text x="1192" y="434" class="field">    work_performed</text>
+  <text x="1192" y="460" class="field">    assigned_at</text>
+  <text x="1192" y="486" class="field">    started_at</text>
+  <text x="1192" y="512" class="field">    completed_at</text>
+  <text x="1192" y="538" class="field">    created_at                 NN</text>
+  <text x="1192" y="564" class="field">    updated_at                 NN</text>
+  <text x="1192" y="590" class="field">UQ  (preventive_plan_assignment_id,</text>
+  <text x="1192" y="612" class="field">     due_date)</text>
+
+  <!-- USERS -->
+  <rect x="1730" y="250" width="410" height="300" rx="4" class="box"/>
+  <rect x="1730" y="250" width="410" height="42" rx="4" class="head"/>
+  <text x="1935" y="278" text-anchor="middle" class="title">USERS</text>
+  <text x="1752" y="322" class="field">PK  id</text>
+  <text x="1752" y="348" class="field">    name                       NN</text>
+  <text x="1752" y="374" class="field">    last_name</text>
+  <text x="1752" y="400" class="field">UQ  email                      NN</text>
+  <text x="1752" y="426" class="field">    password_hash              NN</text>
+  <text x="1752" y="452" class="field">    role                       NN</text>
+  <text x="1752" y="478" class="field">    enabled                    NN</text>
+  <text x="1752" y="504" class="field">    created_at                 NN</text>
+  <text x="1752" y="530" class="field">    updated_at                 NN</text>
+
+  <!-- INCIDENTS -->
+  <rect x="1170" y="720" width="410" height="400" rx="4" class="box"/>
+  <rect x="1170" y="720" width="410" height="42" rx="4" class="head"/>
+  <text x="1375" y="748" text-anchor="middle" class="title">INCIDENTS</text>
+  <text x="1192" y="792" class="field">PK  id</text>
+  <text x="1192" y="818" class="field">FK  preventive_id              NN</text>
+  <text x="1192" y="844" class="field">FK  reported_by_inspector_id   NN</text>
+  <text x="1192" y="870" class="field">FK  assigned_technician_id</text>
+  <text x="1192" y="896" class="field">    description                NN</text>
+  <text x="1192" y="922" class="field">    severity                   NN</text>
+  <text x="1192" y="948" class="field">    status                     NN</text>
+  <text x="1192" y="974" class="field">    assigned_at</text>
+  <text x="1192" y="1000" class="field">    started_at</text>
+  <text x="1192" y="1026" class="field">    resolved_at</text>
+  <text x="1192" y="1052" class="field">    closed_at</text>
+  <text x="1192" y="1078" class="field">    created_at                 NN</text>
+  <text x="1192" y="1104" class="field">    updated_at                 NN</text>
+
+  <!-- INCIDENT_ACTIONS -->
+  <rect x="1730" y="820" width="410" height="220" rx="4" class="box"/>
+  <rect x="1730" y="820" width="410" height="42" rx="4" class="head"/>
+  <text x="1935" y="848" text-anchor="middle" class="title">INCIDENT_ACTIONS</text>
+  <text x="1752" y="892" class="field">PK  id</text>
+  <text x="1752" y="918" class="field">FK  incident_id                NN</text>
+  <text x="1752" y="944" class="field">FK  performed_by_technician_id NN</text>
+  <text x="1752" y="970" class="field">    work_performed             NN</text>
+  <text x="1752" y="996" class="field">    created_at                 NN</text>
+
+  <text x="60" y="1140" class="note">· role, status de máquina, status de preventivo, status de incidencia y severity se almacenan como enumeraciones de texto.</text>
+  <text x="60" y="1170" class="note">· assigned_inspector_id y assigned_technician_id pueden ser nulos; las demás claves foráneas son obligatorias.</text>
+  <text x="60" y="1200" class="note">· plan_name y plan_description son una instantánea histórica de la plantilla.</text>
+</svg>
