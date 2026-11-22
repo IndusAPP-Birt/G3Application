@@ -70,6 +70,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/preventives/*/start", "/api/preventives/*/work-performed", "/api/preventives/*/completion").hasAuthority("ROLE_INSPECTOR")
                         .requestMatchers(HttpMethod.GET, "/api/incidents/severities", "/api/incidents/statuses").hasAnyAuthority("ROLE_ADMINISTRATOR", "ROLE_INSPECTOR", "ROLE_MAINTENANCE_TECHNICIAN")
                         .requestMatchers(HttpMethod.GET, "/api/incidents").hasAuthority("ROLE_ADMINISTRATOR")
+                        .requestMatchers(HttpMethod.GET, "/api/incidents/*").hasAuthority("ROLE_ADMINISTRATOR")
                         .anyRequest().denyAll()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
