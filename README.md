@@ -65,6 +65,8 @@ El token contiene el correo electrónico como sujeto y el rol en el claim `role`
 | Catálogos de estados y niveles de gravedad de incidencias | Sí | Sí | Sí |
 | Listado y consulta individual de incidencias | Sí | — | — |
 | Incidencias asociadas a un preventivo | Sí | Sí | — |
+| Bandeja de incidencias asignadas | — | — | Sí |
+| Incidencias comunicadas por el inspector | — | Sí | — |
 | Inicio, registro de trabajo y cierre de preventivos | — | Sí* | — |
 
 `*` La capa de servicio comprueba además que el preventivo pertenece al inspector autenticado.
@@ -162,7 +164,7 @@ Representa las ejecuciones generadas desde una asignación preventiva y su ciclo
 
 ### Incidencias
 
-Representa los problemas detectados durante la ejecución de un preventivo. Actualmente permite consultar sus catálogos, su listado paginado, el detalle de cada incidencia y las incidencias asociadas a un preventivo. El listado y el detalle están reservados a administración; la consulta por preventivo está disponible para administración e inspección.
+Representa los problemas detectados durante la ejecución de un preventivo. Actualmente permite consultar sus catálogos, su listado paginado, el detalle de cada incidencia, las incidencias asociadas a un preventivo y las bandejas personales del técnico y del inspector. El listado y el detalle están reservados a administración; la consulta por preventivo está disponible para administración e inspección.
 
 | Método | Ruta | Operación |
 |---|---|---|
@@ -171,6 +173,8 @@ Representa los problemas detectados durante la ejecución de un preventivo. Actu
 | `GET` | `/api/incidents` | Obtiene incidencias paginadas. |
 | `GET` | `/api/incidents/{id}` | Obtiene una incidencia por identificador. |
 | `GET` | `/api/preventives/{preventiveId}/incidents` | Obtiene las incidencias paginadas asociadas a un preventivo. |
+| `GET` | `/api/incidents/me` | Obtiene las incidencias paginadas asignadas al técnico autenticado. |
+| `GET` | `/api/incidents/reported-by-me` | Obtiene las incidencias paginadas comunicadas por el inspector autenticado. |
 
 ## Consola de pruebas
 

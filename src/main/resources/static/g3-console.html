@@ -81,6 +81,8 @@
             <tr><td>GET</td><td><code>/api/incidents</code></td><td class="allowed">Sí</td><td class="denied">—</td><td class="denied">—</td></tr>
             <tr><td>GET</td><td><code>/api/incidents/{id}</code></td><td class="allowed">Sí</td><td class="denied">—</td><td class="denied">—</td></tr>
             <tr><td>GET</td><td><code>/api/preventives/{preventiveId}/incidents</code></td><td class="allowed">Sí</td><td class="allowed">Sí</td><td class="denied">—</td></tr>
+            <tr><td>GET</td><td><code>/api/incidents/me</code></td><td class="denied">—</td><td class="denied">—</td><td class="allowed">Sí</td></tr>
+            <tr><td>GET</td><td><code>/api/incidents/reported-by-me</code></td><td class="denied">—</td><td class="allowed">Sí</td><td class="denied">—</td></tr>
             <tr><td>GET</td><td><code>/api/preventives</code></td><td class="allowed">Sí</td><td class="denied">—</td><td class="denied">—</td></tr>
             <tr><td>GET</td><td><code>/api/preventives/{id}</code></td><td class="allowed">Sí</td><td class="denied">—</td><td class="denied">—</td></tr>
             <tr><td>GET</td><td><code>/api/preventives/by-plan/{preventivePlanId}</code></td><td class="allowed">Sí</td><td class="denied">—</td><td class="denied">—</td></tr>
@@ -134,7 +136,9 @@ entities.incidents={label:'Incident',icon:'I',description:'Incidencias detectada
 {label:'Gravedad',method:'GET',path:'/api/incidents/severities',description:'Catálogo de niveles de gravedad de incidencias.',fields:[]},
 {label:'Listado',method:'GET',path:'/api/incidents',description:'Página de incidencias registradas.',fields:pagination},
 {label:'Por preventivo',method:'GET',path:'/api/preventives/{preventiveId}/incidents',description:'Incidencias asociadas a un preventivo.',fields:[textField('preventiveId','Identificador de preventivo','1',true,'number'),...pagination]},
-{label:'Por ID',method:'GET',path:'/api/incidents/{id}',description:'Consulta una incidencia por identificador.',fields:[textField('id','Identificador','1',true,'number')]}
+{label:'Por ID',method:'GET',path:'/api/incidents/{id}',description:'Consulta una incidencia por identificador.',fields:[textField('id','Identificador','1',true,'number')]},
+{label:'Mis asignadas',method:'GET',path:'/api/incidents/me',description:'Bandeja de incidencias asignadas al técnico autenticado.',fields:pagination},
+{label:'Comunicadas por mí',method:'GET',path:'/api/incidents/reported-by-me',description:'Bandeja de incidencias comunicadas por el inspector autenticado.',fields:pagination}
 ]};
 entities.preventives.description='Ejecuciones generadas desde una asignación preventiva y su ciclo de trabajo.';
 entities.workflow={label:'Flujo',icon:'→',description:'Modelo de mantenimiento preventivo y ciclo de trabajo.',actions:[]};
@@ -210,6 +214,8 @@ rules:[
 'Los catálogos están disponibles para administradores, inspectores y técnicos de mantenimiento.',
 'El listado global y la consulta individual están reservados a administración.',
 'La consulta de incidencias de un preventivo está disponible para administración e inspección.',
+'La bandeja del técnico solo muestra las incidencias que tiene asignadas.',
+'La bandeja del inspector muestra las incidencias que ha comunicado, incluidas las resueltas pendientes de validación y cierre.',
 'Las operaciones de apertura, asignación y resolución se incorporarán progresivamente.'
 ]
 }
