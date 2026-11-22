@@ -83,7 +83,8 @@
       {"name":"Listar estados de incidencia","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/incidents/statuses"}},
       {"name":"Listar niveles de gravedad","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/incidents/severities"}},
       {"name":"Listar incidencias","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/incidents?page={{page}}&size={{size}}"}},
-      {"name":"Obtener incidencia","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/incidents/{{incidentId}}"}}
+      {"name":"Obtener incidencia","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/incidents/{{incidentId}}"}},
+      {"name":"Listar incidencias de un preventivo","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/preventives/{{preventiveId}}/incidents?page={{page}}&size={{size}}"}}
     ]}
   ]
 }

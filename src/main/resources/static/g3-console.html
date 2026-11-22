@@ -80,6 +80,7 @@
             <tr><td>GET</td><td><code>/api/incidents/severities</code></td><td class="allowed">Sí</td><td class="allowed">Sí</td><td class="allowed">Sí</td></tr>
             <tr><td>GET</td><td><code>/api/incidents</code></td><td class="allowed">Sí</td><td class="denied">—</td><td class="denied">—</td></tr>
             <tr><td>GET</td><td><code>/api/incidents/{id}</code></td><td class="allowed">Sí</td><td class="denied">—</td><td class="denied">—</td></tr>
+            <tr><td>GET</td><td><code>/api/preventives/{preventiveId}/incidents</code></td><td class="allowed">Sí</td><td class="allowed">Sí</td><td class="denied">—</td></tr>
             <tr><td>GET</td><td><code>/api/preventives</code></td><td class="allowed">Sí</td><td class="denied">—</td><td class="denied">—</td></tr>
             <tr><td>GET</td><td><code>/api/preventives/{id}</code></td><td class="allowed">Sí</td><td class="denied">—</td><td class="denied">—</td></tr>
             <tr><td>GET</td><td><code>/api/preventives/by-plan/{preventivePlanId}</code></td><td class="allowed">Sí</td><td class="denied">—</td><td class="denied">—</td></tr>
@@ -132,6 +133,7 @@ entities.incidents={label:'Incident',icon:'I',description:'Incidencias detectada
 {label:'Estados',method:'GET',path:'/api/incidents/statuses',description:'Catálogo de estados del ciclo de trabajo de incidencias.',fields:[]},
 {label:'Gravedad',method:'GET',path:'/api/incidents/severities',description:'Catálogo de niveles de gravedad de incidencias.',fields:[]},
 {label:'Listado',method:'GET',path:'/api/incidents',description:'Página de incidencias registradas.',fields:pagination},
+{label:'Por preventivo',method:'GET',path:'/api/preventives/{preventiveId}/incidents',description:'Incidencias asociadas a un preventivo.',fields:[textField('preventiveId','Identificador de preventivo','1',true,'number'),...pagination]},
 {label:'Por ID',method:'GET',path:'/api/incidents/{id}',description:'Consulta una incidencia por identificador.',fields:[textField('id','Identificador','1',true,'number')]}
 ]};
 entities.preventives.description='Ejecuciones generadas desde una asignación preventiva y su ciclo de trabajo.';
@@ -207,6 +209,7 @@ rules:[
 'Una incidencia se clasifica por su estado y nivel de gravedad.',
 'Los catálogos están disponibles para administradores, inspectores y técnicos de mantenimiento.',
 'El listado global y la consulta individual están reservados a administración.',
+'La consulta de incidencias de un preventivo está disponible para administración e inspección.',
 'Las operaciones de apertura, asignación y resolución se incorporarán progresivamente.'
 ]
 }
