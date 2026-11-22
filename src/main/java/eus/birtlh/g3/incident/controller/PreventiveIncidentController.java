@@ -62,7 +62,7 @@ public class PreventiveIncidentController {
     ) {
         return ResponseEntity.ok(
                 ApiSuccessResponse.success(
-                        incidentService.getAllIncidentsByPreventiveId(page, size, preventiveId),
+                        incidentService.getIncidentsByPreventiveId(page, size, preventiveId),
                         "Incidencias obtenidas correctamente."
                 )
         );

@@ -23,8 +23,8 @@ import java.util.List;
 /**
  * Servicio de aplicación que coordina los casos de uso de incidencias.
  *
- * <p>Expone los catálogos de estados y niveles de gravedad que utilizarán los clientes de la
- * API al gestionar incidencias.</p>
+ * <p>Expone los catálogos y las consultas paginadas que utilizan los clientes de la API para
+ * consultar incidencias.</p>
  */
 @Service
 @RequiredArgsConstructor
@@ -115,7 +115,7 @@ public class IncidentService {
      * @throws PreventiveNotFoundException si no existe el preventivo indicado
      */
     @Transactional(readOnly = true)
-    public PageResponse<IncidentResponse> getAllIncidentsByPreventiveId(
+    public PageResponse<IncidentResponse> getIncidentsByPreventiveId(
             int page,
             int size,
             Long preventiveId
@@ -128,6 +128,40 @@ public class IncidentService {
 
         Page<Incident> incidents = incidentRepository.findAllByPreventiveId(
                 preventiveId,
+                PageRequest.of(page, size, Sort.by("id").ascending())
+        );
+
+        return new PageResponse<>(
+                incidents.getContent()
+                        .stream()
+                        .map(IncidentMapper::toResponse)
+                        .toList(),
+                incidents.getNumber(),
+                incidents.getSize(),
+                incidents.getTotalElements(),
+                incidents.getTotalPages()
+        );
+    }
+
+    /**
+     * Obtiene una página de incidencias asignadas a un técnico de mantenimiento.
+     *
+     * <p>El correo recibido identifica al técnico autenticado y se utiliza para limitar el
+     * resultado a su propia bandeja de trabajo.</p>
+     *
+     * @param page índice de página basado en cero
+     * @param size número de incidencias por página
+     * @param technicianEmail correo electrónico del técnico asignado
+     * @return página de incidencias asignadas al técnico; su contenido puede estar vacío
+     */
+    @Transactional(readOnly = true)
+    public PageResponse<IncidentResponse> getByAssignedTechnicianEmail(
+            int page,
+            int size,
+            String technicianEmail
+    ) {
+        Page<Incident> incidents = incidentRepository.findByAssignedTechnicianEmail(
+                technicianEmail,
                 PageRequest.of(page, size, Sort.by("id").ascending())
         );
 

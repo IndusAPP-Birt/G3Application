@@ -21,4 +21,13 @@ public interface IncidentRepository extends JpaRepository<Incident, Long> {
      * @return página de incidencias vinculadas al preventivo; puede estar vacía
      */
     Page<Incident> findAllByPreventiveId(Long preventiveId, Pageable pageable);
+
+    /**
+     * Obtiene una página de incidencias asignadas a un técnico de mantenimiento.
+     *
+     * @param technicianEmail correo electrónico del técnico asignado
+     * @param pageable configuración de página y ordenación solicitada
+     * @return página de incidencias asignadas al técnico; puede estar vacía
+     */
+    Page<Incident> findByAssignedTechnicianEmail(String technicianEmail, Pageable pageable);
 }

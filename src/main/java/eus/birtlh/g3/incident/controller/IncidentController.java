@@ -11,15 +11,17 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 /**
- * Controlador REST que expone los catálogos de incidencias.
+ * Controlador REST que expone las consultas sobre incidencias.
  *
- * <p>Delega la obtención de estados y niveles de gravedad en {@link IncidentService}, y devuelve
- * sus resultados mediante el contrato estándar {@link ApiSuccessResponse}.</p>
+ * <p>Delega los casos de uso en {@link IncidentService} y devuelve sus resultados mediante el
+ * contrato estándar {@link ApiSuccessResponse}.</p>
  */
 @RestController
 @RequestMapping("/api/incidents")
@@ -112,6 +114,58 @@ public class IncidentController {
                 ApiSuccessResponse.success(
                         incidentService.getIncidentById(id),
                         "Incidencia obtenida correctamente."
+                )
+        );
+    }
+
+    /**
+     * Obtiene una página de incidencias asignadas al técnico autenticado.
+     *
+     * <p>El correo del técnico se obtiene del sujeto del JWT, por lo que la petición no admite un
+     * identificador de técnico modificable por el cliente.</p>
+     *
+     * @param page índice de página basado en cero
+     * @param size número de incidencias por página
+     * @param jwt token JWT del técnico autenticado
+     * @return respuesta HTTP 200 con la página de incidencias y su marca temporal
+     */
+    @GetMapping("/me")
+    public ResponseEntity<ApiSuccessResponse<PageResponse<IncidentResponse>>> findIncidentsByAssignedTechnicianEmail(
+            @RequestParam(
+                    name = "page",
+                    defaultValue = PaginationConstants.DEFAULT_PAGE_VALUE
+            )
+            @Min(
+                    value = PaginationConstants.MIN_PAGE,
+                    message = "La página debe ser {value} o mayor."
+            )
+            int page,
+
+            @RequestParam(
+                    name = "size",
+                    defaultValue = PaginationConstants.DEFAULT_PAGE_SIZE_VALUE
+            )
+            @Min(
+                    value = PaginationConstants.MIN_PAGE_SIZE,
+                    message = "El tamaño de página debe ser {value} o mayor."
+            )
+            @Max(
+                    value = PaginationConstants.MAX_PAGE_SIZE,
+                    message = "El tamaño de página no puede superar {value}."
+            )
+            int size,
+
+            @AuthenticationPrincipal
+            Jwt jwt
+    ) {
+        return ResponseEntity.ok(
+                ApiSuccessResponse.success(
+                        incidentService.getByAssignedTechnicianEmail(
+                                page,
+                                size,
+                                jwt.getSubject()
+                        ),
+                        "Incidencias obtenidas correctamente."
                 )
         );
     }
