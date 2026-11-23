@@ -18,6 +18,7 @@ import eus.birtlh.g3.user.Role;
 import eus.birtlh.g3.user.UserService;
 import eus.birtlh.g3.user.dto.CreateUserRequest;
 import eus.birtlh.g3.user.dto.UserResponse;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,17 @@ class PreventiveServiceBusinessTest {
     @Autowired private UserService userService;
     @Autowired private PreventiveRepository preventiveRepository;
 
+    private UserResponse administrator;
+
+    /**
+     * Prepara el administrador que debe quedar registrado al asignar los preventivos de cada
+     * prueba.
+     */
+    @BeforeEach
+    void createAdministrator() {
+        administrator = createUser("administrator.business@test.local", Role.ROLE_ADMINISTRATOR);
+    }
+
     /** Comprueba que solo un usuario con rol inspector puede recibir un preventivo pendiente. */
     @DisplayName("Rechaza asignar un preventivo pendiente a un usuario que no es inspector")
     @Test
@@ -54,7 +66,9 @@ class PreventiveServiceBusinessTest {
         UserResponse technician = createUser("technician@test.local", Role.ROLE_MAINTENANCE_TECHNICIAN);
 
         assertThatThrownBy(() -> preventiveService.assignInspectorToPreventive(
-                preventive.getId(), new AssignInspectorToPreventiveRequest(technician.id())
+                preventive.getId(),
+                new AssignInspectorToPreventiveRequest(technician.id()),
+                administrator.email()
         ))
                 .as("Un técnico no puede recibir un preventivo")
                 .isInstanceOf(UserIsNotInspectorException.class);
@@ -70,12 +84,18 @@ class PreventiveServiceBusinessTest {
         Preventive preventive = createPendingPreventive("REASSIGNMENT");
         UserResponse assignedInspector = createUser("assigned@test.local", Role.ROLE_INSPECTOR);
         UserResponse otherInspector = createUser("other@test.local", Role.ROLE_INSPECTOR);
+
+        // El administrador realiza la primera asignación del preventivo
         preventiveService.assignInspectorToPreventive(
-                preventive.getId(), new AssignInspectorToPreventiveRequest(assignedInspector.id())
+                preventive.getId(),
+                new AssignInspectorToPreventiveRequest(assignedInspector.id()),
+                administrator.email()
         );
 
         assertThatThrownBy(() -> preventiveService.assignInspectorToPreventive(
-                preventive.getId(), new AssignInspectorToPreventiveRequest(otherInspector.id())
+                preventive.getId(),
+                new AssignInspectorToPreventiveRequest(otherInspector.id()),
+                administrator.email()
         ))
                 .as("No se sustituye el inspector de un preventivo ya asignado")
                 .isInstanceOf(InvalidPreventiveStatusTransitionException.class);
@@ -90,7 +110,13 @@ class PreventiveServiceBusinessTest {
     void permiteCorregirTrabajoEnPreventivoEnProgreso() {
         Preventive preventive = createPendingPreventive("WORK-CORRECTION");
         UserResponse inspector = createUser("work@test.local", Role.ROLE_INSPECTOR);
-        preventiveService.assignInspectorToPreventive(preventive.getId(), new AssignInspectorToPreventiveRequest(inspector.id()));
+
+        // El administrador asigna el preventivo antes de que el inspector lo ejecute
+        preventiveService.assignInspectorToPreventive(
+                preventive.getId(),
+                new AssignInspectorToPreventiveRequest(inspector.id()),
+                administrator.email()
+        );
         preventiveService.startPreventive(preventive.getId(), inspector.email());
         preventiveService.recordWorkPerformed(preventive.getId(), new RecordPreventiveWorkRequest("Trabajo inicial"), inspector.email());
 
@@ -112,8 +138,18 @@ class PreventiveServiceBusinessTest {
         Preventive second = createPendingPreventive("INBOX-B");
         UserResponse inspectorA = createUser("inbox-a@test.local", Role.ROLE_INSPECTOR);
         UserResponse inspectorB = createUser("inbox-b@test.local", Role.ROLE_INSPECTOR);
-        preventiveService.assignInspectorToPreventive(first.getId(), new AssignInspectorToPreventiveRequest(inspectorA.id()));
-        preventiveService.assignInspectorToPreventive(second.getId(), new AssignInspectorToPreventiveRequest(inspectorB.id()));
+
+        // El administrador asigna un preventivo a cada inspector
+        preventiveService.assignInspectorToPreventive(
+                first.getId(),
+                new AssignInspectorToPreventiveRequest(inspectorA.id()),
+                administrator.email()
+        );
+        preventiveService.assignInspectorToPreventive(
+                second.getId(),
+                new AssignInspectorToPreventiveRequest(inspectorB.id()),
+                administrator.email()
+        );
 
         PageResponse<PreventiveResponse> inbox = preventiveService
                 .getPreventivesByAuthenticatedAssignedInspector(0, 20, inspectorA.email());

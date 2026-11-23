@@ -288,23 +288,27 @@ public class PreventiveService {
     /**
      * Asigna un inspector a un preventivo pendiente.
      *
-     * <p>Comprueba que el preventivo y el usuario existan, que este último tenga el rol de
-     * inspector y que el preventivo esté pendiente. La entidad registra la asignación y cambia
-     * su estado a {@link PreventiveStatus#ASSIGNED}. Tras sincronizar el cambio, publica un
+     * <p>Comprueba que el preventivo, el inspector y el administrador autenticado existan, que el
+     * inspector tenga ese rol y que el preventivo esté pendiente. La entidad registra al
+     * inspector y al administrador responsable de la asignación, y cambia su estado a
+     * {@link PreventiveStatus#ASSIGNED}. Tras sincronizar el cambio, publica un
      * {@link PreventiveAssignedEvent} para que otros módulos reaccionen a la asignación.</p>
      *
      * @param id identificador del preventivo al que se asignará el inspector
      * @param request identificador validado del inspector que recibirá la asignación
-     * @return DTO público del preventivo con el inspector asignado
+     * @param administratorEmail correo electrónico del administrador autenticado
+     * @return DTO público del preventivo con el inspector y el administrador de la asignación
      * @throws PreventiveNotFoundException si no existe un preventivo con el identificador indicado
-     * @throws UserNotFoundException si no existe el usuario inspector indicado
+     * @throws UserNotFoundException si no existe el inspector indicado o el administrador
+     *                               autenticado
      * @throws UserIsNotInspectorException si el usuario indicado no tiene el rol de inspector
      * @throws InvalidPreventiveStatusTransitionException si el preventivo no está pendiente
      */
     @Transactional
     public PreventiveResponse assignInspectorToPreventive(
             long id,
-            AssignInspectorToPreventiveRequest request
+            AssignInspectorToPreventiveRequest request,
+            String administratorEmail
     ) {
         Preventive preventive = preventiveRepository.findById(id)
                 .orElseThrow(() -> new PreventiveNotFoundException(
@@ -328,7 +332,12 @@ public class PreventiveService {
             );
         }
 
-        preventive.assignInspector(inspector);
+        User administrator = userRepository.findByEmail(administratorEmail)
+                .orElseThrow(() -> new UserNotFoundException(
+                        "Administrador autenticado no encontrado."
+                ));
+
+        preventive.assignInspector(inspector, administrator);
         preventiveRepository.flush();
 
         applicationEventPublisher.publishEvent(

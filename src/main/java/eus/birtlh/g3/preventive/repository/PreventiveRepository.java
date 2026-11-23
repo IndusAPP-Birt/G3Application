@@ -61,6 +61,16 @@ public interface PreventiveRepository extends JpaRepository<Preventive, Long> {
     Page<Preventive> findByAssignedInspectorEmail(String email, Pageable pageable);
 
     /**
+     * Busca los preventivos cuya asignación fue realizada por un administrador identificado por
+     * su correo electrónico.
+     *
+     * @param email correo electrónico del administrador con el que filtrar
+     * @param pageable configuración de página, tamaño y orden solicitados
+     * @return página de preventivos asignados por el administrador; puede no contener resultados
+     */
+    Page<Preventive> findByAssignedByAdministratorEmail(String email, Pageable pageable);
+
+    /**
      * Busca los preventivos cuya fecha prevista está comprendida en un rango inclusivo.
      *
      * @param from fecha inicial del rango, incluida

@@ -17,6 +17,7 @@ import eus.birtlh.g3.user.Role;
 import eus.birtlh.g3.user.UserService;
 import eus.birtlh.g3.user.dto.CreateUserRequest;
 import eus.birtlh.g3.user.dto.UserResponse;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +59,25 @@ public class PreventiveServiceTest {
 
     @Autowired
     UserService userService;
+
+    private UserResponse administrator;
+
+    /**
+     * Prepara el administrador que debe quedar registrado al asignar los preventivos de cada
+     * prueba.
+     */
+    @BeforeEach
+    void createAdministrator() {
+        administrator = userService.createUser(
+                new CreateUserRequest(
+                        "Administrador",
+                        "Prueba",
+                        "administrator.preventive@test.local",
+                        "Password123!",
+                        Role.ROLE_ADMINISTRATOR
+                )
+        );
+    }
 
     /**
      * Comprueba que el inspector asignado puede iniciar un preventivo. La máquina y la plantilla
@@ -126,10 +146,11 @@ public class PreventiveServiceTest {
                 )
         );
 
-        // Asignamos el preventivo al inspector
+        // El administrador asigna el preventivo al inspector
         PreventiveResponse assigned = preventiveService.assignInspectorToPreventive(
                 preventive.getId(),
-                new AssignInspectorToPreventiveRequest(inspector.id())
+                new AssignInspectorToPreventiveRequest(inspector.id()),
+                administrator.email()
         );
 
         // El inspector inicia el preventivo
@@ -149,6 +170,10 @@ public class PreventiveServiceTest {
         assertThat(started.assignedInspector().id())
                 .as("El inspector asignado es el mismo cuando el preventivo pasa a IN_PROGRESS")
                 .isEqualTo(inspector.id());
+        // Comprobamos que conserva el administrador que realizó la asignación
+        assertThat(started.assignedByAdministrator().id())
+                .as("El administrador asignador se conserva durante la ejecución")
+                .isEqualTo(administrator.id());
     }
 
     /**
@@ -226,10 +251,11 @@ public class PreventiveServiceTest {
                 )
         );
 
-        // Asignamos el preventivo al primer inspector
+        // El administrador asigna el preventivo al primer inspector
         PreventiveResponse assigned = preventiveService.assignInspectorToPreventive(
                 preventive.getId(),
-                new AssignInspectorToPreventiveRequest(inspector.id())
+                new AssignInspectorToPreventiveRequest(inspector.id()),
+                administrator.email()
         );
 
         // Comprobamos que el inspector ajeno no puede iniciar el preventivo
@@ -317,10 +343,11 @@ public class PreventiveServiceTest {
                 )
         );
 
-        // Asignamos el preventivo al inspector
+        // El administrador asigna el preventivo al inspector
         PreventiveResponse assigned = preventiveService.assignInspectorToPreventive(
                 preventive.getId(),
-                new AssignInspectorToPreventiveRequest(inspector.id())
+                new AssignInspectorToPreventiveRequest(inspector.id()),
+                administrator.email()
         );
 
         // El inspector asignado inicia el preventivo
@@ -433,10 +460,11 @@ public class PreventiveServiceTest {
                 )
         );
 
-        // Asignamos el preventivo al inspector
+        // El administrador asigna el preventivo al inspector
         PreventiveResponse assigned = preventiveService.assignInspectorToPreventive(
                 preventive.getId(),
-                new AssignInspectorToPreventiveRequest(inspector.id())
+                new AssignInspectorToPreventiveRequest(inspector.id()),
+                administrator.email()
         );
 
         // El inspector asignado inicia el preventivo
@@ -635,10 +663,11 @@ public class PreventiveServiceTest {
                 )
         );
 
-        // Asignamos e iniciamos el preventivo con el inspector asignado
+        // El administrador asigna el preventivo y el inspector lo inicia
         PreventiveResponse assigned = preventiveService.assignInspectorToPreventive(
                 preventive.getId(),
-                new AssignInspectorToPreventiveRequest(inspector.id())
+                new AssignInspectorToPreventiveRequest(inspector.id()),
+                administrator.email()
         );
         PreventiveResponse started = preventiveService.startPreventive(
                 assigned.id(),
@@ -746,10 +775,11 @@ public class PreventiveServiceTest {
                 )
         );
 
-        // Asignamos el preventivo sin iniciarlo
+        // El administrador asigna el preventivo sin iniciarlo
         PreventiveResponse assigned = preventiveService.assignInspectorToPreventive(
                 preventive.getId(),
-                new AssignInspectorToPreventiveRequest(inspector.id())
+                new AssignInspectorToPreventiveRequest(inspector.id()),
+                administrator.email()
         );
 
         // Comprobamos que no se puede registrar trabajo antes de iniciar el preventivo
@@ -837,10 +867,11 @@ public class PreventiveServiceTest {
                 )
         );
 
-        // Asignamos e iniciamos el preventivo con el inspector asignado
+        // El administrador asigna el preventivo y el inspector lo inicia
         PreventiveResponse assigned = preventiveService.assignInspectorToPreventive(
                 preventive.getId(),
-                new AssignInspectorToPreventiveRequest(inspector.id())
+                new AssignInspectorToPreventiveRequest(inspector.id()),
+                administrator.email()
         );
         PreventiveResponse started = preventiveService.startPreventive(
                 assigned.id(),
@@ -935,10 +966,11 @@ public class PreventiveServiceTest {
                 )
         );
 
-        // Asignamos e iniciamos el preventivo con el inspector asignado
+        // El administrador asigna el preventivo y el inspector lo inicia
         PreventiveResponse assigned = preventiveService.assignInspectorToPreventive(
                 preventive.getId(),
-                new AssignInspectorToPreventiveRequest(inspector.id())
+                new AssignInspectorToPreventiveRequest(inspector.id()),
+                administrator.email()
         );
         PreventiveResponse started = preventiveService.startPreventive(
                 assigned.id(),

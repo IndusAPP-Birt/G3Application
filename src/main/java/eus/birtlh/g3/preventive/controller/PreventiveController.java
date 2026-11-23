@@ -366,11 +366,14 @@ public class PreventiveController {
             Long id,
 
             @Valid
-            @RequestBody AssignInspectorToPreventiveRequest request
+            @RequestBody AssignInspectorToPreventiveRequest request,
+
+            @AuthenticationPrincipal
+            Jwt jwt
     ) {
         return ResponseEntity.ok(
                 ApiSuccessResponse.success(
-                        preventiveService.assignInspectorToPreventive(id, request),
+                        preventiveService.assignInspectorToPreventive(id, request, jwt.getSubject()),
                         "Inspector asignado correctamente."
                 )
         );

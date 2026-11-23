@@ -15,7 +15,8 @@ import java.time.LocalDate;
  *
  * <p>Conserva una instantánea del nombre y la descripción de la plantilla para preservar el
  * contexto histórico de la ejecución. Su ciclo de trabajo avanza de pendiente a asignado, en
- * progreso y completado.</p>
+ * progreso y completado. La asignación registra tanto al inspector responsable como al
+ * administrador que la realiza.</p>
  */
 @Entity
 @Table(
@@ -25,6 +26,10 @@ import java.time.LocalDate;
                         name = "preventives_assignment_due_date_key",
                         columnList = "preventive_plan_assignment_id, due_date",
                         unique = true
+                ),
+                @Index(
+                        name = "preventives_assigned_by_administrator_key",
+                        columnList = "assigned_by_administrator_id"
                 )
         }
 )
@@ -48,6 +53,10 @@ public class Preventive {
 
     @Column(name = "due_date", nullable = false, updatable = false)
     private LocalDate dueDate;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assigned_by_administrator_id")
+    private User assignedByAdministrator;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assigned_inspector_id")
@@ -110,12 +119,15 @@ public class Preventive {
     }
 
     /**
-     * Asigna el preventivo a un inspector y registra el momento de la asignación.
+     * Asigna el preventivo a un inspector y registra el administrador y el momento de la
+     * asignación.
      *
      * @param inspector usuario inspector ya autorizado y validado
+     * @param administrator administrador autenticado que realiza la asignación
      */
-    void assignInspector(User inspector) {
+    void assignInspector(User inspector, User administrator) {
         assignedInspector = inspector;
+        assignedByAdministrator = administrator;
         assignedAt = Instant.now();
         status = PreventiveStatus.ASSIGNED;
     }

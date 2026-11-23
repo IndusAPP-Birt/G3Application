@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
  * Convierte entidades {@link Preventive} persistidas en sus DTOs públicos de respuesta.
  *
  * <p>La asignación de origen se transforma mediante {@link PreventivePlanAssignmentMapper}.
- * Cuando todavía no se ha asignado un inspector, la respuesta conserva ese valor como
- * {@code null}.</p>
+ * Cuando todavía no se ha realizado una asignación, la respuesta conserva como {@code null} al
+ * administrador que la realiza y al inspector responsable.</p>
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class PreventiveMapper {
@@ -38,6 +38,8 @@ public final class PreventiveMapper {
                 PreventivePlanAssignmentMapper.toResponse(preventive.getPreventivePlanAssignment()),
                 preventive.getPlanName(),
                 preventive.getPlanDescription(),
+                preventive.getAssignedByAdministrator() == null
+                ? null : UserMapper.toResponse(preventive.getAssignedByAdministrator()),
                 preventive.getAssignedInspector() == null
                 ? null : UserMapper.toResponse(preventive.getAssignedInspector()),
                 preventive.getDueDate(),

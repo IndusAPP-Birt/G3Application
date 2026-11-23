@@ -154,7 +154,8 @@ public class SecurityAuthorizationTest {
 
         // Preparamos un preventivo ASSIGNED para el inspector autenticado
         UserResponse inspector = createInspector("inspector.start-http@test.local", "Inicio HTTP");
-        long preventiveId = createPreventiveAssignedTo(inspector);
+        UserResponse administrator = createAdministrator("administrator.start-http@test.local", "Inicio HTTP");
+        long preventiveId = createPreventiveAssignedTo(inspector, administrator);
 
         // El inspector inicia su preventivo mediante la ruta protegida
         mockMvc.perform(put("/api/preventives/{id}/start", preventiveId)
@@ -286,12 +287,32 @@ public class SecurityAuthorizationTest {
     }
 
     /**
+     * Crea un administrador habilitado para registrar una asignación preventiva de prueba.
+     *
+     * @param email correo que identificará al administrador
+     * @param lastName apellidos que distinguen el dato de prueba
+     * @return administrador persistido
+     */
+    private UserResponse createAdministrator(String email, String lastName) {
+        return userService.createUser(
+                new CreateUserRequest(
+                        "Administrador",
+                        lastName,
+                        email,
+                        "Password123!",
+                        Role.ROLE_ADMINISTRATOR
+                )
+        );
+    }
+
+    /**
      * Prepara un preventivo en estado ASSIGNED para el inspector indicado.
      *
      * @param inspector inspector al que se asignará el preventivo generado
+     * @param administrator administrador que realizará la asignación
      * @return identificador del preventivo asignado
      */
-    private long createPreventiveAssignedTo(UserResponse inspector) {
+    private long createPreventiveAssignedTo(UserResponse inspector, UserResponse administrator) {
         MachineResponse machine = machineService.createMachine(
                 new CreateMachineRequest(
                         "TEST-HTTP-START-001",
@@ -330,7 +351,8 @@ public class SecurityAuthorizationTest {
 
         preventiveService.assignInspectorToPreventive(
                 preventive.getId(),
-                new AssignInspectorToPreventiveRequest(inspector.id())
+                new AssignInspectorToPreventiveRequest(inspector.id()),
+                administrator.email()
         );
 
         return preventive.getId();
