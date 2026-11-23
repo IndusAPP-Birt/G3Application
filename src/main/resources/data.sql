@@ -153,6 +153,7 @@ INSERT INTO preventives (
     preventive_plan_assignment_id,
     plan_name,
     plan_description,
+    assigned_by_administrator_id,
     assigned_inspector_id,
     due_date,
     status,
@@ -167,6 +168,10 @@ SELECT
     assignment.id,
     plan.name,
     plan.description,
+    CASE MOD(machine.id, 4)
+        WHEN 0 THEN NULL
+        ELSE 1 + MOD(machine.id - 1, 3)
+    END,
     CASE MOD(machine.id, 4)
         WHEN 0 THEN NULL
         ELSE 4 + MOD(machine.id - 1, 5)
