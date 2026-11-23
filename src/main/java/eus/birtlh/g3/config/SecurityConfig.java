@@ -55,7 +55,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/g3-console.html").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/g3-console.html", "/g3-flow-administrator.html").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/users/me").authenticated()
                         .requestMatchers("/api/users", "/api/users/**").hasAuthority("ROLE_ADMINISTRATOR")
                         .requestMatchers(HttpMethod.GET, "/api/machines", "/api/machines/**").authenticated()
