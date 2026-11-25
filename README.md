@@ -67,6 +67,7 @@ El token contiene el correo electrónico como sujeto y el rol en el claim `role`
 | Incidencias asociadas a un preventivo | Sí | Sí | — |
 | Bandeja de incidencias asignadas | — | — | Sí |
 | Incidencias comunicadas por el inspector | — | Sí | — |
+| Filtros de incidencias por estado, gravedad, inspector o técnico | Sí | — | — |
 | Inicio, registro de trabajo y cierre de preventivos | — | Sí* | — |
 
 `*` La capa de servicio comprueba además que el preventivo pertenece al inspector autenticado.
@@ -165,7 +166,7 @@ Representa las ejecuciones generadas desde una asignación preventiva y su ciclo
 
 ### Incidencias
 
-Representa los problemas detectados durante la ejecución de un preventivo. Actualmente permite consultar sus catálogos, su listado paginado, el detalle de cada incidencia, las incidencias asociadas a un preventivo y las bandejas personales del técnico y del inspector. El listado y el detalle están reservados a administración; la consulta por preventivo está disponible para administración e inspección.
+Representa los problemas detectados durante la ejecución de un preventivo. Actualmente permite consultar sus catálogos, su listado paginado, el detalle de cada incidencia, las incidencias asociadas a un preventivo y las bandejas personales del técnico y del inspector. El listado, el detalle y los filtros por estado, gravedad, inspector comunicador o técnico asignado están reservados a administración; la consulta por preventivo está disponible para administración e inspección.
 
 | Método | Ruta | Operación |
 |---|---|---|
@@ -176,6 +177,10 @@ Representa los problemas detectados durante la ejecución de un preventivo. Actu
 | `GET` | `/api/preventives/{preventiveId}/incidents` | Obtiene las incidencias paginadas asociadas a un preventivo. |
 | `GET` | `/api/incidents/me` | Obtiene las incidencias paginadas asignadas al técnico autenticado. |
 | `GET` | `/api/incidents/reported-by-me` | Obtiene las incidencias paginadas comunicadas por el inspector autenticado. |
+| `GET` | `/api/incidents/by-status` | Filtra incidencias por estado. |
+| `GET` | `/api/incidents/by-severity` | Filtra incidencias por nivel de gravedad. |
+| `GET` | `/api/incidents/by-reporter/{inspectorId}` | Filtra incidencias por inspector comunicador. |
+| `GET` | `/api/incidents/by-technician/{technicianId}` | Filtra incidencias por técnico asignado. |
 
 ## Consola de pruebas
 

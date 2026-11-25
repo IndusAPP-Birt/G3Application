@@ -102,6 +102,10 @@
             <tr><td>GET</td><td><code>/api/preventives/{preventiveId}/incidents</code></td><td class="allowed">Sí</td><td class="allowed">Sí</td><td class="denied">—</td></tr>
             <tr><td>GET</td><td><code>/api/incidents/me</code></td><td class="denied">—</td><td class="denied">—</td><td class="allowed">Sí</td></tr>
             <tr><td>GET</td><td><code>/api/incidents/reported-by-me</code></td><td class="denied">—</td><td class="allowed">Sí</td><td class="denied">—</td></tr>
+            <tr><td>GET</td><td><code>/api/incidents/by-status</code></td><td class="allowed">Sí</td><td class="denied">—</td><td class="denied">—</td></tr>
+            <tr><td>GET</td><td><code>/api/incidents/by-severity</code></td><td class="allowed">Sí</td><td class="denied">—</td><td class="denied">—</td></tr>
+            <tr><td>GET</td><td><code>/api/incidents/by-reporter/{inspectorId}</code></td><td class="allowed">Sí</td><td class="denied">—</td><td class="denied">—</td></tr>
+            <tr><td>GET</td><td><code>/api/incidents/by-technician/{technicianId}</code></td><td class="allowed">Sí</td><td class="denied">—</td><td class="denied">—</td></tr>
         </tbody></table></div><p>* El servicio verifica que el preventivo está asignado al inspector autenticado.</p></section>
     </section>
     <section class="card request-card" id="request-card"><div class="card-header"><h3 id="request-title">Consulta</h3><p id="request-description"></p></div><div style="padding:16px"><form id="request-form" novalidate><div class="form-body" id="form-body"></div><button class="execute" id="execute-button" type="submit">Ejecutar consulta</button></form></div></section>
@@ -146,7 +150,11 @@ entities.incidents={label:'Incident',icon:'I',description:'Incidencias detectada
 {label:'Por preventivo',method:'GET',path:'/api/preventives/{preventiveId}/incidents',description:'Incidencias asociadas a un preventivo.',fields:[textField('preventiveId','Identificador de preventivo','1',true,'number'),...pagination]},
 {label:'Por ID',method:'GET',path:'/api/incidents/{id}',description:'Consulta una incidencia por identificador.',fields:[textField('id','Identificador','1',true,'number')]},
 {label:'Mis asignadas',method:'GET',path:'/api/incidents/me',description:'Bandeja de incidencias asignadas al técnico autenticado.',fields:pagination},
-{label:'Comunicadas por mí',method:'GET',path:'/api/incidents/reported-by-me',description:'Bandeja de incidencias comunicadas por el inspector autenticado.',fields:pagination}
+{label:'Comunicadas por mí',method:'GET',path:'/api/incidents/reported-by-me',description:'Bandeja de incidencias comunicadas por el inspector autenticado.',fields:pagination},
+{label:'Por estado',method:'GET',path:'/api/incidents/by-status',description:'Filtra incidencias por estado.',fields:[selectField('status','Estado',[['OPEN','OPEN'],['ASSIGNED','ASSIGNED'],['IN_PROGRESS','IN_PROGRESS'],['RESOLVED','RESOLVED'],['CLOSED','CLOSED']]),...pagination]},
+{label:'Por gravedad',method:'GET',path:'/api/incidents/by-severity',description:'Filtra incidencias por nivel de gravedad.',fields:[selectField('severity','Gravedad',[['LOW','LOW'],['MEDIUM','MEDIUM'],['HIGH','HIGH'],['CRITICAL','CRITICAL']]),...pagination]},
+{label:'Por inspector comunicador',method:'GET',path:'/api/incidents/by-reporter/{inspectorId}',description:'Filtra incidencias comunicadas por un inspector.',fields:[textField('inspectorId','Identificador de inspector','4',true,'number'),...pagination]},
+{label:'Por técnico asignado',method:'GET',path:'/api/incidents/by-technician/{technicianId}',description:'Filtra incidencias asignadas a un técnico.',fields:[textField('technicianId','Identificador de técnico','9',true,'number'),...pagination]}
 ]};
 entities.preventives.description='Ejecuciones generadas desde una asignación preventiva y su ciclo de trabajo.';
 entities.workflow={label:'Flujo',icon:'→',description:'Modelo de mantenimiento preventivo y ciclo de trabajo.',actions:[]};
@@ -220,7 +228,7 @@ purpose:'Permite consultar los catálogos y las incidencias detectadas durante l
 rules:[
 'Una incidencia se clasifica por su estado y nivel de gravedad.',
 'Los catálogos están disponibles para administradores, inspectores y técnicos de mantenimiento.',
-'El listado global y la consulta individual están reservados a administración.',
+'El listado global, la consulta individual y los filtros están reservados a administración.',
 'La consulta de incidencias de un preventivo está disponible para administración e inspección.',
 'La bandeja del técnico solo muestra las incidencias que tiene asignadas.',
 'La bandeja del inspector muestra las incidencias que ha comunicado, incluidas las resueltas pendientes de validación y cierre.',

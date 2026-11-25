@@ -9,11 +9,11 @@
     {"key":"baseUrl","value":"https://g3application.onrender.com"},
     {"key":"accessToken","value":""}, {"key":"loginEmail","value":""}, {"key":"loginPassword","value":""},
     {"key":"page","value":"0"}, {"key":"size","value":"20"},
-    {"key":"userId","value":"1"}, {"key":"inspectorId","value":"2"},
+    {"key":"userId","value":"1"}, {"key":"inspectorId","value":"5"}, {"key":"technicianId","value":"9"},
     {"key":"machineId","value":"1"}, {"key":"preventivePlanId","value":"1"}, {"key":"preventivePlanAssignmentId","value":"1"}, {"key":"preventiveId","value":"1"}, {"key":"incidentId","value":"1"},
     {"key":"emailSearchTerm","value":"inspector"}, {"key":"enabled","value":"true"}, {"key":"role","value":"ROLE_INSPECTOR"},
     {"key":"assetCodeSearchTerm","value":"MAQ"}, {"key":"serialNumberSearchTerm","value":"SN"}, {"key":"machineStatus","value":"ACTIVE"},
-    {"key":"planActive","value":"true"}, {"key":"planNameSearchTerm","value":"Revisión"}, {"key":"preventiveStatus","value":"PENDING"},
+    {"key":"planActive","value":"true"}, {"key":"planNameSearchTerm","value":"Revisión"}, {"key":"preventiveStatus","value":"PENDING"}, {"key":"incidentStatus","value":"OPEN"}, {"key":"incidentSeverity","value":"HIGH"},
     {"key":"from","value":"2026-01-01"}, {"key":"to","value":"2026-12-31"},
     {"key":"newUserEmail","value":"postman@example.com"}, {"key":"newMachineAssetCode","value":"MAQ-POSTMAN"}, {"key":"newMachineSerialNumber","value":"SN-POSTMAN"}
   ],
@@ -87,7 +87,11 @@
       {"name":"Obtener incidencia","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/incidents/{{incidentId}}"}},
       {"name":"Listar incidencias de un preventivo","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/preventives/{{preventiveId}}/incidents?page={{page}}&size={{size}}"}},
       {"name":"Mis incidencias asignadas","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/incidents/me?page={{page}}&size={{size}}"}},
-      {"name":"Mis incidencias comunicadas","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/incidents/reported-by-me?page={{page}}&size={{size}}"}}
+      {"name":"Mis incidencias comunicadas","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/incidents/reported-by-me?page={{page}}&size={{size}}"}},
+      {"name":"Filtrar por estado","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/incidents/by-status?status={{incidentStatus}}&page={{page}}&size={{size}}"}},
+      {"name":"Filtrar por gravedad","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/incidents/by-severity?severity={{incidentSeverity}}&page={{page}}&size={{size}}"}},
+      {"name":"Filtrar por inspector comunicador","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/incidents/by-reporter/{{inspectorId}}?page={{page}}&size={{size}}"}},
+      {"name":"Filtrar por técnico asignado","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/incidents/by-technician/{{technicianId}}?page={{page}}&size={{size}}"}}
     ]}
   ]
 }
