@@ -178,6 +178,40 @@ public class IncidentService {
     }
 
     /**
+     * Obtiene una página de incidencias asignadas a un técnico concreto.
+     *
+     * <p>Conserva el orden ascendente por identificador para ofrecer resultados estables entre
+     * páginas.</p>
+     *
+     * @param page índice de página basado en cero
+     * @param size número de incidencias por página
+     * @param technicianId identificador del técnico asignado a las incidencias
+     * @return página de incidencias asignadas al técnico; su contenido puede estar vacío
+     */
+    @Transactional(readOnly = true)
+    public PageResponse<IncidentResponse> getIncidentsByAssignedTechnicianId(
+            int page,
+            int size,
+            Long technicianId
+    ) {
+        Page<Incident> incidents = incidentRepository.findByAssignedTechnicianId(
+                technicianId,
+                PageRequest.of(page, size, Sort.by("id").ascending())
+        );
+
+        return new PageResponse<>(
+                incidents.getContent()
+                        .stream()
+                        .map(IncidentMapper::toResponse)
+                        .toList(),
+                incidents.getNumber(),
+                incidents.getSize(),
+                incidents.getTotalElements(),
+                incidents.getTotalPages()
+        );
+    }
+
+    /**
      * Obtiene una página de incidencias comunicadas por un inspector.
      *
      * <p>El correo recibido identifica al inspector autenticado y limita el resultado a las
@@ -196,6 +230,108 @@ public class IncidentService {
     ) {
         Page<Incident> incidents = incidentRepository.findByReportedByInspectorEmail(
                 inspectorEmail,
+                PageRequest.of(page, size, Sort.by("id").ascending())
+        );
+
+        return new PageResponse<>(
+                incidents.getContent()
+                        .stream()
+                        .map(IncidentMapper::toResponse)
+                        .toList(),
+                incidents.getNumber(),
+                incidents.getSize(),
+                incidents.getTotalElements(),
+                incidents.getTotalPages()
+        );
+    }
+
+    /**
+     * Obtiene una página de incidencias comunicadas por un inspector concreto.
+     *
+     * <p>Conserva el orden ascendente por identificador para ofrecer resultados estables entre
+     * páginas.</p>
+     *
+     * @param page índice de página basado en cero
+     * @param size número de incidencias por página
+     * @param inspectorId identificador del inspector que comunicó las incidencias
+     * @return página de incidencias comunicadas por el inspector; su contenido puede estar vacío
+     */
+    @Transactional(readOnly = true)
+    public PageResponse<IncidentResponse> getIncidentsByReportedByInspectorId(
+            int page,
+            int size,
+            Long inspectorId
+    ) {
+        Page<Incident> incidents = incidentRepository.findByReportedByInspectorId(
+                inspectorId,
+                PageRequest.of(page, size, Sort.by("id").ascending())
+        );
+
+        return new PageResponse<>(
+                incidents.getContent()
+                        .stream()
+                        .map(IncidentMapper::toResponse)
+                        .toList(),
+                incidents.getNumber(),
+                incidents.getSize(),
+                incidents.getTotalElements(),
+                incidents.getTotalPages()
+        );
+    }
+
+    /**
+     * Obtiene una página de incidencias filtradas por estado.
+     *
+     * <p>Conserva el orden ascendente por identificador para ofrecer resultados estables entre
+     * páginas.</p>
+     *
+     * @param page índice de página basado en cero
+     * @param size número de incidencias por página
+     * @param status estado por el que se filtran las incidencias
+     * @return página de incidencias con el estado indicado; su contenido puede estar vacío
+     */
+    @Transactional(readOnly = true)
+    public PageResponse<IncidentResponse> getIncidentsByStatus(
+            int page,
+            int size,
+            IncidentStatus status
+    ) {
+        Page<Incident> incidents = incidentRepository.findByStatus(
+                status,
+                PageRequest.of(page, size, Sort.by("id").ascending())
+        );
+
+        return new PageResponse<>(
+                incidents.getContent()
+                        .stream()
+                        .map(IncidentMapper::toResponse)
+                        .toList(),
+                incidents.getNumber(),
+                incidents.getSize(),
+                incidents.getTotalElements(),
+                incidents.getTotalPages()
+        );
+    }
+
+    /**
+     * Obtiene una página de incidencias filtradas por gravedad.
+     *
+     * <p>Conserva el orden ascendente por identificador para ofrecer resultados estables entre
+     * páginas.</p>
+     *
+     * @param page índice de página basado en cero
+     * @param size número de incidencias por página
+     * @param severity nivel de gravedad por el que se filtran las incidencias
+     * @return página de incidencias con la gravedad indicada; su contenido puede estar vacío
+     */
+    @Transactional(readOnly = true)
+    public PageResponse<IncidentResponse> getIncidentsBySeverity(
+            int page,
+            int size,
+            IncidentSeverity severity
+    ) {
+        Page<Incident> incidents = incidentRepository.findBySeverity(
+                severity,
                 PageRequest.of(page, size, Sort.by("id").ascending())
         );
 

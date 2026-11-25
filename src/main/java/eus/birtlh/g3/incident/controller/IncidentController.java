@@ -5,6 +5,8 @@ import eus.birtlh.g3.common.dto.ApiSuccessResponse;
 import eus.birtlh.g3.common.dto.CatalogOptionResponse;
 import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.incident.IncidentService;
+import eus.birtlh.g3.incident.IncidentSeverity;
+import eus.birtlh.g3.incident.IncidentStatus;
 import eus.birtlh.g3.incident.dto.IncidentResponse;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -171,6 +173,56 @@ public class IncidentController {
     }
 
     /**
+     * Obtiene una página de incidencias asignadas a un técnico concreto.
+     *
+     * @param page índice de página basado en cero
+     * @param size número de incidencias por página
+     * @param technicianId identificador positivo del técnico asignado a las incidencias
+     * @return respuesta HTTP 200 con la página de incidencias y su marca temporal
+     */
+    @GetMapping("/by-technician/{technicianId}")
+    public ResponseEntity<ApiSuccessResponse<PageResponse<IncidentResponse>>> findIncidentsByAssignedTechnicianId(
+            @RequestParam(
+                    name = "page",
+                    defaultValue = PaginationConstants.DEFAULT_PAGE_VALUE
+            )
+            @Min(
+                    value = PaginationConstants.MIN_PAGE,
+                    message = "La página debe ser {value} o mayor."
+            )
+            int page,
+
+            @RequestParam(
+                    name = "size",
+                    defaultValue = PaginationConstants.DEFAULT_PAGE_SIZE_VALUE
+            )
+            @Min(
+                    value = PaginationConstants.MIN_PAGE_SIZE,
+                    message = "El tamaño de página debe ser {value} o mayor."
+            )
+            @Max(
+                    value = PaginationConstants.MAX_PAGE_SIZE,
+                    message = "El tamaño de página no puede superar {value}."
+            )
+            int size,
+
+            @PathVariable
+            @Positive(message = "El identificador debe ser mayor que cero.")
+            Long technicianId
+    ) {
+        return ResponseEntity.ok(
+                ApiSuccessResponse.success(
+                        incidentService.getIncidentsByAssignedTechnicianId(
+                                page,
+                                size,
+                                technicianId
+                        ),
+                        "Incidencias obtenidas correctamente."
+                )
+        );
+    }
+
+    /**
      * Obtiene una página de incidencias comunicadas por el inspector autenticado.
      *
      * <p>El correo del inspector se obtiene del sujeto del JWT, por lo que la petición no admite
@@ -217,6 +269,145 @@ public class IncidentController {
                                 size,
                                 jwt.getSubject()
                         ),
+                        "Incidencias obtenidas correctamente."
+                )
+        );
+    }
+
+    /**
+     * Obtiene una página de incidencias comunicadas por un inspector concreto.
+     *
+     * @param page índice de página basado en cero
+     * @param size número de incidencias por página
+     * @param inspectorId identificador positivo del inspector que comunicó las incidencias
+     * @return respuesta HTTP 200 con la página de incidencias y su marca temporal
+     */
+    @GetMapping("/by-reporter/{inspectorId}")
+    public ResponseEntity<ApiSuccessResponse<PageResponse<IncidentResponse>>> findIncidentsByReportedByInspectorId(
+            @RequestParam(
+                    name = "page",
+                    defaultValue = PaginationConstants.DEFAULT_PAGE_VALUE
+            )
+            @Min(
+                    value = PaginationConstants.MIN_PAGE,
+                    message = "La página debe ser {value} o mayor."
+            )
+            int page,
+
+            @RequestParam(
+                    name = "size",
+                    defaultValue = PaginationConstants.DEFAULT_PAGE_SIZE_VALUE
+            )
+            @Min(
+                    value = PaginationConstants.MIN_PAGE_SIZE,
+                    message = "El tamaño de página debe ser {value} o mayor."
+            )
+            @Max(
+                    value = PaginationConstants.MAX_PAGE_SIZE,
+                    message = "El tamaño de página no puede superar {value}."
+            )
+            int size,
+
+            @PathVariable
+            @Positive(message = "El identificador debe ser mayor que cero.")
+            Long inspectorId
+    ) {
+        return ResponseEntity.ok(
+                ApiSuccessResponse.success(
+                        incidentService.getIncidentsByReportedByInspectorId(
+                                page,
+                                size,
+                                inspectorId
+                        ),
+                        "Incidencias obtenidas correctamente."
+                )
+        );
+    }
+
+    /**
+     * Obtiene una página de incidencias filtradas por estado.
+     *
+     * @param status estado por el que se filtran las incidencias
+     * @param page índice de página basado en cero
+     * @param size número de incidencias por página
+     * @return respuesta HTTP 200 con la página de incidencias y su marca temporal
+     */
+    @GetMapping("/by-status")
+    public  ResponseEntity<ApiSuccessResponse<PageResponse<IncidentResponse>>> findIncidentsByStatus(
+            IncidentStatus status,
+
+            @RequestParam(
+                    name = "page",
+                    defaultValue = PaginationConstants.DEFAULT_PAGE_VALUE
+            )
+            @Min(
+                    value = PaginationConstants.MIN_PAGE,
+                    message = "La página debe ser {value} o mayor."
+            )
+            int page,
+
+            @RequestParam(
+                    name = "size",
+                    defaultValue = PaginationConstants.DEFAULT_PAGE_SIZE_VALUE
+            )
+            @Min(
+                    value = PaginationConstants.MIN_PAGE_SIZE,
+                    message = "El tamaño de página debe ser {value} o mayor."
+            )
+            @Max(
+                    value = PaginationConstants.MAX_PAGE_SIZE,
+                    message = "El tamaño de página no puede superar {value}."
+            )
+            int size
+    ) {
+        return ResponseEntity.ok(
+                ApiSuccessResponse.success(
+                        incidentService.getIncidentsByStatus(page, size, status),
+                        "Incidencias obtenidas correctamente."
+                )
+        );
+    }
+
+    /**
+     * Obtiene una página de incidencias filtradas por gravedad.
+     *
+     * @param severity nivel de gravedad por el que se filtran las incidencias
+     * @param page índice de página basado en cero
+     * @param size número de incidencias por página
+     * @return respuesta HTTP 200 con la página de incidencias y su marca temporal
+     */
+    @GetMapping("/by-severity")
+    public  ResponseEntity<ApiSuccessResponse<PageResponse<IncidentResponse>>> findIncidentsBySeverity(
+            @RequestParam("severity")
+            IncidentSeverity severity,
+
+            @RequestParam(
+                    name = "page",
+                    defaultValue = PaginationConstants.DEFAULT_PAGE_VALUE
+            )
+            @Min(
+                    value = PaginationConstants.MIN_PAGE,
+                    message = "La página debe ser {value} o mayor."
+            )
+            int page,
+
+            @RequestParam(
+                    name = "size",
+                    defaultValue = PaginationConstants.DEFAULT_PAGE_SIZE_VALUE
+            )
+            @Min(
+                    value = PaginationConstants.MIN_PAGE_SIZE,
+                    message = "El tamaño de página debe ser {value} o mayor."
+            )
+            @Max(
+                    value = PaginationConstants.MAX_PAGE_SIZE,
+                    message = "El tamaño de página no puede superar {value}."
+            )
+            int size
+    ) {
+        return ResponseEntity.ok(
+                ApiSuccessResponse.success(
+                        incidentService.getIncidentsBySeverity(page, size, severity),
                         "Incidencias obtenidas correctamente."
                 )
         );
