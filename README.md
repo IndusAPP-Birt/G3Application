@@ -59,7 +59,7 @@ El token contiene el correo electrónico como sujeto y el rol en el claim `role`
 | Perfil del usuario autenticado | Sí | Sí | Sí |
 | Consulta de máquinas | Sí | Sí | Sí |
 | Alta y actualización de máquinas | Sí | — | — |
-| Consultas globales y asignación de preventivos | Sí | — | — |
+| Consultas globales, asignación y bandeja de asignaciones preventivas | Sí | — | — |
 | Bandeja propia de preventivos | — | Sí | — |
 | Estados preventivos | Sí | Sí | — |
 | Catálogos de estados y niveles de gravedad de incidencias | Sí | Sí | Sí |
@@ -156,6 +156,7 @@ Representa las ejecuciones generadas desde una asignación preventiva y su ciclo
 | `GET` | `/api/preventives/by-status` | Filtra preventivos por estado. |
 | `GET` | `/api/preventives/by-inspector/{inspectorId}` | Filtra preventivos por inspector asignado. |
 | `GET` | `/api/preventives/me` | Obtiene la bandeja del inspector autenticado. |
+| `GET` | `/api/preventives/assigned-by-me` | Obtiene los preventivos asignados por el administrador autenticado. |
 | `GET` | `/api/preventives/by-due-date` | Filtra por un rango inclusivo de fecha prevista. |
 | `PUT` | `/api/preventives/{id}/assignment` | Asigna un inspector a un preventivo pendiente. |
 | `PUT` | `/api/preventives/{id}/start` | Inicia un preventivo asignado. |

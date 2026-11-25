@@ -172,7 +172,7 @@ public class PreventiveServiceTest {
                 .isEqualTo(inspector.id());
         // Comprobamos que conserva el administrador que realizó la asignación
         assertThat(started.assignedByAdministrator().id())
-                .as("El administrador asignador se conserva durante la ejecución")
+                .as("El administrador que realizó la asignación se conserva durante la ejecución")
                 .isEqualTo(administrator.id());
     }
 

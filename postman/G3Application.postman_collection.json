@@ -181,6 +181,7 @@
         {"name": "Filtrar por estado", "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/preventives/by-status?status={{preventiveStatus}}&page={{page}}&size={{size}}"}},
         {"name": "Filtrar por inspector", "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/preventives/by-inspector/{{inspectorId}}?page={{page}}&size={{size}}"}},
         {"name": "Consultar mi bandeja", "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/preventives/me?page={{page}}&size={{size}}"}},
+        {"name": "Consultar preventivos asignados por mí", "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/preventives/assigned-by-me?page={{page}}&size={{size}}"}},
         {"name": "Filtrar por fecha prevista", "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/preventives/by-due-date?from={{from}}&to={{to}}&page={{page}}&size={{size}}"}},
         {
           "name": "Asignar inspector",
