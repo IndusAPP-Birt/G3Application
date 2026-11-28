@@ -5,10 +5,7 @@ import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.incident.dto.AssignMaintenanceTechnicianToIncidentRequest;
 import eus.birtlh.g3.incident.dto.CreateIncidentRequest;
 import eus.birtlh.g3.incident.dto.IncidentResponse;
-import eus.birtlh.g3.incident.exception.IncidentAccessDeniedException;
-import eus.birtlh.g3.incident.exception.IncidentNotFoundException;
-import eus.birtlh.g3.incident.exception.InvalidIncidentStatusTransitionException;
-import eus.birtlh.g3.incident.exception.UserIsNotMaintenanceTechnicianException;
+import eus.birtlh.g3.incident.exception.*;
 import eus.birtlh.g3.incident.mapper.IncidentMapper;
 import eus.birtlh.g3.incident.mapper.IncidentSeverityMapper;
 import eus.birtlh.g3.incident.mapper.IncidentStatusMapper;
@@ -490,5 +487,64 @@ public class IncidentService {
         incidentRepository.flush();
 
         return IncidentMapper.toResponse(incident);
+    }
+
+    /**
+     * Inicia la reparación de una incidencia asignada.
+     *
+     * <p>Solo el técnico de mantenimiento actualmente asignado puede iniciar la incidencia. La
+     * operación cambia el estado de {@link IncidentStatus#ASSIGNED} a
+     * {@link IncidentStatus#IN_PROGRESS} y registra su momento de inicio.</p>
+     *
+     * @param id identificador de la incidencia que se quiere iniciar
+     * @param authenticatedMaintenanceTechnicianEmail correo del técnico autenticado
+     * @return representación pública de la incidencia iniciada
+     * @throws IncidentNotFoundException si no existe la incidencia indicada
+     * @throws UserNotFoundException si no existe el técnico autenticado
+     * @throws MaintenanceTechnicianNotAssignedToIncidentException si el técnico no está asignado
+     *                                                              a la incidencia
+     * @throws InvalidIncidentStatusTransitionException si la incidencia no está asignada
+     */
+    @Transactional
+    public IncidentResponse startIncident(
+        long id,
+        String authenticatedMaintenanceTechnicianEmail
+    ) {
+        Incident incident = incidentRepository.findById(id)
+                .orElseThrow(() -> new IncidentNotFoundException(
+                        "Incidencia con id " + id + " no encontrada."
+                ));
+
+        validateMaintenanceTechnicianAssignment(incident, authenticatedMaintenanceTechnicianEmail);
+
+        if (incident.getStatus() != IncidentStatus.ASSIGNED) {
+            throw new InvalidIncidentStatusTransitionException(
+                    "Solo se puede iniciar una incidencia asignada."
+            );
+        }
+
+        incident.start();
+        incidentRepository.flush();
+
+        return IncidentMapper.toResponse(incident);
+    }
+
+    private void validateMaintenanceTechnicianAssignment(
+            Incident incident,
+            String authenticatedMaintenanceTechnicianEmail
+    ) {
+        User authenticatedMaintenanceTechnician = userRepository.findByEmail(authenticatedMaintenanceTechnicianEmail)
+                .orElseThrow(() -> new UserNotFoundException(
+                        "Técnico de mantenimiento no encontrado."
+                ));
+
+        if (
+                incident.getAssignedTechnician() == null
+                || !incident.getAssignedTechnician().getId().equals(authenticatedMaintenanceTechnician.getId())
+        ) {
+            throw new MaintenanceTechnicianNotAssignedToIncidentException(
+                    "La incidencia no está asignada al técnico de mantenimiento autenticado."
+            );
+        }
     }
 }

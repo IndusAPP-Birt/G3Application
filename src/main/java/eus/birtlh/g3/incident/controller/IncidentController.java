@@ -449,4 +449,31 @@ public class IncidentController {
                 )
         );
     }
+
+    /**
+     * Inicia la reparación de una incidencia asignada.
+     *
+     * <p>El técnico de mantenimiento se identifica mediante el sujeto del JWT. El servicio
+     * comprueba que sea el técnico actualmente asignado a la incidencia.</p>
+     *
+     * @param id identificador positivo de la incidencia que se inicia
+     * @param jwt token JWT del técnico de mantenimiento autenticado
+     * @return respuesta HTTP 200 con la incidencia iniciada y su marca temporal
+     */
+    @PutMapping("/{id}/start")
+    public ResponseEntity<ApiSuccessResponse<IncidentResponse>> startIncident(
+            @PathVariable
+            @Positive(message = "El identificador debe ser mayor que cero.")
+            Long id,
+
+            @AuthenticationPrincipal
+            Jwt jwt
+    ) {
+        return ResponseEntity.ok(
+                ApiSuccessResponse.success(
+                        incidentService.startIncident(id, jwt.getSubject()),
+                        "Incidencia iniciada correctamente."
+                )
+        );
+    }
 }
