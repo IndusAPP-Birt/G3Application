@@ -2,14 +2,22 @@ package eus.birtlh.g3.incident;
 
 import eus.birtlh.g3.common.dto.CatalogOptionResponse;
 import eus.birtlh.g3.common.dto.PageResponse;
+import eus.birtlh.g3.incident.dto.CreateIncidentRequest;
 import eus.birtlh.g3.incident.dto.IncidentResponse;
 import eus.birtlh.g3.incident.exception.IncidentNotFoundException;
 import eus.birtlh.g3.incident.mapper.IncidentMapper;
 import eus.birtlh.g3.incident.mapper.IncidentSeverityMapper;
 import eus.birtlh.g3.incident.mapper.IncidentStatusMapper;
 import eus.birtlh.g3.incident.repository.IncidentRepository;
+import eus.birtlh.g3.preventive.Preventive;
+import eus.birtlh.g3.preventive.PreventiveStatus;
+import eus.birtlh.g3.preventive.exceptions.assignment.InspectorNotAssignedToPreventiveException;
+import eus.birtlh.g3.preventive.exceptions.execution.InvalidPreventiveStatusTransitionException;
 import eus.birtlh.g3.preventive.exceptions.execution.PreventiveNotFoundException;
 import eus.birtlh.g3.preventive.repository.PreventiveRepository;
+import eus.birtlh.g3.user.User;
+import eus.birtlh.g3.user.exception.UserNotFoundException;
+import eus.birtlh.g3.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,8 +31,7 @@ import java.util.List;
 /**
  * Servicio de aplicación que coordina los casos de uso de incidencias.
  *
- * <p>Expone los catálogos y las consultas paginadas que utilizan los clientes de la API para
- * consultar incidencias.</p>
+ * <p>Expone catálogos, consultas paginadas y operaciones del ciclo de trabajo de incidencias.</p>
  */
 @Service
 @RequiredArgsConstructor
@@ -32,6 +39,7 @@ public class IncidentService {
 
     private final IncidentRepository incidentRepository;
     private final PreventiveRepository preventiveRepository;
+    private final UserRepository userRepository;
 
     /**
      * Obtiene todos los niveles de gravedad disponibles como opciones de catálogo públicas.
@@ -345,5 +353,68 @@ public class IncidentService {
                 incidents.getTotalElements(),
                 incidents.getTotalPages()
         );
+    }
+
+    /**
+     * Crea una incidencia abierta en un preventivo que está en ejecución.
+     *
+     * <p>El correo autenticado identifica al inspector que comunica la incidencia. Solo se
+     * permite la creación si dicho inspector es el asignado al preventivo y este se encuentra en
+     * {@link PreventiveStatus#IN_PROGRESS}. La incidencia se persiste inicialmente con estado
+     * {@link IncidentStatus#OPEN}.</p>
+     *
+     * @param preventiveId identificador del preventivo en el que se ha detectado el problema
+     * @param request descripción y gravedad ya validadas de la incidencia
+     * @param authenticatedInspectorEmail correo del inspector autenticado
+     * @return representación pública de la incidencia creada
+     * @throws PreventiveNotFoundException si no existe el preventivo indicado
+     * @throws UserNotFoundException si no existe el inspector autenticado
+     * @throws InspectorNotAssignedToPreventiveException si el inspector no está asignado al
+     *                                                    preventivo
+     * @throws InvalidPreventiveStatusTransitionException si el preventivo no está en progreso
+     */
+    @Transactional
+    public IncidentResponse createIncident(
+        long preventiveId,
+        CreateIncidentRequest request,
+        String authenticatedInspectorEmail
+    ) {
+        Preventive preventive = preventiveRepository.findById(preventiveId)
+                .orElseThrow(() -> new PreventiveNotFoundException(
+                        "Preventivo con id " + preventiveId + " no encontrado."
+                ));
+
+        User authenticatedInspector = userRepository.findByEmail(authenticatedInspectorEmail)
+                .orElseThrow(() -> new UserNotFoundException(
+                        "Inspector autenticado no encontrado."
+                ));
+
+        if (
+                preventive.getAssignedInspector() == null
+                || !preventive.getAssignedInspector().getId().equals(authenticatedInspector.getId())
+        ) {
+            throw new InspectorNotAssignedToPreventiveException(
+                    "El preventivo no está asignado al inspector autenticado."
+            );
+        }
+
+        if (preventive.getStatus() != PreventiveStatus.IN_PROGRESS) {
+            throw new InvalidPreventiveStatusTransitionException(
+                    "Solo se pueden comunicar incidencias en un preventivo en progreso."
+            );
+        }
+
+        Incident incident = incidentRepository.save(
+                new Incident(
+                        preventive,
+                        request.description(),
+                        request.severity(),
+                        authenticatedInspector
+                )
+        );
+
+        incidentRepository.flush();
+
+        return IncidentMapper.toResponse(incident);
     }
 }

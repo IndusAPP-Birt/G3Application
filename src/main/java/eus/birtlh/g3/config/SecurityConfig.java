@@ -76,6 +76,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/incidents/by-reporter/**").hasAuthority("ROLE_ADMINISTRATOR")
                         .requestMatchers(HttpMethod.GET, "/api/incidents/by-technician/**").hasAuthority("ROLE_ADMINISTRATOR")
                         .requestMatchers(HttpMethod.GET, "/api/incidents/*").hasAuthority("ROLE_ADMINISTRATOR")
+                        .requestMatchers(HttpMethod.POST, "/api/preventives/*/incidents").hasAuthority("ROLE_INSPECTOR")
                         .anyRequest().denyAll()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
