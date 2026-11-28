@@ -17,7 +17,7 @@ Incident
 
 Una máquina y una plantilla preventiva existen de forma independiente. `PreventivePlanAssignment` las vincula y configura el calendario de mantenimiento. Desde una asignación activa, el proceso programado genera ejecuciones `Preventive` que un inspector asignado puede iniciar, documentar y completar.
 
-`Incident` representa una incidencia detectada durante la ejecución de un preventivo. Define su gravedad y ciclo de trabajo; sus acciones y operaciones de gestión se incorporarán progresivamente a la API.
+`Incident` representa una incidencia detectada durante la ejecución de un preventivo. Define su gravedad y ciclo de trabajo; actualmente permite comunicarla, asignarla a un técnico e iniciar su reparación.
 
 ## Documentación
 
@@ -28,7 +28,6 @@ Una máquina y una plantilla preventiva existen de forma independiente. `Prevent
 | [Auditoría técnica](docs/auditoria-aplicacion.md) | Hallazgos técnicos, prioridades y acciones de mejora. |
 | [Colección Postman local](postman/G3Application.postman_collection.json) | Consultas contra el servicio local. |
 | [Colección Postman Render](postman/G3Application_Render.postman_collection.json) | Consultas contra el servicio desplegado. |
-| [Consola de pruebas](src/main/resources/static/g3-console.html) | Cliente web ligero publicado por la propia aplicación. |
 
 ## Convenciones de la API
 
@@ -51,7 +50,7 @@ Las operaciones protegidas requieren la cabecera:
 Authorization: Bearer <accessToken>
 ```
 
-El token contiene el correo electrónico como sujeto y el rol en el claim `role`. Las rutas no declaradas se deniegan por defecto. `GET /actuator/health`, `POST /api/auth/login` y `GET /g3-console.html` son públicas.
+El token contiene el correo electrónico como sujeto y el rol en el claim `role`. Las rutas no declaradas se deniegan por defecto. `GET /actuator/health` y `POST /api/auth/login` son públicas.
 
 | Recurso u operación | Administrador | Inspector | Técnico |
 |---|:---:|:---:|:---:|
@@ -68,9 +67,11 @@ El token contiene el correo electrónico como sujeto y el rol en el claim `role`
 | Bandeja de incidencias asignadas | — | — | Sí |
 | Incidencias comunicadas por el inspector | — | Sí | — |
 | Filtros de incidencias por estado, gravedad, inspector o técnico | Sí | — | — |
+| Comunicación y asignación de incidencias | — | Sí* | — |
+| Inicio de incidencias asignadas | — | — | Sí* |
 | Inicio, registro de trabajo y cierre de preventivos | — | Sí* | — |
 
-`*` La capa de servicio comprueba además que el preventivo pertenece al inspector autenticado.
+`*` La capa de servicio comprueba además la relación del usuario autenticado con el recurso.
 
 ### Credenciales de desarrollo
 
@@ -166,7 +167,7 @@ Representa las ejecuciones generadas desde una asignación preventiva y su ciclo
 
 ### Incidencias
 
-Representa los problemas detectados durante la ejecución de un preventivo. Actualmente permite consultar sus catálogos, su listado paginado, el detalle de cada incidencia, las incidencias asociadas a un preventivo y las bandejas personales del técnico y del inspector. El listado, el detalle y los filtros por estado, gravedad, inspector comunicador o técnico asignado están reservados a administración; la consulta por preventivo está disponible para administración e inspección.
+Representa los problemas detectados durante la ejecución de un preventivo. Permite comunicar incidencias en preventivos en curso, asignarlas a un técnico habilitado e iniciar su reparación, además de consultar sus catálogos, listado paginado, detalle, incidencias por preventivo y bandejas personales. El listado, el detalle y los filtros por estado, gravedad, inspector comunicador o técnico asignado están reservados a administración; la consulta por preventivo está disponible para administración e inspección. Al asignar un técnico, la aplicación le envía una notificación por correo tras confirmar la transacción.
 
 | Método | Ruta | Operación |
 |---|---|---|
@@ -181,12 +182,11 @@ Representa los problemas detectados durante la ejecución de un preventivo. Actu
 | `GET` | `/api/incidents/by-severity` | Filtra incidencias por nivel de gravedad. |
 | `GET` | `/api/incidents/by-reporter/{inspectorId}` | Filtra incidencias por inspector comunicador. |
 | `GET` | `/api/incidents/by-technician/{technicianId}` | Filtra incidencias por técnico asignado. |
+| `POST` | `/api/preventives/{preventiveId}/incidents` | Comunica una incidencia en un preventivo en progreso. |
+| `PUT` | `/api/incidents/{id}/assignment` | Asigna un técnico habilitado a una incidencia abierta. |
+| `PUT` | `/api/incidents/{id}/start` | Inicia la reparación de una incidencia asignada. |
 
-## Consola de pruebas
-
-La aplicación publica una consola web en `/g3-console.html`. Permite consultar, filtrar, crear y actualizar los recursos publicados por la API desde el mismo origen. La pestaña `Auth` obtiene el JWT y lo conserva en `sessionStorage` para adjuntarlo a las operaciones protegidas.
-
-Al desplegar el servicio, la consola se publica en su misma URL; por ejemplo, `https://servicio.onrender.com/g3-console.html`.
+El flujo disponible es `OPEN → ASSIGNED → IN_PROGRESS`: el inspector asignado al preventivo comunica la incidencia; el inspector que la comunicó asigna el técnico; y el técnico asignado inicia la reparación.
 
 ## Colecciones Postman
 
@@ -197,7 +197,7 @@ Las colecciones incluyen las rutas publicadas, variables de identificadores, fil
 | `postman/G3Application.postman_collection.json` | Desarrollo local | `http://localhost:8080` |
 | `postman/G3Application_Render.postman_collection.json` | Servicio desplegado | URL pública del servicio |
 
-Cada colección comienza con `Autenticación > Iniciar sesión`, que guarda el JWT en la variable `accessToken` para las peticiones protegidas.
+Cada colección comienza con `Autenticación > Iniciar sesión`, que guarda el JWT en la variable `accessToken` para las peticiones protegidas. Para el flujo de incidencias, usa un token de inspector al comunicar o asignar y uno del técnico asignado al iniciar la reparación.
 
 ## Configuración operativa
 

@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "25b8305c-39c7-4e77-aa68-f90f5afdb94c",
     "name": "G3 API - Render",
-    "description": "Colección completa para el servicio desplegado en Render. Sustituye baseUrl por la URL pública real del servicio antes de usarla.",
+    "description": "Colección completa para el servicio desplegado en Render. Sustituye baseUrl por la URL pública real del servicio antes de usarla. Para el flujo de incidencias, usa un token de inspector al comunicar o asignar y uno del técnico asignado al iniciar.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -91,7 +91,10 @@
       {"name":"Filtrar por estado","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/incidents/by-status?status={{incidentStatus}}&page={{page}}&size={{size}}"}},
       {"name":"Filtrar por gravedad","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/incidents/by-severity?severity={{incidentSeverity}}&page={{page}}&size={{size}}"}},
       {"name":"Filtrar por inspector comunicador","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/incidents/by-reporter/{{inspectorId}}?page={{page}}&size={{size}}"}},
-      {"name":"Filtrar por técnico asignado","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/incidents/by-technician/{{technicianId}}?page={{page}}&size={{size}}"}}
+      {"name":"Filtrar por técnico asignado","request":{"method":"GET","header":[],"url":"{{baseUrl}}/api/incidents/by-technician/{{technicianId}}?page={{page}}&size={{size}}"}},
+      {"name":"Comunicar incidencia","request":{"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"description\": \"Se detecta una fuga en la válvula de presión.\",\n  \"severity\": \"HIGH\"\n}"},"url":"{{baseUrl}}/api/preventives/{{preventiveId}}/incidents"}},
+      {"name":"Asignar técnico de mantenimiento","request":{"method":"PUT","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"maintenanceTechnicianId\": {{technicianId}}\n}"},"url":"{{baseUrl}}/api/incidents/{{incidentId}}/assignment"}},
+      {"name":"Iniciar incidencia","request":{"method":"PUT","header":[],"url":"{{baseUrl}}/api/incidents/{{incidentId}}/start"}}
     ]}
   ]
 }

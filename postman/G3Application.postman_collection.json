@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "f194a86d-ef88-4a50-a079-d662dc4030f2",
     "name": "G3 API - Local",
-    "description": "Colección completa para el servicio local. Ajusta las variables antes de ejecutar operaciones que dependen de identificadores existentes.",
+    "description": "Colección completa para el servicio local. Ajusta las variables antes de ejecutar operaciones que dependen de identificadores existentes. Para el flujo de incidencias, usa un token de inspector al comunicar o asignar y uno del técnico asignado al iniciar.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -221,7 +221,10 @@
         {"name": "Filtrar por estado", "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/incidents/by-status?status={{incidentStatus}}&page={{page}}&size={{size}}"}},
         {"name": "Filtrar por gravedad", "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/incidents/by-severity?severity={{incidentSeverity}}&page={{page}}&size={{size}}"}},
         {"name": "Filtrar por inspector comunicador", "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/incidents/by-reporter/{{inspectorId}}?page={{page}}&size={{size}}"}},
-        {"name": "Filtrar por técnico asignado", "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/incidents/by-technician/{{technicianId}}?page={{page}}&size={{size}}"}}
+        {"name": "Filtrar por técnico asignado", "request": {"method": "GET", "header": [], "url": "{{baseUrl}}/api/incidents/by-technician/{{technicianId}}?page={{page}}&size={{size}}"}},
+        {"name": "Comunicar incidencia", "request": {"method": "POST", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"description\": \"Se detecta una fuga en la válvula de presión.\",\n  \"severity\": \"HIGH\"\n}"}, "url": "{{baseUrl}}/api/preventives/{{preventiveId}}/incidents"}},
+        {"name": "Asignar técnico de mantenimiento", "request": {"method": "PUT", "header": [{"key": "Content-Type", "value": "application/json"}], "body": {"mode": "raw", "raw": "{\n  \"maintenanceTechnicianId\": {{technicianId}}\n}"}, "url": "{{baseUrl}}/api/incidents/{{incidentId}}/assignment"}},
+        {"name": "Iniciar incidencia", "request": {"method": "PUT", "header": [], "url": "{{baseUrl}}/api/incidents/{{incidentId}}/start"}}
       ]
     }
   ]
