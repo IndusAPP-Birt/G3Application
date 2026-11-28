@@ -7,7 +7,9 @@ import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.incident.IncidentService;
 import eus.birtlh.g3.incident.IncidentSeverity;
 import eus.birtlh.g3.incident.IncidentStatus;
+import eus.birtlh.g3.incident.dto.AssignMaintenanceTechnicianToIncidentRequest;
 import eus.birtlh.g3.incident.dto.IncidentResponse;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
@@ -20,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * Controlador REST que expone las consultas sobre incidencias.
+ * Controlador REST que expone las consultas y operaciones del ciclo de trabajo de incidencias.
  *
  * <p>Delega los casos de uso en {@link IncidentService} y devuelve sus resultados mediante el
  * contrato estándar {@link ApiSuccessResponse}.</p>
@@ -409,6 +411,41 @@ public class IncidentController {
                 ApiSuccessResponse.success(
                         incidentService.getIncidentsBySeverity(page, size, severity),
                         "Incidencias obtenidas correctamente."
+                )
+        );
+    }
+
+    /**
+     * Asigna una incidencia abierta a un técnico de mantenimiento.
+     *
+     * <p>El inspector se identifica mediante el sujeto del JWT. El servicio comprueba que sea
+     * quien comunicó la incidencia y que el técnico seleccionado esté habilitado.</p>
+     *
+     * @param id identificador positivo de la incidencia que se asigna
+     * @param request identificador validado del técnico de mantenimiento
+     * @param jwt token JWT del inspector autenticado
+     * @return respuesta HTTP 200 con la incidencia actualizada y su marca temporal
+     */
+    @PutMapping("/{id}/assignment")
+    public ResponseEntity<ApiSuccessResponse<IncidentResponse>> assignMaintenanceTechnicianToIncident(
+            @PathVariable
+            @Positive(message = "El identificador debe ser mayor que cero.")
+            Long id,
+
+            @Valid
+            @RequestBody AssignMaintenanceTechnicianToIncidentRequest request,
+
+            @AuthenticationPrincipal
+            Jwt jwt
+    ) {
+        return ResponseEntity.ok(
+                ApiSuccessResponse.success(
+                        incidentService.assignMaintenanceTechnicianToIncident(
+                                id,
+                                request,
+                                jwt.getSubject()
+                        ),
+                        "Técnico de mantenimiento asignado correctamente."
                 )
         );
     }

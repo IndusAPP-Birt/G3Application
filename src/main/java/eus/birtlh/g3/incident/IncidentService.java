@@ -2,9 +2,13 @@ package eus.birtlh.g3.incident;
 
 import eus.birtlh.g3.common.dto.CatalogOptionResponse;
 import eus.birtlh.g3.common.dto.PageResponse;
+import eus.birtlh.g3.incident.dto.AssignMaintenanceTechnicianToIncidentRequest;
 import eus.birtlh.g3.incident.dto.CreateIncidentRequest;
 import eus.birtlh.g3.incident.dto.IncidentResponse;
+import eus.birtlh.g3.incident.exception.IncidentAccessDeniedException;
 import eus.birtlh.g3.incident.exception.IncidentNotFoundException;
+import eus.birtlh.g3.incident.exception.InvalidIncidentStatusTransitionException;
+import eus.birtlh.g3.incident.exception.UserIsNotMaintenanceTechnicianException;
 import eus.birtlh.g3.incident.mapper.IncidentMapper;
 import eus.birtlh.g3.incident.mapper.IncidentSeverityMapper;
 import eus.birtlh.g3.incident.mapper.IncidentStatusMapper;
@@ -15,6 +19,7 @@ import eus.birtlh.g3.preventive.exceptions.assignment.InspectorNotAssignedToPrev
 import eus.birtlh.g3.preventive.exceptions.execution.InvalidPreventiveStatusTransitionException;
 import eus.birtlh.g3.preventive.exceptions.execution.PreventiveNotFoundException;
 import eus.birtlh.g3.preventive.repository.PreventiveRepository;
+import eus.birtlh.g3.user.Role;
 import eus.birtlh.g3.user.User;
 import eus.birtlh.g3.user.exception.UserNotFoundException;
 import eus.birtlh.g3.user.repository.UserRepository;
@@ -413,6 +418,75 @@ public class IncidentService {
                 )
         );
 
+        incidentRepository.flush();
+
+        return IncidentMapper.toResponse(incident);
+    }
+
+    /**
+     * Asigna una incidencia abierta a un técnico de mantenimiento habilitado.
+     *
+     * <p>Solo el inspector que comunicó la incidencia puede realizar la asignación. El usuario
+     * seleccionado debe tener el rol {@link Role#ROLE_MAINTENANCE_TECHNICIAN} y estar habilitado.
+     * La operación cambia el estado de {@link IncidentStatus#OPEN} a
+     * {@link IncidentStatus#ASSIGNED}.</p>
+     *
+     * @param id identificador de la incidencia que se quiere asignar
+     * @param request identificador del técnico de mantenimiento seleccionado
+     * @param authenticatedInspectorEmail correo del inspector autenticado
+     * @return representación pública de la incidencia con el técnico asignado
+     * @throws IncidentNotFoundException si no existe la incidencia indicada
+     * @throws UserNotFoundException si no existe el inspector autenticado o el técnico indicado
+     * @throws IncidentAccessDeniedException si el inspector no comunicó la incidencia
+     * @throws InvalidIncidentStatusTransitionException si la incidencia no está abierta
+     * @throws UserIsNotMaintenanceTechnicianException si el usuario no es un técnico habilitado
+     */
+    @Transactional
+    public IncidentResponse assignMaintenanceTechnicianToIncident(
+        long id,
+        AssignMaintenanceTechnicianToIncidentRequest request,
+        String authenticatedInspectorEmail
+    ) {
+        Incident incident = incidentRepository.findById(id)
+                .orElseThrow(() -> new IncidentNotFoundException(
+                        "Incidencia con id " + id + " no encontrada."
+                ));
+
+        User inspector = userRepository.findByEmail(authenticatedInspectorEmail)
+                .orElseThrow(() -> new UserNotFoundException(
+                        "Inspector autenticado no encontrado."
+                ));
+
+        if (!incident.getReportedByInspector().getId().equals(inspector.getId())) {
+            throw new IncidentAccessDeniedException(
+                    "Solo el inspector que comunicó la incidencia puede asignarla."
+            );
+        }
+
+        if (incident.getStatus() != IncidentStatus.OPEN) {
+            throw new InvalidIncidentStatusTransitionException(
+                    "Solo se puede asignar un técnico a una incidencia abierta."
+            );
+        }
+
+        User maintenanceTechnician = userRepository.findById(request.maintenanceTechnicianId())
+                .orElseThrow(() -> new UserNotFoundException(
+                        "Usuario con " + request.maintenanceTechnicianId() + " no encontrado."
+                ));
+
+        if (maintenanceTechnician.getRole() != Role.ROLE_MAINTENANCE_TECHNICIAN) {
+            throw new UserIsNotMaintenanceTechnicianException(
+                    "El usuario indicado no tiene rol de técnico de mantenimiento."
+            );
+        }
+
+        if (!maintenanceTechnician.isEnabled()) {
+            throw new UserIsNotMaintenanceTechnicianException(
+                    "El técnico de mantenimiento indicado no está habilitado."
+            );
+        }
+
+        incident.assignTechnician(maintenanceTechnician);
         incidentRepository.flush();
 
         return IncidentMapper.toResponse(incident);
