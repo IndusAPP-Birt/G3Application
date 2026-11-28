@@ -5,6 +5,7 @@ import eus.birtlh.g3.common.dto.PageResponse;
 import eus.birtlh.g3.incident.dto.AssignMaintenanceTechnicianToIncidentRequest;
 import eus.birtlh.g3.incident.dto.CreateIncidentRequest;
 import eus.birtlh.g3.incident.dto.IncidentResponse;
+import eus.birtlh.g3.incident.event.IncidentAssignedEvent;
 import eus.birtlh.g3.incident.exception.*;
 import eus.birtlh.g3.incident.mapper.IncidentMapper;
 import eus.birtlh.g3.incident.mapper.IncidentSeverityMapper;
@@ -12,6 +13,7 @@ import eus.birtlh.g3.incident.mapper.IncidentStatusMapper;
 import eus.birtlh.g3.incident.repository.IncidentRepository;
 import eus.birtlh.g3.preventive.Preventive;
 import eus.birtlh.g3.preventive.PreventiveStatus;
+import eus.birtlh.g3.preventive.event.PreventiveAssignedEvent;
 import eus.birtlh.g3.preventive.exceptions.assignment.InspectorNotAssignedToPreventiveException;
 import eus.birtlh.g3.preventive.exceptions.execution.InvalidPreventiveStatusTransitionException;
 import eus.birtlh.g3.preventive.exceptions.execution.PreventiveNotFoundException;
@@ -21,6 +23,7 @@ import eus.birtlh.g3.user.User;
 import eus.birtlh.g3.user.exception.UserNotFoundException;
 import eus.birtlh.g3.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -42,6 +45,7 @@ public class IncidentService {
     private final IncidentRepository incidentRepository;
     private final PreventiveRepository preventiveRepository;
     private final UserRepository userRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     /**
      * Obtiene todos los niveles de gravedad disponibles como opciones de catálogo públicas.
@@ -485,6 +489,10 @@ public class IncidentService {
 
         incident.assignTechnician(maintenanceTechnician);
         incidentRepository.flush();
+
+        applicationEventPublisher.publishEvent(
+                new IncidentAssignedEvent(incident.getId(), maintenanceTechnician.getId())
+        );
 
         return IncidentMapper.toResponse(incident);
     }
